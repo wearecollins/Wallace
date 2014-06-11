@@ -14,7 +14,7 @@ dev_appserver.py ./
 Deploying
 ======
 ```
-cd /path/to/Mirror/test
+cd /path/to/Mirror/test/headControl
 appcfg.py update
 ```
 * If you have errors (e.g. 'this application does not exist'), force a re-login like this:
