@@ -1,0 +1,26 @@
+application: wallace-01
+version: 1
+runtime: python27
+api_version: 1
+threadsafe: true
+
+handlers:
+- url: /js
+  static_dir: headControl/js
+
+- url: /css
+  static_dir: headControl/css
+
+- url: /WALLACE_TESTS
+  static_dir: WALLACE_TESTS
+
+- url: /includes
+  static_dir: includes
+
+- url: /
+  static_files: headControl/index\.html
+  upload: headControl/index\.html
+
+- url: /(.*\.(gif|png|jpg|mp4|html))$
+  static_files: headControl/\1
+  upload: headControl/.*\.(gif|png|jpg|mp4|html)$
