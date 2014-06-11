@@ -300,7 +300,9 @@ function APP( _useStats, _debug)
 			console.log( normalMaps[value] );
 		}.bind(diffMaterial));
 
-
+		var bleedFolder = gui.addFolder("bleedFolder");
+		bleedFolder.addFolder("bleedExpo").add(diffMaterial.uniforms.bleedExpo, "value", 1, 30);
+		bleedFolder.addFolder("decay").add(diffMaterial.uniforms.decay, "value", .95, 1.).step(.0001);
 		//debug
 		//
 		console.log( vidPlane );
