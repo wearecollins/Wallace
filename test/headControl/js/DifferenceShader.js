@@ -26,7 +26,8 @@ var DifferenceShader = function(params)
 			time: {type: 'f', value: params.time || 0},
 			bleedDir: {type: 'v2', value: params.bleedDir || new THREE.Vector2( 0, -.0025 )},
 			bleedExpo: {type: 'f', value: params.bleedExpo || 10},
-			decay: {type: 'f', value: params.decay || .99}
+			decay: {type: 'f', value: params.decay || .99},
+			timeDelta: {type: 'f', value: params.timeDelta || 1}
 		},
 
 		vertexShader: [
@@ -46,6 +47,7 @@ var DifferenceShader = function(params)
 		'uniform float time;',
 		'uniform float bleedExpo;',
 		'uniform float decay;',
+		'uniform float timeDelta;',
 
 		'uniform float mixVal;',
 
@@ -61,17 +63,19 @@ var DifferenceShader = function(params)
 
 
 		'	float sampleCount = 0.;',
-		'	float sampleDist = 1.;',
+		'	float sampleDist = timeDelta;',
 		'	vec2 sampleOffset = 2. / (vec2(1280., 720.) * .25);',
 		'	vec4 lastDiff = vec4(0.);',
 
+		//sample the delta texture to get a local vector. we could probably pass this off to onther pass later on
 		'	vec2 sampleDirection = vec2(0.,0.);',
 		'	sampleDirection.x = getGray(texture2D(lastDiffTex, vec2(vUv.x - sampleOffset.x, vUv.y)).xyz);',
 		'	sampleDirection.x -= getGray(texture2D(lastDiffTex, vec2(vUv.x + sampleOffset.x, vUv.y)).xyz);',
 
 		'	sampleDirection.y = getGray(texture2D(lastDiffTex, vec2(vUv.x, vUv.y - sampleOffset.y )).xyz);',
 		'	sampleDirection.y -= getGray(texture2D(lastDiffTex, vec2(vUv.x, vUv.y + sampleOffset.y )).xyz);',
-		// '	sampleDirection = normalize(sampleDirection);',
+
+		//	sample normal map to add some global direction
 		'	sampleDirection += (texture2D(directionalTex, vUv).xy * 2. - 1.);',
 
 		'	sampleDirection *= sampleOffset * -sampleDist;',

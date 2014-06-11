@@ -300,13 +300,15 @@ function APP( _useStats, _debug)
 			console.log( normalMaps[value] );
 		}.bind(diffMaterial));
 
-
+		var bleedFolder = gui.addFolder("bleedFolder");
+		bleedFolder.addFolder("bleedExpo").add(diffMaterial.uniforms.bleedExpo, "value", 1, 30);
+		bleedFolder.addFolder("decay").add(diffMaterial.uniforms.decay, "value", .95, 1.).step(.0001);
 		//debug
 		//
 		console.log( vidPlane );
 		tempPlane = new THREE.Mesh( vidPlane.geometry, new THREE.MeshBasicMaterial( {map: currentDiff, side: 2} ));
 		tempPlane.scale.set( window.innerWidth, -window.innerWidth / vidAscpect, 1);
-		scene.add(tempPlane);
+		// scene.add(tempPlane);
 
 		//kick off some random transitioning
 		if(debug)	startTransition( endTransition );
@@ -407,6 +409,12 @@ function APP( _useStats, _debug)
 		diffMaterial.uniforms.lastDiffTex.value = previousDiff;
 		diffMaterial.uniforms.mixVal.value = texBlendMat.uniforms.mixVal.value;
 		diffMaterial.uniforms.time.value = clock.getElapsedTime() * -.001;
+		diffMaterial.uniforms.timeDelta.value = Math.max(1., 0.016666 / (clock.getDelta() * 6000));
+		// if(clock.getElapsedTime() > 2 && clock.getElapsedTime() < 3)
+		// {
+		// 	var delta = clock.getDelta();
+		// 	console.log( "delta", delta, delta * 6000 );
+		// }
 
 		renderer.render( diffScene, camera, currentDiff, true );
 
