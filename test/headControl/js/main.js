@@ -94,7 +94,7 @@ function APP( _useStats, _debug)
 	var htracker = new headtrackr.Tracker();
 
 
-	var debug = _debug || true;
+	var debug = _debug || false;
 	var useStats = _useStats || true;
 
 	var gui, stats, renderer;
@@ -309,7 +309,7 @@ function APP( _useStats, _debug)
 		scene.add(tempPlane);
 
 		//kick off some random transitioning
-		startTransition( endTransition );
+		if(debug)	startTransition( endTransition );
 	}
 
 	/**
@@ -449,7 +449,7 @@ function APP( _useStats, _debug)
 	{
 		bTransitioning = false;
 
-		if( headtrackr.status != "tracking")
+		if(debug)
 		{
 			randomtTransition();
 		}

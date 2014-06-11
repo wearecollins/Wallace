@@ -24,7 +24,9 @@ var DifferenceShader = function(params)
 
 			mixVal: {type: 'f', value: params.mixVal || 0},
 			time: {type: 'f', value: params.time || 0},
-			bleedDir: {type: 'v2', value: params.bleedDir || new THREE.Vector2( 0, -.0025 )}
+			bleedDir: {type: 'v2', value: params.bleedDir || new THREE.Vector2( 0, -.0025 )},
+			bleedExpo: {type: 'f', value: params.bleedExpo || 10},
+			decay: {type: 'f', value: params.decay || .99}
 		},
 
 		vertexShader: [
@@ -42,6 +44,8 @@ var DifferenceShader = function(params)
 		'uniform sampler2D directionalTex;',
 		'uniform vec2 bleedDir;',
 		'uniform float time;',
+		'uniform float bleedExpo;',
+		'uniform float decay;',
 
 		'uniform float mixVal;',
 
@@ -94,12 +98,11 @@ var DifferenceShader = function(params)
 		// '	vec4 diff = abs(mix(current, prev, mixVal) - current);',
 		// '	vec4 diff = max(vec4(0.), mix(current, prev, mixVal) - current);',
 
-		'	vec4 diff = max(vec4(0.), mix(current, prev, 1. - pow(1.-mixVal, 3.)) - current);',
+		'	vec4 diff = max(vec4(0.), mix(current, prev, 1. - pow(1.-mixVal, bleedExpo)) - current);',
 
 		'	float delta = (diff.x + diff.y + diff.z) > .1 ? 1. : 0.;',
 		'	vec3 c = diff.xyz;//vec3(delta);',
 
-		'	float decay = .99;',
 		'	gl_FragColor = max(vec4(c, 1.), vec4(lastDiff.xyz * decay, 1.));',
 		'}'].join('\n'),
 
