@@ -7,13 +7,6 @@ var TextureBlendShader = function(params)
 {
 	params = params || {};
 
-	var lightPositions = [], lightColors = [], lights = params.lights || [];
-	var numLights = lights.length;
-	for (var i = 0; i < numLights; i++) {
-		lightPositions[i] = lights[i].position;
-		lightColors[i] = lights[i].color;
-	};
-
 	var matParams = {
 		transparent: true,
 		blending: params.blending || 1,
@@ -38,18 +31,9 @@ var TextureBlendShader = function(params)
 		},
 
 		vertexShader: [
-		//light positions and colors(colors are xtz not rgb)
-
 		'varying vec2 vUv;',
-		// 'varying vec3 vNormal;',
-		// 'varying vec4 ecPosition;',
-		// 'varying vec3 eye;',
 		'void main() {',
 		'	vUv = uv;',
-		// '	vNormal = normalize(normalMatrix * normal);',
-		// '	ecPosition = modelViewMatrix * vec4( position, 1.0 );',
-		// '	eye = -normalize(ecPosition.xyz);',
-
 		'	gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );',
 		'}'].join('\n'),
 
@@ -68,9 +52,6 @@ var TextureBlendShader = function(params)
 		'uniform float K2;',
 		'uniform float offset;',
 
-		// 'varying vec4 ecPosition;',
-		// 'varying vec3 vNormal;',
-		// 'varying vec3 eye;',
 		'varying vec2 vUv;',
 
 
@@ -120,7 +101,7 @@ var TextureBlendShader = function(params)
 
   		//we could try passinf the half vector as a varying...
 		'void main() {',
-		'	float blendVal = texture2D(blendMap, vUv ).x;',
+		'	float blendVal = rgb2hsv(texture2D(blendMap, vUv ).xyz).z;',
 		
 		// '	blendVal = mixVal > blendVal ? 1. : 0.;',
 
@@ -145,6 +126,7 @@ var TextureBlendShader = function(params)
 		'	current = mix(bgCol, current, gVal);',
 
 		'	gl_FragColor = mix(prev, current, blendVal);',
+		'	gl_FragColor += texture2D(blendMap, vUv );',
 		'}'].join('\n'),
 
 	}
