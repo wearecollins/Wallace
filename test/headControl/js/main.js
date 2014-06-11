@@ -1,8 +1,6 @@
 
 var app;
 
-
-
 $(window).bind("load", function() {
 	var debug = getQuerystring('debug') == "true";
 	var useStats = getQuerystring('useStats') == "true";
