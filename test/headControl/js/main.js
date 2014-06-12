@@ -275,8 +275,8 @@ function APP( _useStats, _debug)
 
 		//difference render target
 		diffScene = new THREE.Scene();
-		currentDiff = new THREE.WebGLRenderTarget( 1280/4, 720/4, { minFilter: THREE.LinearFilter, magFilter: THREE.LinearFilter, format: THREE.RGBFormat, wrapS: THREE.RepeatWrapping, wrapT: THREE.RepeatWrapping } );
-		previousDiff = new THREE.WebGLRenderTarget( 1280/4, 720/4, { minFilter: THREE.LinearFilter, magFilter: THREE.LinearFilter, format: THREE.RGBFormat, wrapS: THREE.RepeatWrapping, wrapT: THREE.RepeatWrapping } );
+		currentDiff = new THREE.WebGLRenderTarget( 1280, 720, { minFilter: THREE.LinearFilter, magFilter: THREE.LinearFilter, format: THREE.RGBFormat, wrapS: THREE.RepeatWrapping, wrapT: THREE.RepeatWrapping } );
+		previousDiff = new THREE.WebGLRenderTarget( 1280, 720, { minFilter: THREE.LinearFilter, magFilter: THREE.LinearFilter, format: THREE.RGBFormat, wrapS: THREE.RepeatWrapping, wrapT: THREE.RepeatWrapping } );
 
 		renderer.render( diffScene, camera, currentDiff, true );
 		renderer.render( diffScene, camera, previousDiff, true );
@@ -303,6 +303,7 @@ function APP( _useStats, _debug)
 		var bleedFolder = gui.addFolder("bleedFolder");
 		bleedFolder.addFolder("bleedExpo").add(diffMaterial.uniforms.bleedExpo, "value", 1, 30);
 		bleedFolder.addFolder("decay").add(diffMaterial.uniforms.decay, "value", .95, 1.).step(.0001);
+		bleedFolder.addFolder("distance").add(diffMaterial.uniforms.bleedDistance, "value", 1, 10);
 		//debug
 		//
 		console.log( vidPlane );
