@@ -27,7 +27,8 @@ var DifferenceShader = function(params)
 			bleedDir: {type: 'v2', value: params.bleedDir || new THREE.Vector2( 0, -.0025 )},
 			bleedExpo: {type: 'f', value: params.bleedExpo || 10},
 			decay: {type: 'f', value: params.decay || .97},
-			timeDelta: {type: 'f', value: params.timeDelta || 1}
+			timeDelta: {type: 'f', value: params.timeDelta || 1},
+			bleedDistance: {type: 'f', value: params.bleedDistance || 3}
 		},
 
 		vertexShader: [
@@ -46,6 +47,7 @@ var DifferenceShader = function(params)
 		'uniform vec2 bleedDir;',
 		'uniform float time;',
 		'uniform float bleedExpo;',
+		'uniform float bleedDistance;',
 		'uniform float decay;',
 		'uniform float timeDelta;',
 
@@ -64,7 +66,7 @@ var DifferenceShader = function(params)
 
 		'	float sampleCount = 0.;',
 		'	float sampleDist = timeDelta;',
-		'	vec2 sampleOffset = 1. / (vec2(1280., 720.) * .25);',
+		'	vec2 sampleOffset = bleedDistance / (vec2(1280., 720.));',
 		'	vec4 lastDiff = vec4(0.);',
 
 		//sample the delta texture to get a local vector. we could probably pass this off to onther pass later on
