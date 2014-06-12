@@ -26,7 +26,7 @@ var DifferenceShader = function(params)
 			time: {type: 'f', value: params.time || 0},
 			bleedDir: {type: 'v2', value: params.bleedDir || new THREE.Vector2( 0, -.0025 )},
 			bleedExpo: {type: 'f', value: params.bleedExpo || 10},
-			decay: {type: 'f', value: params.decay || .99},
+			decay: {type: 'f', value: params.decay || .97},
 			timeDelta: {type: 'f', value: params.timeDelta || 1}
 		},
 
@@ -64,7 +64,7 @@ var DifferenceShader = function(params)
 
 		'	float sampleCount = 0.;',
 		'	float sampleDist = timeDelta;',
-		'	vec2 sampleOffset = 2. / (vec2(1280., 720.) * .25);',
+		'	vec2 sampleOffset = 1. / (vec2(1280., 720.) * .25);',
 		'	vec4 lastDiff = vec4(0.);',
 
 		//sample the delta texture to get a local vector. we could probably pass this off to onther pass later on
@@ -85,29 +85,24 @@ var DifferenceShader = function(params)
 		'	uv.y -= floor(uv.y);',
 		'	lastDiff = texture2D(lastDiffTex, uv );',
 
-		// 	//blurring
-		// '	for(int i=-2; i<3; i++)',
-		// '	{',
-		// '		for(int j=-2; j<3; j++)',
-		// '		{',
-		// // '			lastDiff = max(texture2D(lastDiffTex, vUv + (vec2(i, j) * sampleOffset) + sampleDirection ),lastDiff);',
-		// '			lastDiff += texture2D(lastDiffTex, vUv + (vec2(i, j) * sampleOffset) + sampleDirection );',
-		// '			sampleCount++;',
-		// '		}',
-		// '	}',
-		// '	lastDiff /= sampleCount;',
+		'	vec4 prev = texture2D(previousTex, uv );',
+		'	vec4 current = texture2D(currentTex, uv );',
 
-		'	vec4 prev = texture2D(previousTex, vUv );',
-		'	vec4 current = texture2D(currentTex, vUv );',
-		// '	vec4 diff = abs(mix(current, prev, mixVal) - current);',
-		// '	vec4 diff = max(vec4(0.), mix(current, prev, mixVal) - current);',
+		'	float dk = decay;',
 
-		'	vec4 diff = max(vec4(0.), mix(current, prev, 1. - pow(1.-mixVal, bleedExpo)) - current);',
+		// '	vec4 diff = max(vec4(0.), mix(current, prev, 1. - pow(1.-mixVal, bleedExpo)) - current);',
 
-		'	float delta = (diff.x + diff.y + diff.z) > .1 ? 1. : 0.;',
+		'	vec4 diff = min(1., mixVal*10.) * mix(current, prev, 1. - pow(mixVal,bleedExpo)) - current;',
+		'	diff = max( diff, mix(prev, current, mixVal) - prev);',
+		'	diff = max( vec4(0.), diff);',
+
+		// '	float delta = (diff.x + diff.y + diff.z) > .1 ? 1. : 0.;',
 		'	vec3 c = diff.xyz;//vec3(delta);',
 
-		'	gl_FragColor = max(vec4(c, 1.), vec4(lastDiff.xyz * decay, 1.));',
+		'	lastDiff *= dk;',
+
+		'	gl_FragColor = max(vec4(c, 1.), vec4(lastDiff.xyz, 1.));',
+
 		'}'].join('\n'),
 
 	}
