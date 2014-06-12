@@ -23,6 +23,16 @@ var AzealiaVideoObject = function(params)
 	this.dir = params.dir || new THREE.Vector2( 0, 0 );
 }
 
+AzealiaVideoObject.prototype.pause = funciton()
+{
+	//TODO
+}
+
+AzealiaVideoObject.prototype.play = funciton(position)
+{
+	//TODO
+}
+
 
 function APP( _useStats, _debug)
 {
@@ -223,14 +233,6 @@ function APP( _useStats, _debug)
 		vidPlane = new THREE.Mesh( new THREE.PlaneGeometry( 1,1, 12, 7 ), texBlendMat);
 		scaleVidMesh();
 		scene.add(vidPlane);
-
-		// gui.add(controls, "positionSmoothing", .001, 1);
-		// gui.add(controls, "transitionSpeed", 100, 3000);
-		// gui.add(controls, 'blendMap', Object.keys(blendMaps) )
-		// .onChange(function(value) {
-		// 	this.uniforms.blendMap.value = blendMaps[value];
-		// 	console.log( blendMaps[value] );
-		// }.bind(texBlendMat));
 
 		gui.remember(controls);
 
@@ -465,7 +467,7 @@ function APP( _useStats, _debug)
 			diffMaterial.uniforms.bleedDir.value.copy(deltaVec2);
 
 			new TWEEN.Tween(diffMaterial.uniforms.bleedDir.value)
-			.to(deltaVec2, controls.transitionSpeed)
+			.to(currentVid.dir.clone().multiplyScalar( bleedAmount ), controls.transitionSpeed)
             .easing( TWEEN.Easing.Bounce.Out )
 			.start();
 		})

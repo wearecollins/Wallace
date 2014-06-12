@@ -88,7 +88,7 @@ var DifferenceShader = function(params)
 		'	lastDiff = texture2D(lastDiffTex, uv );',
 
 		'	vec4 prev = texture2D(previousTex, uv );',
-		'	vec4 current = texture2D(currentTex, uv );',
+		'	vec4 current = texture2D(currentTex, vUv );',
 
 		'	float dk = decay;',
 
