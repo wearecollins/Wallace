@@ -19,6 +19,8 @@ var AzealiaVideoObject = function(params)
 	this.texture.needsUpdate = false;	//
 
 	this.bIsActive = params.bIsActive || false;
+
+	this.dir = params.dir || new THREE.Vector2( 0, 0 );
 }
 
 
@@ -180,26 +182,26 @@ function APP( _useStats, _debug)
 		blendMaps["transition6"] = THREE.ImageUtils.loadTexture( '../blendMaps/transition6.png' );
 
 
-		normalMaps["buttons"] = THREE.ImageUtils.loadTexture( '../normalMaps/buttons.png' );
-		normalMaps["flower"] = THREE.ImageUtils.loadTexture( '../normalMaps/flower.png' );
-		normalMaps["geometric"] = THREE.ImageUtils.loadTexture( '../normalMaps/geometric.png' );
-		normalMaps["honeycomb"] = THREE.ImageUtils.loadTexture( '../normalMaps/honeycomb.png' );
-		normalMaps["moss_normal_map"] = THREE.ImageUtils.loadTexture( '../normalMaps/moss_normal_map.png' );
+		// normalMaps["buttons"] = THREE.ImageUtils.loadTexture( '../normalMaps/buttons.png' );
+		// normalMaps["flower"] = THREE.ImageUtils.loadTexture( '../normalMaps/flower.png' );
+		// normalMaps["geometric"] = THREE.ImageUtils.loadTexture( '../normalMaps/geometric.png' );
+		// normalMaps["honeycomb"] = THREE.ImageUtils.loadTexture( '../normalMaps/honeycomb.png' );
+		// normalMaps["moss_normal_map"] = THREE.ImageUtils.loadTexture( '../normalMaps/moss_normal_map.png' );
 		normalMaps["noise"] = THREE.ImageUtils.loadTexture( '../normalMaps/noise.png' );
 		normalMaps["noise1"] = THREE.ImageUtils.loadTexture( '../normalMaps/noise1.png' );
 		normalMaps["noiseSmooth"] = THREE.ImageUtils.loadTexture( '../normalMaps/noiseSmooth.png' );
-		normalMaps["noisy_terrain"] = THREE.ImageUtils.loadTexture( '../normalMaps/noisy_terrain.png' );
-		normalMaps["ocean_waves_normal1"] = THREE.ImageUtils.loadTexture( '../normalMaps/ocean_waves_normal1.png' );
-		normalMaps["squares"] = THREE.ImageUtils.loadTexture( '../normalMaps/squares.png' );
-		normalMaps["waves"] = THREE.ImageUtils.loadTexture( '../normalMaps/waves.png' );
+		// normalMaps["noisy_terrain"] = THREE.ImageUtils.loadTexture( '../normalMaps/noisy_terrain.png' );
+		// normalMaps["ocean_waves_normal1"] = THREE.ImageUtils.loadTexture( '../normalMaps/ocean_waves_normal1.png' );
+		// normalMaps["squares"] = THREE.ImageUtils.loadTexture( '../normalMaps/squares.png' );
+		// normalMaps["waves"] = THREE.ImageUtils.loadTexture( '../normalMaps/waves.png' );
 
 
 		//videos textures
-		videos['straightOn'] = new AzealiaVideoObject({video: document.getElementById( 'StraightOnVideo' )});
-		videos['down'] = new AzealiaVideoObject({video: document.getElementById( 'DownVideo' )});
-		videos['up'] = new AzealiaVideoObject({video: document.getElementById( 'UpVideo' )});
-		videos['left'] = new AzealiaVideoObject({video: document.getElementById( 'LeftVideo' )});
-		videos['right'] = new AzealiaVideoObject({video: document.getElementById( 'RightVideo' )});
+		videos['straightOn'] = new AzealiaVideoObject({video: document.getElementById( 'StraightOnVideo' ), dir: new THREE.Vector2(0,0)});
+		videos['down'] = new AzealiaVideoObject({video: document.getElementById( 'DownVideo' ), dir: new THREE.Vector2(0,1)});
+		videos['up'] = new AzealiaVideoObject({video: document.getElementById( 'UpVideo' ), dir: new THREE.Vector2(0,-1)});
+		videos['left'] = new AzealiaVideoObject({video: document.getElementById( 'LeftVideo' ), dir: new THREE.Vector2(-1,0)});
+		videos['right'] = new AzealiaVideoObject({video: document.getElementById( 'RightVideo' ), dir: new THREE.Vector2(1,0)});
 		videos['background'] = new AzealiaVideoObject({video: document.getElementById( 'BackgroundVideo' ), bIsActive: true});
 
 		videos['straightOn'].bIsActive = true;
@@ -290,7 +292,7 @@ function APP( _useStats, _debug)
 		diffMesh.scale.set(1,1,1);
 		diffScene.add(diffMesh);
 
-
+		console.log( diffMaterial );
 
 		gui.add(controls, 'normalMap', Object.keys(normalMaps) )
 		.onChange(function(value) {
@@ -329,6 +331,9 @@ function APP( _useStats, _debug)
 					setCurrentVideo("left");
 					startTransition();
 				}
+
+
+				// bleedDir: {type: 'v2', value: params.bleedDir || new THREE.Vector2( 0, -.0025 )},
 			}
 			else if(nose.x > thresholds["right"])
 			{
@@ -389,8 +394,15 @@ function APP( _useStats, _debug)
 	{
 		previousVid.bIsActive = false;
 		previousVid = currentVid;
+
 		currentVid = videos[name];
+
 		currentVid.bIsActive = previousVid.bIsActive = true;
+
+
+		// if(previousVid != currentVid)
+		// {
+		// }
 	}
 
 	/**
@@ -407,7 +419,7 @@ function APP( _useStats, _debug)
 		diffMaterial.uniforms.lastDiffTex.value = previousDiff;
 		diffMaterial.uniforms.mixVal.value = texBlendMat.uniforms.mixVal.value;
 		diffMaterial.uniforms.time.value = clock.getElapsedTime() * -.001;
-		diffMaterial.uniforms.timeDelta.value = Math.max(1., 0.016666 / (clock.getDelta() * 6000));
+		diffMaterial.uniforms.timeDelta.value = 1;//Math.max(1., 0.016666 / (clock.getDelta() * 6000));
 		// if(clock.getElapsedTime() > 2 && clock.getElapsedTime() < 3)
 		// {
 		// 	var delta = clock.getDelta();
@@ -442,6 +454,20 @@ function APP( _useStats, _debug)
 		new TWEEN.Tween(controls)
 		.to({mixVal: 1}, controls.transitionSpeed)
 		.delay( delay )
+		.onStart( function(value)
+		{
+
+			var bleedAmount = .001;
+
+			var deltaVec2 = previousVid.dir.clone().sub(currentVid.dir).multiplyScalar( -bleedAmount );
+
+			diffMaterial.uniforms.bleedDir.value.copy(deltaVec2);
+
+			new TWEEN.Tween(diffMaterial.uniforms.bleedDir.value)
+			.to(deltaVec2, controls.transitionSpeed)
+            .easing( TWEEN.Easing.Bounce.Out )
+			.start();
+		})
 		.onUpdate( function( value )
 		{
 			controls.mixVal = value;
@@ -455,7 +481,7 @@ function APP( _useStats, _debug)
 	{
 		bTransitioning = false;
 
-		if(debug)
+		if(debug == true)
 		{
 			randomtTransition();
 		}

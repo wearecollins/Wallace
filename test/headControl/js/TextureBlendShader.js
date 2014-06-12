@@ -102,6 +102,7 @@ var TextureBlendShader = function(params)
   		//we could try passinf the half vector as a varying...
 		'void main() {',
 		'	float blendVal = rgb2hsv(texture2D(blendMap, vUv ).xyz).z;',
+		'	blendVal = 1. - pow(1. - blendVal, 2.);',
 		
 		// '	blendVal = mixVal > blendVal ? 1. : 0.;',
 
@@ -125,8 +126,12 @@ var TextureBlendShader = function(params)
 		'	gVal = min(gVal, greenVal(current.xyz, greenScreen1));',
 		'	current = mix(bgCol, current, gVal);',
 
+		'	vec4 blend = texture2D(blendMap, vUv );',
+
 		'	gl_FragColor = mix(prev, current, blendVal);',
-		'	gl_FragColor += texture2D(blendMap, vUv );',
+
+		'	gl_FragColor = vec4(max(gl_FragColor, vec4(blend.xyz, 1.)));',
+		
 		'}'].join('\n'),
 
 	}
