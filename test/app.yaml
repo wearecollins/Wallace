@@ -1,0 +1,56 @@
+application: wallace-01
+version: 1
+runtime: python27
+api_version: 1
+threadsafe: true
+
+handlers:
+- url: /
+  static_files: headControl/index\.html
+  upload: headControl/index\.html
+  login: required
+  auth_fail_action: redirect
+
+- url: /js
+  static_dir: headControl/js
+
+- url: /css
+  static_dir: headControl/css
+
+- url: /WALLACE_TESTS
+  static_dir: WALLACE_TESTS
+  login: required
+  auth_fail_action: redirect
+
+- url: /includes
+  static_dir: includes
+
+- url: /blendMaps
+  static_dir: blendMaps
+
+- url: /normalMaps
+  static_dir: normalMaps
+
+- url: /blendMaps/(.*\.(gif|png|jpg|mp4))$
+  static_files: normalMaps/\1
+  upload: normalMaps/.*\.(gif|png|jpg|mp4)$
+
+- url: /blendMaps/(.*\.(gif|png|jpg|mp4))$
+  static_files: blendMaps/\1
+  upload: blendMaps/.*\.(gif|png|jpg|mp4)$
+
+- url: /(.*\.(gif|png|jpg|mp4))$
+  static_files: headControl/\1
+  upload: headControl/.*\.(gif|png|jpg|mp4)$
+
+- url: /(.*\.(html))$
+  static_files: headControl/\1
+  upload: headControl/.*\.(html)$
+  login: required
+  auth_fail_action: redirect
+
+- url: /.*
+  static_files: headControl/index\.html
+  upload: headControl/index\.html
+  login: required
+  auth_fail_action: redirect
