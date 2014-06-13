@@ -30,6 +30,13 @@ handlers:
 - url: /normalMaps
   static_dir: normalMaps
 
+- url: /mixingTest
+  static_dir: mixingTest
+
+- url: /mixingTest/(.*\.(gif|png|jpg|mp4|html))$
+  static_files: mixingTest/\1
+  upload: mixingTest/.*\.(gif|png|jpg|mp4|html)$
+
 - url: /blendMaps/(.*\.(gif|png|jpg|mp4))$
   static_files: normalMaps/\1
   upload: normalMaps/.*\.(gif|png|jpg|mp4)$

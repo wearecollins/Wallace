@@ -33,7 +33,6 @@ AzealiaVideoObject.prototype.play = function(position)
 	//TODO
 }
 
-
 function APP( _useStats, _debug)
 {
 
@@ -72,6 +71,11 @@ function APP( _useStats, _debug)
 	var normalMaps = {};
 	var videoTextures = {};
 	var texBlendMat;
+
+	// alpha blender
+	var alphaBlendMat, alphaBlendTex, alphaBlendScene, alphaPlane;
+	var alphaBlendMatBack, alphaBlendTexBack, alphaBlendSceneBack, alphaPlaneBack;
+
 	var videoMixValue = 0;
 
 
@@ -180,7 +184,35 @@ function APP( _useStats, _debug)
 			blendMap: blendMaps [controls.blendMap],
 			mixVal: 0
 		});
+
+		// ALPHA BLENDER
+		alphaBlendMat = new AlphaLookupShader(
+		{
+			currentTex:  videos['straightOn'].texture,
+			texH: 720
+		});
+
+		alphaBlendMatBack = new AlphaLookupShader(
+		{
+			currentTex:  videos['down'].texture,
+			texH: 720
+		});
+
+		alphaBlendScene = new THREE.Scene();
+		alphaBlendTex 	= new THREE.WebGLRenderTarget( 1280, 720, { minFilter: THREE.LinearFilter, magFilter: THREE.LinearFilter, format: THREE.RGBFormat, wrapS: THREE.RepeatWrapping, wrapT: THREE.RepeatWrapping } );
+		alphaPlane = new THREE.Mesh( new THREE.PlaneGeometry( 1,1, 12, 7 ), alphaBlendMat);
+		alphaBlendScene.add(alphaPlane);
+
+		alphaBlendSceneBack = new THREE.Scene();
+		alphaBlendTexBack 	= new THREE.WebGLRenderTarget( 1280, 720, { minFilter: THREE.LinearFilter, magFilter: THREE.LinearFilter, format: THREE.RGBFormat, wrapS: THREE.RepeatWrapping, wrapT: THREE.RepeatWrapping } );
+		alphaPlaneBack = new THREE.Mesh( new THREE.PlaneGeometry( 1,1, 12, 7 ), alphaBlendMatBack);
+		alphaBlendSceneBack.add(alphaPlaneBack);
+
+		renderer.render( alphaBlendScene, camera, alphaBlendTex, true );
+		renderer.render( alphaBlendSceneBack, camera, alphaBlendTexBack, true );
+
 		renderer.initMaterial( texBlendMat, scene.__lights, scene.fog );
+		renderer.initMaterial( alphaBlendMat, scene.__lights, scene.fog );
 
 		vidPlane = new THREE.Mesh( new THREE.PlaneGeometry( 1,1, 12, 7 ), texBlendMat);
 		scaleVidMesh();
@@ -295,6 +327,17 @@ function APP( _useStats, _debug)
 	function draw()
 	{
 
+		// render front
+		alphaBlendMat.uniforms.currentTex.value = currentVid.texture;
+		renderer.render( alphaBlendScene, camera, alphaBlendTex, true );
+		texBlendMat.uniforms.currentTex.value = alphaBlendTex;
+
+		alphaBlendMatBack.uniforms.currentTex.value = previousVid.texture;
+		renderer.render( alphaBlendSceneBack, camera, alphaBlendTexBack, true );
+		texBlendMat.uniforms.previousTex.value = alphaBlendTexBack;
+
+		// texBlendMat.uniforms.currentTex.value = currentDiff;
+
 		//to screen
 		renderer.render( scene, camera, null, true );
 	}
@@ -378,6 +421,8 @@ function APP( _useStats, _debug)
 	function scaleVidMesh()
 	{
 		vidPlane.scale.set( window.innerWidth, -window.innerWidth / vidAscpect, 1);
+		alphaPlane.scale.set( window.innerWidth, -window.innerWidth / vidAscpect, 1);
+		alphaPlaneBack.scale.set( window.innerWidth, -window.innerWidth / vidAscpect, 1);
 	}
 
 	function resetCamera()

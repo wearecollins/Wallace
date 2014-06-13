@@ -57,7 +57,7 @@ var TextureBlendShader = function(params)
 		'	float m = mapLinear(b,0.,1.,.01, .99) > mixVal ? 0. : 1.;//clamp((mixVal * 2. - 1.) + b, 0., 1.);',
 
 		'	vec2 pUv = vUv;',
-		'	vec2 cUv = vUv + vec2(0., .4 * (1. - mixVal) * (b*2. - 1.));',
+		'	vec2 cUv = vUv;// + vec2(0., .4 * (1. - mixVal) * (b*2. - 1.));',
 
 		'	vec4 p = texture2D(previousTex, pUv);',
 		'	vec4 c = texture2D(currentTex, cUv);',
