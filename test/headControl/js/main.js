@@ -235,17 +235,6 @@ function APP( _useStats, _debug)
 		scaleVidMesh();
 		scene.add(vidPlane);
 
-<<<<<<< HEAD
-=======
-		// gui.add(controls, "positionSmoothing", .001, 1);
-		// gui.add(controls, "transitionSpeed", 100, 3000);
-		// gui.add(controls, 'blendMap', Object.keys(../blendMaps) )
-		// .onChange(function(value) {
-		// 	this.uniforms.blendMap.value = blendMaps [value];
-		// 	console.log( blendMaps [value] );
-		// }.bind(texBlendMat));
-
->>>>>>> FETCH_HEAD
 		gui.remember(controls);
 
 		var thresholdGui = gui.addFolder("thresholds");
