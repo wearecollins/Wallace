@@ -120,14 +120,6 @@ var BleedShader = function(params)
 	    '	return clamp(opacity, 0., 1.);',
 		'}',
 
-		vec4 greenTest(vec4 c)
-		{
-			
-		// '	float gVal = greenVal(prev.xyz, greenScreen);',
-		// '	gVal = min(gVal, greenVal(prev.xyz, greenScreen1));',
-		// '	prev = mix(bgCol, prev, gVal);',
-		}
-
 		'void main() {',
 
 
@@ -148,6 +140,7 @@ var BleedShader = function(params)
 		'	sampleDirection += (texture2D(directionalTex, vUv).xy * 2. - 1.);',
 		'	sampleDirection *= -sampleDist;',
 
+		'	gl_FragColor = vec4(1., 0., 0., 1.);',
 
 		//what are we doing
 		'	float dk = decay;',
