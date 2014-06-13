@@ -1,9 +1,12 @@
+// BleedShader.js
+
+
 /**
- * DifferenceShader.js
+ * BleedShader.js
  */
 
 
-var DifferenceShader = function(params)
+var BleedShader = function(params)
 {
 	params = params || {};
 
@@ -80,33 +83,25 @@ var DifferenceShader = function(params)
 		//	sample normal map to add some global direction
 		'	sampleDirection += (texture2D(directionalTex, vUv).xy * 2. - 1.);',
 
-		'	sampleDirection *= sampleOffset * -sampleDist;',
+		'	sampleDirection *= -sampleDist;',
 
-		//	offset sample and wrap the y
-		'	vec2 uv = vUv + sampleDirection + bleedDir;',
-		'	uv.y -= floor(uv.y);',
+		'	gl_FragColor = vec4(1., 0., 0., 1.);',
 
-
-		'	lastDiff = texture2D(lastDiffTex, uv );',
-		'	lastDiff = max(lastDiff, texture2D(lastDiffTex, vUv ));',
-
-		'	vec4 prev = texture2D(previousTex, uv );',
-		'	vec4 current = texture2D(currentTex, uv );',
-
+		//what are we doing
 		'	float dk = decay;',
+		
+		//get our sample offset
+		'	vec2 uv = vUv + (sampleDirection * sampleOffset + bleedDir);',
+		
+		// sample the last frame
+		'	vec4 lastFrame = texture2D(lastDiffTex, vUv );',
+		'	vec4 lastFrameBled = texture2D(lastDiffTex, uv );',
 
-		// '	vec4 diff = max(vec4(0.), mix(current, prev, 1. - pow(1.-mixVal, bleedExpo)) - current);',
-		'	vec4 diff = vec4(0.);',
+		//sample our current frame
+		'	vec4 currentFrame = mix(texture2D(previousTex, vUv), texture2D(currentTex, vUv), mixVal);',
+		'	vec4 currentFrameBled = mix(texture2D(previousTex, uv), texture2D(currentTex, uv), mixVal);',
 
-		'	diff = min(1., mixVal*10.) * mix(current, prev, 1. - pow(mixVal,bleedExpo)) - current;',
-		'	diff = max( diff, mix(prev, current, mixVal) - prev);',
-		'	diff = max( vec4(0.), diff);',
-
-		'	vec3 c = diff.xyz;',
-
-		'	lastDiff *= dk;',
-
-		'	gl_FragColor = max(vec4(c, 1.), vec4(lastDiff.xyz, 1.));',
+		'	gl_FragColor = max(lastFrameBled * dk, max(lastFrame * dk, currentFrameBled));',
 
 		'}'].join('\n'),
 
@@ -116,4 +111,4 @@ var DifferenceShader = function(params)
 }
 
 
-DifferenceShader.prototype = Object.create( THREE.ShaderMaterial.prototype );
+BleedShader.prototype = Object.create( THREE.ShaderMaterial.prototype );

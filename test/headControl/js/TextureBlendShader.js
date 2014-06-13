@@ -130,7 +130,8 @@ var TextureBlendShader = function(params)
 
 		'	gl_FragColor = mix(prev, current, blendVal);',
 
-		'	gl_FragColor = vec4(max(gl_FragColor, vec4(blend.xyz, 1.)));',
+		'	gl_FragColor = max(gl_FragColor, blend);',
+		// '	gl_FragColor = blend;//vec4(max(gl_FragColor, vec4(blend.xyz, 1.)));',
 		
 		'}'].join('\n'),
 

@@ -23,12 +23,12 @@ var AzealiaVideoObject = function(params)
 	this.dir = params.dir || new THREE.Vector2( 0, 0 );
 }
 
-AzealiaVideoObject.prototype.pause = funciton()
+AzealiaVideoObject.prototype.pause = function()
 {
 	//TODO
 }
 
-AzealiaVideoObject.prototype.play = funciton(position)
+AzealiaVideoObject.prototype.play = function(position)
 {
 	//TODO
 }
@@ -304,8 +304,8 @@ function APP( _useStats, _debug)
 
 		var bleedFolder = gui.addFolder("bleedFolder");
 		bleedFolder.addFolder("bleedExpo").add(diffMaterial.uniforms.bleedExpo, "value", 1, 30);
-		bleedFolder.addFolder("decay").add(diffMaterial.uniforms.decay, "value", .95, 1.).step(.0001);
-		bleedFolder.addFolder("distance").add(diffMaterial.uniforms.bleedDistance, "value", 1, 10);
+		bleedFolder.addFolder("decay").add(diffMaterial.uniforms.decay, "value", .5, 1.).step(.0001);
+		bleedFolder.addFolder("distance").add(diffMaterial.uniforms.bleedDistance, "value", 0, 10);
 		//debug
 		//
 		console.log( vidPlane );
