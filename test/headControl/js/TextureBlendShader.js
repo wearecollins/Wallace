@@ -101,36 +101,37 @@ var TextureBlendShader = function(params)
 
   		//we could try passinf the half vector as a varying...
 		'void main() {',
-		'	float blendVal = rgb2hsv(texture2D(blendMap, vUv ).xyz).z;',
-		'	blendVal = 1. - pow(1. - blendVal, 2.);',
+		// '	float blendVal = rgb2hsv(texture2D(blendMap, vUv ).xyz).z;',
+		// '	blendVal = 1. - pow(1. - blendVal, 2.);',
 		
-		// '	blendVal = mixVal > blendVal ? 1. : 0.;',
+		// // '	blendVal = mixVal > blendVal ? 1. : 0.;',
 
-		'	blendVal = clamp( mixVal*2. - blendVal, 0., 1.);',
+		// '	blendVal = clamp( mixVal*2. - blendVal, 0., 1.);',
 
-		'	vec4 prev = texture2D(previousTex, vUv );',
-		'	vec4 current = texture2D(currentTex, vUv );',
+		// '	vec4 prev = texture2D(previousTex, vUv );',
+		// '	vec4 current = texture2D(currentTex, vUv );',
 
-		'	vec3 gHSV = rgb2hsv(greenScreen);',
-		'	vec3 pHSV = rgb2hsv(prev.xyz);',
+		// '	vec3 gHSV = rgb2hsv(greenScreen);',
+		// '	vec3 pHSV = rgb2hsv(prev.xyz);',
 
-		//I JUST MADE THIS UP without any research! there is probably a better way to alpha out the green screen
-		//if one of them is green then we blend the other with the background
-		'	vec4 bgCol = texture2D(backgroundTex, vUv );',
+		// //I JUST MADE THIS UP without any research! there is probably a better way to alpha out the green screen
+		// //if one of them is green then we blend the other with the background
+		// '	vec4 bgCol = texture2D(backgroundTex, vUv );',
 
-		'	float gVal = greenVal(prev.xyz, greenScreen);',
-		'	gVal = min(gVal, greenVal(prev.xyz, greenScreen1));',
-		'	prev = mix(bgCol, prev, gVal);',
+		// '	float gVal = greenVal(prev.xyz, greenScreen);',
+		// '	gVal = min(gVal, greenVal(prev.xyz, greenScreen1));',
+		// '	prev = mix(bgCol, prev, gVal);',
 
-		'	gVal = greenVal(current.xyz, greenScreen);',
-		'	gVal = min(gVal, greenVal(current.xyz, greenScreen1));',
-		'	current = mix(bgCol, current, gVal);',
+		// '	gVal = greenVal(current.xyz, greenScreen);',
+		// '	gVal = min(gVal, greenVal(current.xyz, greenScreen1));',
+		// '	current = mix(bgCol, current, gVal);',
 
 		'	vec4 blend = texture2D(blendMap, vUv );',
 
-		'	gl_FragColor = mix(prev, current, blendVal);',
+		// '	gl_FragColor = mix(prev, current, blendVal);',
 
-		'	gl_FragColor = vec4(max(gl_FragColor, vec4(blend.xyz, 1.)));',
+		'	gl_FragColor = blend;//max(gl_FragColor, blend);',
+		// '	gl_FragColor = blend;//vec4(max(gl_FragColor, vec4(blend.xyz, 1.)));',
 		
 		'}'].join('\n'),
 

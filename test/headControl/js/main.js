@@ -23,6 +23,16 @@ var AzealiaVideoObject = function(params)
 	this.dir = params.dir || new THREE.Vector2( 0, 0 );
 }
 
+AzealiaVideoObject.prototype.pause = function()
+{
+	//TODO
+}
+
+AzealiaVideoObject.prototype.play = function(position)
+{
+	//TODO
+}
+
 
 function APP( _useStats, _debug)
 {
@@ -147,7 +157,6 @@ function APP( _useStats, _debug)
 
 	//fauxSlit
 	var diffScene, currentDiff, previousDiff, diffMaterial, diffMesh, diffTarget0, diffTarget1;
-	var tempPlane;
 
 	function setup() 
 	{
@@ -253,14 +262,6 @@ function APP( _useStats, _debug)
 		scaleVidMesh();
 		scene.add(vidPlane);
 
-		// gui.add(controls, "positionSmoothing", .001, 1);
-		// gui.add(controls, "transitionSpeed", 100, 3000);
-		// gui.add(controls, 'blendMap', Object.keys(../blendMaps) )
-		// .onChange(function(value) {
-		// 	this.uniforms.blendMap.value = blendMaps [value];
-		// 	console.log( blendMaps [value] );
-		// }.bind(texBlendMat));
-
 		gui.remember(controls);
 
 		var thresholdGui = gui.addFolder("thresholds");
@@ -310,7 +311,7 @@ function APP( _useStats, _debug)
 		renderer.render( diffScene, camera, currentDiff, true );
 		renderer.render( diffScene, camera, previousDiff, true );
 
-		diffMaterial = new DifferenceShader({
+		diffMaterial = new BleedShader({
 			previousTex: videos['straightOn'].texture,
 			currentTex:  videos['down'].texture,
 			lastDiffTex:  previousDiff,
@@ -331,14 +332,8 @@ function APP( _useStats, _debug)
 
 		var bleedFolder = gui.addFolder("bleedFolder");
 		bleedFolder.addFolder("bleedExpo").add(diffMaterial.uniforms.bleedExpo, "value", 1, 30);
-		bleedFolder.addFolder("decay").add(diffMaterial.uniforms.decay, "value", .95, 1.).step(.0001);
-		bleedFolder.addFolder("distance").add(diffMaterial.uniforms.bleedDistance, "value", 1, 10);
-		//debug
-		//
-		console.log( vidPlane );
-		tempPlane = new THREE.Mesh( vidPlane.geometry, new THREE.MeshBasicMaterial( {map: currentDiff, side: 2} ));
-		tempPlane.scale.set( window.innerWidth, -window.innerWidth / vidAscpect, 1);
-		// scene.add(tempPlane);
+		bleedFolder.addFolder("decay").add(diffMaterial.uniforms.decay, "value", .5, 1.).step(.0001);
+		bleedFolder.addFolder("distance").add(diffMaterial.uniforms.bleedDistance, "value", 0, 10);
 
 		//kick off some random transitioning
 		if(debug)	startTransition( endTransition );
@@ -485,8 +480,6 @@ function APP( _useStats, _debug)
 
 		renderer.render( diffScene, camera, currentDiff, true );
 
-		tempPlane.material.map = currentDiff;
-
 		texBlendMat.uniforms.blendMap.value = currentDiff;
 
 		//to screen
@@ -508,20 +501,23 @@ function APP( _useStats, _debug)
 		diffMaterial.uniforms.previousTex.value = previousVid.texture,
 		diffMaterial.uniforms.currentTex.value = currentVid.texture,
 
+		diffMaterial.uniforms.decay.value = .97;
+
 		new TWEEN.Tween(controls)
 		.to({mixVal: 1}, controls.transitionSpeed)
 		.delay( delay )
 		.onStart( function(value)
 		{
 
+			diffMaterial.uniforms.decay.value = .97;
+
+			//tween the bleed dir
 			var bleedAmount = .001;
-
 			var deltaVec2 = previousVid.dir.clone().sub(currentVid.dir).multiplyScalar( -bleedAmount );
-
 			diffMaterial.uniforms.bleedDir.value.copy(deltaVec2);
 
 			new TWEEN.Tween(diffMaterial.uniforms.bleedDir.value)
-			.to(deltaVec2, controls.transitionSpeed)
+			.to(currentVid.dir.clone().multiplyScalar( bleedAmount ), controls.transitionSpeed)
             .easing( TWEEN.Easing.Bounce.Out )
 			.start();
 		})
@@ -530,7 +526,15 @@ function APP( _useStats, _debug)
 			controls.mixVal = value;
 			texBlendMat.uniforms.mixVal.value = value;
 		})
-		.onComplete( callback )
+		.onComplete( function()
+		{
+			new TWEEN.Tween(diffMaterial.uniforms.decay)
+			.to({value: 0}, controls.transitionSpeed)
+			.easing(TWEEN.Easing.Circular.In)
+			.start();
+
+			callback();
+		})
 		.start();
 	}
 

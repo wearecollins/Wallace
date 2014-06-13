@@ -1,9 +1,12 @@
+// BleedShader.js
+
+
 /**
- * DifferenceShader.js
+ * BleedShader.js
  */
 
 
-var DifferenceShader = function(params)
+var BleedShader = function(params)
 {
 	params = params || {};
 
@@ -69,44 +72,35 @@ var DifferenceShader = function(params)
 		'	vec2 sampleOffset = bleedDistance / (vec2(1280., 720.));',
 		'	vec4 lastDiff = vec4(0.);',
 
-		//sample the delta texture to get a local vector. we could probably pass this off to onther pass later on
+		//sample the delta texture to get a rough local vector. 
+		//we could probably pass this off to onther pass later on
 		'	vec2 sampleDirection = vec2(0.,0.);',
 		'	sampleDirection.x = getGray(texture2D(lastDiffTex, vec2(vUv.x - sampleOffset.x, vUv.y)).xyz);',
 		'	sampleDirection.x -= getGray(texture2D(lastDiffTex, vec2(vUv.x + sampleOffset.x, vUv.y)).xyz);',
-
 		'	sampleDirection.y = getGray(texture2D(lastDiffTex, vec2(vUv.x, vUv.y - sampleOffset.y )).xyz);',
 		'	sampleDirection.y -= getGray(texture2D(lastDiffTex, vec2(vUv.x, vUv.y + sampleOffset.y )).xyz);',
 
-		//	sample normal map to add some global direction
+		//	sample normal map to add some global/fluid direction
 		'	sampleDirection += (texture2D(directionalTex, vUv).xy * 2. - 1.);',
+		'	sampleDirection *= -sampleDist;',
 
-		'	sampleDirection *= sampleOffset * -sampleDist;',
+		'	gl_FragColor = vec4(1., 0., 0., 1.);',
 
-		//	offset sample and wrap the y
-		'	vec2 uv = vUv + sampleDirection + bleedDir;',
-		'	uv.y -= floor(uv.y);',
-
-
-		'	lastDiff = texture2D(lastDiffTex, uv );',
-		'	lastDiff = max(lastDiff, texture2D(lastDiffTex, vUv ));',
-
-		'	vec4 prev = texture2D(previousTex, uv );',
-		'	vec4 current = texture2D(currentTex, uv );',
-
+		//what are we doing
 		'	float dk = decay;',
+		
+		//get our sample offset
+		'	vec2 uv = vUv + (sampleDirection * sampleOffset + bleedDir);',
+		
+		// sample the last frame
+		'	vec4 lastFrame = texture2D(lastDiffTex, vUv );',
+		'	vec4 lastFrameBled = texture2D(lastDiffTex, uv );',
 
-		// '	vec4 diff = max(vec4(0.), mix(current, prev, 1. - pow(1.-mixVal, bleedExpo)) - current);',
-		'	vec4 diff = vec4(0.);',
+		//sample our current frame
+		'	vec4 currentFrame = mix(texture2D(previousTex, vUv), texture2D(currentTex, vUv), mixVal);',
+		'	vec4 currentFrameBled = mix(texture2D(previousTex, uv), texture2D(currentTex, uv), mixVal);',
 
-		'	diff = min(1., mixVal*10.) * mix(current, prev, 1. - pow(mixVal,bleedExpo)) - current;',
-		'	diff = max( diff, mix(prev, current, mixVal) - prev);',
-		'	diff = max( vec4(0.), diff);',
-
-		'	vec3 c = diff.xyz;',
-
-		'	lastDiff *= dk;',
-
-		'	gl_FragColor = max(vec4(c, 1.), vec4(lastDiff.xyz, 1.));',
+		'	gl_FragColor = max(lastFrameBled * dk, max(lastFrame * dk, currentFrameBled));',
 
 		'}'].join('\n'),
 
@@ -116,4 +110,4 @@ var DifferenceShader = function(params)
 }
 
 
-DifferenceShader.prototype = Object.create( THREE.ShaderMaterial.prototype );
+BleedShader.prototype = Object.create( THREE.ShaderMaterial.prototype );
