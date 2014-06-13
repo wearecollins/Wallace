@@ -6,8 +6,7 @@ threadsafe: true
 
 handlers:
 - url: /
-  static_files: headControl/index\.html
-  upload: headControl/index\.html
+  script: app.application
   login: required
   auth_fail_action: redirect
 
