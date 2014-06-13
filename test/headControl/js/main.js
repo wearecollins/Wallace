@@ -59,7 +59,7 @@ function APP( _useStats, _debug)
 	var currentVid, previousVid;
 
 	var videos = {};
-	var blendMaps = {};
+	var blendMaps  = {};
 	var normalMaps = {};
 	var videoTextures = {};
 	var texBlendMat;
@@ -171,24 +171,24 @@ function APP( _useStats, _debug)
 		scene.add( group );	
 
 		//blend textures
-		blendMaps["hardNoise"] = THREE.ImageUtils.loadTexture( '../blendMaps/hard_noise.png' );
-		blendMaps["randomGrid"] = THREE.ImageUtils.loadTexture( '../blendMaps/random_grid.png' );
-		blendMaps["softNoise"] = THREE.ImageUtils.loadTexture( '../blendMaps/soft_noise.png' );
-		blendMaps["Checker"] = THREE.ImageUtils.loadTexture( '../blendMaps/Checker.png' );
-		blendMaps["circlepattern"] = THREE.ImageUtils.loadTexture( '../blendMaps/circlepattern.png' );
-		blendMaps["floral"] = THREE.ImageUtils.loadTexture( '../blendMaps/floral.png' );
+		blendMaps ["hardNoise"] = THREE.ImageUtils.loadTexture( '../blendMaps/hard_noise.png' );
+		blendMaps ["randomGrid"] = THREE.ImageUtils.loadTexture( '../blendMaps/random_grid.png' );
+		blendMaps ["softNoise"] = THREE.ImageUtils.loadTexture( '../blendMaps/soft_noise.png' );
+		blendMaps ["Checker"] = THREE.ImageUtils.loadTexture( '../blendMaps/Checker.png' );
+		blendMaps ["circlepattern"] = THREE.ImageUtils.loadTexture( '../blendMaps/circlepattern.png' );
+		blendMaps ["floral"] = THREE.ImageUtils.loadTexture( '../blendMaps/floral.png' );
 
-		blendMaps["downToUp"] = THREE.ImageUtils.loadTexture( '../blendMaps/down_to_up.png' );
-		blendMaps["leftToRight"] = THREE.ImageUtils.loadTexture( '../blendMaps/left_to_right.png' );
-		blendMaps["rightToLeft"] = THREE.ImageUtils.loadTexture( '../blendMaps/right_to_left.png' );
-		blendMaps["upToDown"] = THREE.ImageUtils.loadTexture( '../blendMaps/up_to_down.png' );
+		blendMaps ["downToUp"] = THREE.ImageUtils.loadTexture( '../blendMaps/down_to_up.png' );
+		blendMaps ["leftToRight"] = THREE.ImageUtils.loadTexture( '../blendMaps/left_to_right.png' );
+		blendMaps ["rightToLeft"] = THREE.ImageUtils.loadTexture( '../blendMaps/right_to_left.png' );
+		blendMaps ["upToDown"] = THREE.ImageUtils.loadTexture( '../blendMaps/up_to_down.png' );
 
-		blendMaps["transition1"] = THREE.ImageUtils.loadTexture( '../blendMaps/transition1.png' );
-		blendMaps["transition2"] = THREE.ImageUtils.loadTexture( '../blendMaps/transition2.png' );
-		blendMaps["transition3"] = THREE.ImageUtils.loadTexture( '../blendMaps/transition3.png' );
-		blendMaps["transition4"] = THREE.ImageUtils.loadTexture( '../blendMaps/transition4.png' );
-		blendMaps["transition5"] = THREE.ImageUtils.loadTexture( '../blendMaps/transition5.png' );
-		blendMaps["transition6"] = THREE.ImageUtils.loadTexture( '../blendMaps/transition6.png' );
+		blendMaps ["transition1"] = THREE.ImageUtils.loadTexture( '../blendMaps/transition1.png' );
+		blendMaps ["transition2"] = THREE.ImageUtils.loadTexture( '../blendMaps/transition2.png' );
+		blendMaps ["transition3"] = THREE.ImageUtils.loadTexture( '../blendMaps/transition3.png' );
+		blendMaps ["transition4"] = THREE.ImageUtils.loadTexture( '../blendMaps/transition4.png' );
+		blendMaps ["transition5"] = THREE.ImageUtils.loadTexture( '../blendMaps/transition5.png' );
+		blendMaps ["transition6"] = THREE.ImageUtils.loadTexture( '../blendMaps/transition6.png' );
 
 
 		// normalMaps["buttons"] = THREE.ImageUtils.loadTexture( '../normalMaps/buttons.png' );
@@ -204,6 +204,8 @@ function APP( _useStats, _debug)
 		// normalMaps["squares"] = THREE.ImageUtils.loadTexture( '../normalMaps/squares.png' );
 		// normalMaps["waves"] = THREE.ImageUtils.loadTexture( '../normalMaps/waves.png' );
 
+		// add video elements
+		loadVideos();
 
 		//videos textures
 		videos['straightOn'] = new AzealiaVideoObject({video: document.getElementById( 'StraightOnVideo' ), dir: new THREE.Vector2(0,0)});
@@ -224,7 +226,7 @@ function APP( _useStats, _debug)
 			previousTex: videos['straightOn'].texture,
 			currentTex:  videos['down'].texture,
 			backgroundTex:  videos['background'].texture,
-			blendMap: blendMaps[controls.blendMap],
+			blendMap: blendMaps [controls.blendMap],
 			mixVal: .5
 		});
 		renderer.initMaterial( texBlendMat, scene.__lights, scene.fog );
@@ -233,6 +235,17 @@ function APP( _useStats, _debug)
 		scaleVidMesh();
 		scene.add(vidPlane);
 
+<<<<<<< HEAD
+=======
+		// gui.add(controls, "positionSmoothing", .001, 1);
+		// gui.add(controls, "transitionSpeed", 100, 3000);
+		// gui.add(controls, 'blendMap', Object.keys(../blendMaps) )
+		// .onChange(function(value) {
+		// 	this.uniforms.blendMap.value = blendMaps [value];
+		// 	console.log( blendMaps [value] );
+		// }.bind(texBlendMat));
+
+>>>>>>> FETCH_HEAD
 		gui.remember(controls);
 
 		var thresholdGui = gui.addFolder("thresholds");
@@ -308,6 +321,36 @@ function APP( _useStats, _debug)
 
 		//kick off some random transitioning
 		if(debug)	startTransition( endTransition );
+	}
+
+	var videoFiles = {
+		"BackgroundVideo":"../WALLACE_TESTS/BacktotheCameraShotMontage_H264.mp4",
+		"StraightOnVideo":"../WALLACE_TESTS/WALLACE_STRAIGHT_ON_H264.mp4",
+		"DownVideo":"../WALLACE_TESTS/WALLACE_DOWN_H264.mp4",
+		"LeftVideo":"../WALLACE_TESTS/WALLACE_LEFT_H264.mp4",
+		"RightVideo":"../WALLACE_TESTS/WALLACE_RIGHT_H264.mp4",
+		"UpVideo":"../WALLACE_TESTS/WALLACE_UP_H264.mp4",
+	}
+
+	function loadVideos(){
+		for( var id in videoFiles ){
+			loadVideo( id, videoFiles[id]);
+		}
+		$('video').each(function() {
+		    $(this).get(0).play();
+		});
+		//el.play();
+	}
+
+	function loadVideo( name, url ){
+		var el = document.createElement( 'video' );
+		el.setAttribute("loop", "");
+		el.setAttribute("muted", "");
+		el.setAttribute("id", name);
+		var source = document.createElement('source');
+		source.src = url;
+		el.appendChild(source);
+		document.body.appendChild(el);
 	}
 
 	/**
@@ -603,7 +646,7 @@ function APP( _useStats, _debug)
 	function rendererSetup()
 	{
 
-		renderer = new THREE.WebGLRenderer( { antialias: true } );
+		renderer = new THREE.WebGLRenderer( { antialias: true, devicePixelRatio: 1 } );
 		renderer.setClearColor( 0x444447 );
 		renderer.sortObjects = false;
 		renderer.setSize( window.innerWidth, window.innerHeight );
