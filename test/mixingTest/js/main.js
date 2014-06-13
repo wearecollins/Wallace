@@ -148,7 +148,7 @@ function APP( _useStats, _debug)
 		// 
 		blendMaps["horizontal_stripes"] = THREE.ImageUtils.loadTexture( '../blendMaps/horizontal_stripes.png');
 		blendMaps["horizontalHardGradient"] = THREE.ImageUtils.loadTexture( '../blendMaps/horizontalHardGradient.png');
-		blendMaps["skinny-stripe"] = THREE.ImageUtils.loadTexture( '../blendMaps/skinny.png');
+		blendMaps["skinny-stripe"] = THREE.ImageUtils.loadTexture( '../blendMaps/skinny-stripe.png');
 		blendMaps["verticalHardGradient"] = THREE.ImageUtils.loadTexture( '../blendMaps/verticalHardGradient.png');
 		blendMaps["zigzag"] = THREE.ImageUtils.loadTexture( '../blendMaps/zigzag.png');
 
