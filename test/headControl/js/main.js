@@ -55,6 +55,11 @@ function APP( _useStats, _debug)
 	var texBlendMat;
 	var videoMixValue = 0;
 
+	// LOADING: load videos after all textures are ready
+	var loadedTextureCount 	= 0;
+	var textureToLoadCount 	= 19;	// this needs to == the count of blendMaps + normalMaps
+	var bVideosReady 		= false;
+
 	//HEAD TRACKING
 	var parentDiv = null;
 	parentDiv = document.createElement("cameraParent");
@@ -162,24 +167,24 @@ function APP( _useStats, _debug)
 		scene.add( group );	
 
 		//blend textures
-		blendMaps ["hardNoise"] = THREE.ImageUtils.loadTexture( '../blendMaps/hard_noise.png' );
-		blendMaps ["randomGrid"] = THREE.ImageUtils.loadTexture( '../blendMaps/random_grid.png' );
-		blendMaps ["softNoise"] = THREE.ImageUtils.loadTexture( '../blendMaps/soft_noise.png' );
-		blendMaps ["Checker"] = THREE.ImageUtils.loadTexture( '../blendMaps/Checker.png' );
-		blendMaps ["circlepattern"] = THREE.ImageUtils.loadTexture( '../blendMaps/circlepattern.png' );
-		blendMaps ["floral"] = THREE.ImageUtils.loadTexture( '../blendMaps/floral.png' );
+		blendMaps ["hardNoise"] = THREE.ImageUtils.loadTexture( '../blendMaps/hard_noise.png', new THREE.UVMapping(), onTextureLoaded );
+		blendMaps ["randomGrid"] = THREE.ImageUtils.loadTexture( '../blendMaps/random_grid.png', new THREE.UVMapping(), onTextureLoaded );
+		blendMaps ["softNoise"] = THREE.ImageUtils.loadTexture( '../blendMaps/soft_noise.png', new THREE.UVMapping(), onTextureLoaded );
+		blendMaps ["Checker"] = THREE.ImageUtils.loadTexture( '../blendMaps/Checker.png', new THREE.UVMapping(), onTextureLoaded );
+		blendMaps ["circlepattern"] = THREE.ImageUtils.loadTexture( '../blendMaps/circlepattern.png', new THREE.UVMapping(), onTextureLoaded );
+		blendMaps ["floral"] = THREE.ImageUtils.loadTexture( '../blendMaps/floral.png', new THREE.UVMapping(), onTextureLoaded );
 
-		blendMaps ["downToUp"] = THREE.ImageUtils.loadTexture( '../blendMaps/down_to_up.png' );
-		blendMaps ["leftToRight"] = THREE.ImageUtils.loadTexture( '../blendMaps/left_to_right.png' );
-		blendMaps ["rightToLeft"] = THREE.ImageUtils.loadTexture( '../blendMaps/right_to_left.png' );
-		blendMaps ["upToDown"] = THREE.ImageUtils.loadTexture( '../blendMaps/up_to_down.png' );
+		blendMaps ["downToUp"] = THREE.ImageUtils.loadTexture( '../blendMaps/down_to_up.png', new THREE.UVMapping(), onTextureLoaded );
+		blendMaps ["leftToRight"] = THREE.ImageUtils.loadTexture( '../blendMaps/left_to_right.png', new THREE.UVMapping(), onTextureLoaded );
+		blendMaps ["rightToLeft"] = THREE.ImageUtils.loadTexture( '../blendMaps/right_to_left.png', new THREE.UVMapping(), onTextureLoaded );
+		blendMaps ["upToDown"] = THREE.ImageUtils.loadTexture( '../blendMaps/up_to_down.png', new THREE.UVMapping(), onTextureLoaded );
 
-		blendMaps ["transition1"] = THREE.ImageUtils.loadTexture( '../blendMaps/transition1.png' );
-		blendMaps ["transition2"] = THREE.ImageUtils.loadTexture( '../blendMaps/transition2.png' );
-		blendMaps ["transition3"] = THREE.ImageUtils.loadTexture( '../blendMaps/transition3.png' );
-		blendMaps ["transition4"] = THREE.ImageUtils.loadTexture( '../blendMaps/transition4.png' );
-		blendMaps ["transition5"] = THREE.ImageUtils.loadTexture( '../blendMaps/transition5.png' );
-		blendMaps ["transition6"] = THREE.ImageUtils.loadTexture( '../blendMaps/transition6.png' );
+		blendMaps ["transition1"] = THREE.ImageUtils.loadTexture( '../blendMaps/transition1.png', new THREE.UVMapping(), onTextureLoaded );
+		blendMaps ["transition2"] = THREE.ImageUtils.loadTexture( '../blendMaps/transition2.png', new THREE.UVMapping(), onTextureLoaded );
+		blendMaps ["transition3"] = THREE.ImageUtils.loadTexture( '../blendMaps/transition3.png', new THREE.UVMapping(), onTextureLoaded );
+		blendMaps ["transition4"] = THREE.ImageUtils.loadTexture( '../blendMaps/transition4.png', new THREE.UVMapping(), onTextureLoaded );
+		blendMaps ["transition5"] = THREE.ImageUtils.loadTexture( '../blendMaps/transition5.png', new THREE.UVMapping(), onTextureLoaded );
+		blendMaps ["transition6"] = THREE.ImageUtils.loadTexture( '../blendMaps/transition6.png', new THREE.UVMapping(), onTextureLoaded );
 
 
 		// normalMaps["buttons"] = THREE.ImageUtils.loadTexture( '../normalMaps/buttons.png' );
@@ -187,13 +192,35 @@ function APP( _useStats, _debug)
 		// normalMaps["geometric"] = THREE.ImageUtils.loadTexture( '../normalMaps/geometric.png' );
 		// normalMaps["honeycomb"] = THREE.ImageUtils.loadTexture( '../normalMaps/honeycomb.png' );
 		// normalMaps["moss_normal_map"] = THREE.ImageUtils.loadTexture( '../normalMaps/moss_normal_map.png' );
-		normalMaps["noise"] = THREE.ImageUtils.loadTexture( '../normalMaps/noise.png' );
-		normalMaps["noise1"] = THREE.ImageUtils.loadTexture( '../normalMaps/noise1.png' );
-		normalMaps["noiseSmooth"] = THREE.ImageUtils.loadTexture( '../normalMaps/noiseSmooth.png' );
+		normalMaps["noise"] = THREE.ImageUtils.loadTexture( '../normalMaps/noise.png', new THREE.UVMapping(), onTextureLoaded );
+		normalMaps["noise1"] = THREE.ImageUtils.loadTexture( '../normalMaps/noise1.png', new THREE.UVMapping(), onTextureLoaded );
+		normalMaps["noiseSmooth"] = THREE.ImageUtils.loadTexture( '../normalMaps/noiseSmooth.png', new THREE.UVMapping(), onTextureLoaded );
 		// normalMaps["noisy_terrain"] = THREE.ImageUtils.loadTexture( '../normalMaps/noisy_terrain.png' );
 		// normalMaps["ocean_waves_normal1"] = THREE.ImageUtils.loadTexture( '../normalMaps/ocean_waves_normal1.png' );
 		// normalMaps["squares"] = THREE.ImageUtils.loadTexture( '../normalMaps/squares.png' );
 		// normalMaps["waves"] = THREE.ImageUtils.loadTexture( '../normalMaps/waves.png' );
+	}
+
+	function onTextureLoaded(){
+		loadedTextureCount++;
+		
+		// should be a check here to make sure we don't do it > once
+		if ( loadedTextureCount == textureToLoadCount ){
+			console.log("loaded");
+			setupVideos();
+		}
+	}
+
+	var videoFiles = {
+		"BackgroundVideo":"../WALLACE_TESTS/BacktotheCameraShotMontage_H264.mp4",
+		"StraightOnVideo":"../WALLACE_TESTS/WALLACE_STRAIGHT_ON_H264.mp4",
+		"DownVideo":"../WALLACE_TESTS/WALLACE_DOWN_H264.mp4",
+		"LeftVideo":"../WALLACE_TESTS/WALLACE_LEFT_H264.mp4",
+		"RightVideo":"../WALLACE_TESTS/WALLACE_RIGHT_H264.mp4",
+		"UpVideo":"../WALLACE_TESTS/WALLACE_UP_H264.mp4",
+	}
+
+	function setupVideos(){
 
 		// add video elements
 		loadVideos();
@@ -315,15 +342,7 @@ function APP( _useStats, _debug)
 
 		//kick off some random transitioning
 		if(debug)	startTransition( endTransition );
-	}
-
-	var videoFiles = {
-		"BackgroundVideo":"../WALLACE_TESTS/BacktotheCameraShotMontage_H264.mp4",
-		"StraightOnVideo":"../WALLACE_TESTS/WALLACE_STRAIGHT_ON_H264.mp4",
-		"DownVideo":"../WALLACE_TESTS/WALLACE_DOWN_H264.mp4",
-		"LeftVideo":"../WALLACE_TESTS/WALLACE_LEFT_H264.mp4",
-		"RightVideo":"../WALLACE_TESTS/WALLACE_RIGHT_H264.mp4",
-		"UpVideo":"../WALLACE_TESTS/WALLACE_UP_H264.mp4",
+		bVideosReady = true;
 	}
 
 	function loadVideos(){
@@ -354,6 +373,9 @@ function APP( _useStats, _debug)
 	function update()
 	{
 		TWEEN.update();
+
+		// just chill if we're not ready yet
+		if ( !bVideosReady ) return;
 
 		if (!bTransitioning)
 		{
@@ -444,6 +466,8 @@ function APP( _useStats, _debug)
 	 */
 	function draw()
 	{
+		if ( !bVideosReady ) return;
+
 		//ping pong
 		var swapper = previousDiff;
 		previousDiff = currentDiff;
