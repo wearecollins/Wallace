@@ -250,11 +250,10 @@ function APP( _useStats, _debug)
 
 		texBlendMat = new TextureBlendShader(
 		{
-			previousTex: videos['straightOn'].texture,
+			// currentTex: videos['straightOn'].texture,
 			currentTex:  videos['down'].texture,
-			backgroundTex:  videos['background'].texture,
-			blendMap: blendMaps [controls.blendMap],
-			mixVal: .5
+			mixVal: .5,
+			backgroundTex:  videos['background'].texture
 		});
 		renderer.initMaterial( texBlendMat, scene.__lights, scene.fog );
 
@@ -272,11 +271,11 @@ function APP( _useStats, _debug)
 		gui.remember(thresholds);
 
 		var shaderFolder = gui.addFolder("shader");
-		shaderFolder.addFolder("alphaThreshold").add(texBlendMat.uniforms.alphaThreshold, "value", .01, 5.);
-		shaderFolder.addFolder("offset").add(texBlendMat.uniforms.offset, "value", .001, 1.);
-		shaderFolder.addFolder("K0").add(texBlendMat.uniforms.K0, "value", .001, 1.);
-		shaderFolder.addFolder("K1").add(texBlendMat.uniforms.K1, "value", .001, 1.);
-		shaderFolder.addFolder("K2").add(texBlendMat.uniforms.K2, "value", .001, 1.);
+		// shaderFolder.addFolder("alphaThreshold").add(texBlendMat.uniforms.alphaThreshold, "value", .01, 5.);
+		// shaderFolder.addFolder("offset").add(texBlendMat.uniforms.offset, "value", .001, 1.);
+		// shaderFolder.addFolder("K0").add(texBlendMat.uniforms.K0, "value", .001, 1.);
+		// shaderFolder.addFolder("K1").add(texBlendMat.uniforms.K1, "value", .001, 1.);
+		// shaderFolder.addFolder("K2").add(texBlendMat.uniforms.K2, "value", .001, 1.);
 
 		//HEAD tracking
 		htracker.init(videoInput, canvasInput);
@@ -469,7 +468,7 @@ function APP( _useStats, _debug)
 		currentDiff = swapper;
 
 		diffMaterial.uniforms.lastDiffTex.value = previousDiff;
-		diffMaterial.uniforms.mixVal.value = texBlendMat.uniforms.mixVal.value;
+		//diffMaterial.uniforms.mixVal.value = texBlendMat.uniforms.mixVal.value;
 		diffMaterial.uniforms.time.value = clock.getElapsedTime() * -.001;
 		diffMaterial.uniforms.timeDelta.value = 1;//Math.max(1., 0.016666 / (clock.getDelta() * 6000));
 		// if(clock.getElapsedTime() > 2 && clock.getElapsedTime() < 3)
@@ -480,7 +479,7 @@ function APP( _useStats, _debug)
 
 		renderer.render( diffScene, camera, currentDiff, true );
 
-		texBlendMat.uniforms.blendMap.value = currentDiff;
+		texBlendMat.uniforms.currentTex.value = currentDiff;
 
 		//to screen
 		renderer.render( scene, camera, null, true );

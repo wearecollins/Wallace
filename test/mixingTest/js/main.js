@@ -33,7 +33,6 @@ AzealiaVideoObject.prototype.play = function(position)
 	//TODO
 }
 
-
 function APP( _useStats, _debug)
 {
 
@@ -72,6 +71,7 @@ function APP( _useStats, _debug)
 	var normalMaps = {};
 	var videoTextures = {};
 	var texBlendMat;
+
 	var videoMixValue = 0;
 
 
@@ -106,7 +106,7 @@ function APP( _useStats, _debug)
 
 	var controls = {
 		positionSmoothing: .25,
-		transitionSpeed: 1000,
+		transitionSpeed: 3000,
 		blendMap: "softNoise",
 		normalMap: "noiseSmooth",
 		mixVal: 1
@@ -138,7 +138,7 @@ function APP( _useStats, _debug)
 		scene.add( group );	
 
 		//blend textures
-		blendMaps ["hardNoise"] = THREE.ImageUtils.loadTexture( '../blendMaps/hard_noise.png' );
+		blendMaps ["hardNoise"] = THREE.ImageUtils.loadTexture( '../blendMaps/transition1.png' );
 		blendMaps ["randomGrid"] = THREE.ImageUtils.loadTexture( '../blendMaps/random_grid.png' );
 		blendMaps ["softNoise"] = THREE.ImageUtils.loadTexture( '../blendMaps/soft_noise.png' );
 		blendMaps ["Checker"] = THREE.ImageUtils.loadTexture( '../blendMaps/Checker.png' );
@@ -180,6 +180,8 @@ function APP( _useStats, _debug)
 			blendMap: blendMaps [controls.blendMap],
 			mixVal: 0
 		});
+
+
 		renderer.initMaterial( texBlendMat, scene.__lights, scene.fog );
 
 		//GUI
@@ -290,7 +292,6 @@ function APP( _useStats, _debug)
 	 */
 	function draw()
 	{
-
 		//to screen
 		renderer.render( scene, camera, null, true );
 	}
