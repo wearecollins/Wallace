@@ -264,6 +264,7 @@ function APP( _useStats, _debug)
 	{
 		//SLIT
 		// if(frame % 10 == 0)	slitIndex = (slitIndex+1) % slits.length; // maybe try modulating the index re-definition
+
 		if(frame % controls.slitStep == 0)	slits.push( slits.shift() );
 		renderer.render( slitScene, camera, slits[0], false );
 
@@ -311,7 +312,7 @@ function APP( _useStats, _debug)
 		delay = delay || 0;
 
 
-		blendMat.uniforms.mixVal.value = 0;
+		blendMat.uniforms.mixVal.value = 0.0;
 		blendMat.uniforms.previousTex.value = previousVid.texture,
 		blendMat.uniforms.currentTex.value = currentVid.texture,
 
@@ -335,7 +336,7 @@ function APP( _useStats, _debug)
 		.onComplete( function()
 		{
 			new TWEEN.Tween(slitMat.uniforms.bVal)
-			.to({value: 0}, 500)
+			.to({value: 0}, 1000)
 			.start();
 		})
 		.start();
