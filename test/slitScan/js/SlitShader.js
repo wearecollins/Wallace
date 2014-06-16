@@ -52,7 +52,7 @@ var SlitShader = function(params)
 
 		'void main()',
 		'{',	
-		'	float d = mix(1., texture2D(blendMap, vUv).x * .99, 1.);//1. - pow(1. - bVal, 5.));',
+		'	float d = mix(1., texture2D(blendMap, vUv).x * .99, 1. - pow(1. - bVal, 5.));',
 		'	d -= floor(d);',
 		'	int depthIndex = int(clamp(d * numSlits, 0., '+parseInt(slitCount-1)+'.));',
 		'	for(int i=0; i<'+parseInt(slitCount)+'; i++){',

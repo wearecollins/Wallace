@@ -52,13 +52,15 @@ var BlendShader = function(params)
 		'void main()',
 		'{',	
 
+		'	float b = clamp( texture2D(blendMap, vUv).x + (mixVal * 2. - 1.), 0., 1.);',
+
 		'	vec2 pUv = vUv;',
 		'	vec2 cUv = vUv;// + vec2(0., .4 * (1. - mixVal) * (b*2. - 1.));',
 
 		'	vec4 p = texture2D(previousTex, pUv);',
 		'	vec4 c = texture2D(currentTex, cUv);',
 
-		'	vec4 mixed = mix(p, c, mixVal);',
+		'	vec4 mixed = mix(p, c, b);',
 
 		'	gl_FragColor = mixed;',
 		'}'
