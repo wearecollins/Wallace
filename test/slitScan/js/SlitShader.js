@@ -21,6 +21,7 @@ var SlitShader = function(params)
 		uniforms: {
 			blendMap: {type: 't', value: params.blendMap || undefined },
 			mixVal: {type: 'f', value: params.mixVal || .5},
+			bVal: {type: 'f', value: params.bVal || .5},
 			slitValue: {type: 'f', value: params.slitValue || 0},
 			numSlits: {type: 'f', value: params.slits.length},
 
@@ -41,6 +42,7 @@ var SlitShader = function(params)
 		'uniform sampler2D slits[15];',
 		'uniform sampler2D blendMap;',
 		'uniform float mixVal;',	
+		'uniform float bVal;',	
 		'uniform float slitValue;',	
 		'uniform float numSlits;',
 
@@ -49,8 +51,8 @@ var SlitShader = function(params)
 
 		'void main()',
 		'{',	
-		'	float mm = 1. - mixVal;',
-		'	float d = (1. - pow(mm, 4.)) * mod(texture2D(blendMap, vUv).x, 1.);',
+		'	float mm = 1. - bVal;//mixVal;',
+		'	float d = texture2D(blendMap, vUv).x;',
 		'	int depthIndex = int(clamp(d * numSlits, 0., '+parseInt(slitCount-1)+'.));',
 		'	for(int i=0; i<'+parseInt(slitCount)+'; i++){',
 		'		if(depthIndex == i){',

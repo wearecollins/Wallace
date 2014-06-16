@@ -285,12 +285,12 @@ function APP( _useStats, _debug)
 	function loadVideo( name, url ){
 		var el = document.createElement( 'video' );
 		el.setAttribute("loop", "");
-		if(name != "StraightOnVideo")
-		{
+		
+		// if(name != "StraightOnVideo")
+		// {
 			el.setAttribute("muted", "");
-		}else{
-			console.log( "straightOn" );
-		}
+		// }
+		
 		el.setAttribute("id", name);
 		var source = document.createElement('source');
 		source.src = url;
@@ -320,6 +320,17 @@ function APP( _useStats, _debug)
 		.onComplete( function()
 		{
 			callback();
+		})
+		.start();
+	
+		new TWEEN.Tween(slitMat.uniforms.bVal)
+		.to({value: 1}, 1500)
+		.delay( delay )
+		.onComplete( function()
+		{
+			new TWEEN.Tween(slitMat.uniforms.bVal)
+			.to({value: 0}, 250)
+			.start();
 		})
 		.start();
 	}
