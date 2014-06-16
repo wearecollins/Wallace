@@ -122,7 +122,7 @@ function APP( _useStats, _debug)
 	var slitIndex = 0;
 
 	var controls = {
-		blendMap: 'softNoise'
+		blendMap: 'randomGrid'
 	}
 
 	function setup() 
