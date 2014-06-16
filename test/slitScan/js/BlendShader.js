@@ -51,12 +51,22 @@ var BlendShader = function(params)
 
 		'void main()',
 		'{',	
+		'	vec2 halfUv = vec2(vUv.x, mapLinear(vUv.y, 0.0, 1.0, .5, 1.0));',
+		'	vec4 blendSample = texture2D(currentTex, halfUv );',
+		// '	vec2 pUv = vUv;',
+		// '	vec2 cUv = vUv;// + vec2(0., .4 * (1. - mixVal) * (b*2. - 1.));',
 
-		'	vec2 pUv = vUv;',
-		'	vec2 cUv = vUv;// + vec2(0., .4 * (1. - mixVal) * (b*2. - 1.));',
+		'	vec2 pUv = halfUv;',
+		'	vec2 cUv = halfUv;// + vec2(0., .4 * (1. - mixVal) * (b*2. - 1.));',
+
+		'	vec2 uvLow = vec2(vUv.x, vUv.y/2.0);',
+		'	vec4 blendAlphaP = texture2D(previousTex, uvLow);',
+		'	vec4 blendAlphaC = texture2D(currentTex, uvLow);',
 
 		'	vec4 p = texture2D(previousTex, pUv);',
 		'	vec4 c = texture2D(currentTex, cUv);',
+		'	p.w = blendAlphaP.x;',
+		'	c.w = blendAlphaC.x;',
 
 		'	vec4 mixed = mix(p, c, mixVal);',
 

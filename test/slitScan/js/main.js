@@ -114,7 +114,7 @@ function APP( _useStats, _debug)
 	var slitScene = new THREE.Scene();
 	var rt = new THREE.WebGLRenderTarget( 1280, 720, { minFilter: THREE.LinearFilter, magFilter: THREE.LinearFilter, format: THREE.RGBFormat, wrapS: THREE.RepeatWrapping, wrapT: THREE.RepeatWrapping } );
 	var slits = [];
-	for(var i=0; i<15; i++)
+	for(var i=0; i<16; i++)
 	{
 		slits[i] = new THREE.WebGLRenderTarget( 1280, 720, { minFilter: THREE.LinearFilter, magFilter: THREE.LinearFilter, format: THREE.RGBFormat, wrapS: THREE.RepeatWrapping, wrapT: THREE.RepeatWrapping } );
 	}
@@ -258,7 +258,7 @@ function APP( _useStats, _debug)
 	{
 		//SLIT
 		// if(frame % 10 == 0)	slitIndex = (slitIndex+1) % slits.length; // maybe try modulating the index re-definition
-		if(frame % 4 == 0)	slits.push( slits.shift() );
+		if(frame % 3 == 0)	slits.push( slits.shift() );
 		renderer.render( slitScene, camera, slits[0], false );
 
 		slitMat.uniforms.slits.value = slits;
@@ -305,7 +305,7 @@ function APP( _useStats, _debug)
 		delay = delay || 0;
 
 
-		blendMat.uniforms.mixVal.value = 0;
+		blendMat.uniforms.mixVal.value = 0.0;
 		blendMat.uniforms.previousTex.value = previousVid.texture,
 		blendMat.uniforms.currentTex.value = currentVid.texture,
 

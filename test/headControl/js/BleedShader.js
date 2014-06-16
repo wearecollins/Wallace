@@ -120,14 +120,6 @@ var BleedShader = function(params)
 	    '	return clamp(opacity, 0., 1.);',
 		'}',
 
-		vec4 greenTest(vec4 c)
-		{
-			
-		// '	float gVal = greenVal(prev.xyz, greenScreen);',
-		// '	gVal = min(gVal, greenVal(prev.xyz, greenScreen1));',
-		// '	prev = mix(bgCol, prev, gVal);',
-		}
-
 		'void main() {',
 
 
