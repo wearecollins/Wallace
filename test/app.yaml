@@ -21,11 +21,18 @@ handlers:
   login: required
   auth_fail_action: redirect
 
+- url: /fallingType
+  static_dir: fallingType
+  login: required
+  auth_fail_action: redirect
+
 - url: /includes
   static_dir: includes
 
 - url: /slitScan
   static_dir: slitScan
+  login: required
+  auth_fail_action: redirect
 
 - url: /blendMaps
   static_dir: blendMaps
