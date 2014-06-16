@@ -114,7 +114,7 @@ function APP( _useStats, _debug)
 	var slitScene = new THREE.Scene();
 	var rt = new THREE.WebGLRenderTarget( 1280, 720, { minFilter: THREE.LinearFilter, magFilter: THREE.LinearFilter, format: THREE.RGBFormat, wrapS: THREE.RepeatWrapping, wrapT: THREE.RepeatWrapping } );
 	var slits = [];
-	for(var i=0; i<16; i++)
+	for(var i=0; i<15; i++)
 	{
 		slits[i] = new THREE.WebGLRenderTarget( 1280, 720, { minFilter: THREE.LinearFilter, magFilter: THREE.LinearFilter, format: THREE.RGBFormat, wrapS: THREE.RepeatWrapping, wrapT: THREE.RepeatWrapping } );
 	}
@@ -292,10 +292,10 @@ function APP( _useStats, _debug)
 		var el = document.createElement( 'video' );
 		el.setAttribute("loop", "");
 		
-		// if(name != "StraightOnVideo")
-		// {
+		if(name != "StraightOnVideo")
+		{
 			el.setAttribute("muted", "");
-		// }
+		}
 		
 		el.setAttribute("id", name);
 		var source = document.createElement('source');
@@ -330,12 +330,12 @@ function APP( _useStats, _debug)
 		.start();
 	
 		new TWEEN.Tween(slitMat.uniforms.bVal)
-		.to({value: 1}, 500)
+		.to({value: 1}, 1000)
 		.delay( delay )
 		.onComplete( function()
 		{
 			new TWEEN.Tween(slitMat.uniforms.bVal)
-			.to({value: 0}, 500)
+			.to({value: 0}, 1000)
 			.start();
 		})
 		.start();
