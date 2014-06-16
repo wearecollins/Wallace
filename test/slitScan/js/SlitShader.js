@@ -24,6 +24,7 @@ var SlitShader = function(params)
 			bVal: {type: 'f', value: params.bVal || .5},
 			slitValue: {type: 'f', value: params.slitValue || 0},
 			numSlits: {type: 'f', value: params.slits.length},
+			layerWeight: {type:'f', value: params.layerWeight || 0},
 
 			slits : { type: "tv", value: params.slits } // texture array (regular)
           
@@ -45,18 +46,18 @@ var SlitShader = function(params)
 		'uniform float bVal;',	
 		'uniform float slitValue;',	
 		'uniform float numSlits;',
-
+		'uniform float layerWeight;',
 
 		'varying vec2 vUv;',
 
 		'void main()',
 		'{',	
-		'	float mm = 1. - bVal;//mixVal;',
-		'	float d = texture2D(blendMap, vUv).x;',
+		'	float d = mix(1., texture2D(blendMap, vUv).x * .99, 1.);//1. - pow(1. - bVal, 5.));',
+		'	d -= floor(d);',
 		'	int depthIndex = int(clamp(d * numSlits, 0., '+parseInt(slitCount-1)+'.));',
 		'	for(int i=0; i<'+parseInt(slitCount)+'; i++){',
 		'		if(depthIndex == i){',
-		'			gl_FragColor = texture2D(slits[i], vUv);',
+		'			gl_FragColor = texture2D(slits[i], vUv) + float(i) * layerWeight;',
 		'		}',
 		'	}',
 		'}'
