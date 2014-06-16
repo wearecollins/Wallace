@@ -1,11 +1,13 @@
 /**
- * TextureBlendShader.js
+ * BlendShader.js
  */
 
 
-var TextureBlendShader = function(params)
+var BlendShader = function(params)
 {
 	params = params || {};
+
+	params.slits = params.slits || [ new THREE.Texture() ];
 
 	var matParams = {
 		transparent: true,
@@ -25,7 +27,7 @@ var TextureBlendShader = function(params)
 		'varying vec2 vUv;',
 		'void main() {',
 		'	vUv = uv;',
-		'	gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );',
+		'	gl_Position = vec4( position, 1.0 );',
 		'}'].join('\n'),
 
 		fragmentShader: [
@@ -47,14 +49,8 @@ var TextureBlendShader = function(params)
 		'	return rgb.x * .3 + rgb.x * .59 + rgb.x * .11;',
 		'}',
 
-  		//we could try passinf the half vector as a varying...
 		'void main()',
 		'{',	
-		'	vec4 blendSample = texture2D(blendMap, vUv);',
-
-		'	float b = blendSample.x;',
-
-		'	float m = mapLinear(b,0.,1.,.01, .99) > mixVal ? 0. : 1.;//clamp((mixVal * 2. - 1.) + b, 0., 1.);',
 
 		'	vec2 pUv = vUv;',
 		'	vec2 cUv = vUv;// + vec2(0., .4 * (1. - mixVal) * (b*2. - 1.));',
@@ -62,7 +58,7 @@ var TextureBlendShader = function(params)
 		'	vec4 p = texture2D(previousTex, pUv);',
 		'	vec4 c = texture2D(currentTex, cUv);',
 
-		'	vec4 mixed = mix(p, c, m);',
+		'	vec4 mixed = mix(p, c, mixVal);',
 
 		'	gl_FragColor = mixed;',
 		'}'
@@ -74,4 +70,4 @@ var TextureBlendShader = function(params)
 }
 
 
-TextureBlendShader.prototype = Object.create( THREE.ShaderMaterial.prototype );
+BlendShader.prototype = Object.create( THREE.ShaderMaterial.prototype );

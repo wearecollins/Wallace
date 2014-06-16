@@ -92,25 +92,14 @@ function APP( _useStats, _debug)
 
 	//gui
 	var gui = new dat.GUI();
-	
-	var eyeAngle = 0;
 
-	var horizontal = new THREE.Vector3(1, 0, 0);
-	var verticle = new THREE.Vector3(0,1,0);
-
-	var leftEye = new THREE.Vector3(.45, .45, 0);
-	var rightEye = new THREE.Vector3(.55, .45, 0);
-	var nose = new THREE.Vector2(.5, .5);
-
-	var rotScalar = new THREE.Vector3(2, 5, .5);
-
-	var controls = {
-		positionSmoothing: .25,
-		transitionSpeed: 1000,
-		blendMap: "softNoise",
-		normalMap: "noiseSmooth",
-		mixVal: 1
-	}
+	// var controls = {
+	// 	positionSmoothing: .25,
+	// 	transitionSpeed: 1000,
+	// 	blendMap: "softNoise",
+	// 	normalMap: "noiseSmooth",
+	// 	mixVal: 1
+	// }
 
 	var thresholds = {
 		left: .45,
@@ -119,8 +108,22 @@ function APP( _useStats, _debug)
 		down: .55,
 	}
 
+	var frame = 0;
 	var vidPlane;
+	var slitMat, blendMat;
+	var slitScene = new THREE.Scene();
+	var rt = new THREE.WebGLRenderTarget( 1280, 720, { minFilter: THREE.LinearFilter, magFilter: THREE.LinearFilter, format: THREE.RGBFormat, wrapS: THREE.RepeatWrapping, wrapT: THREE.RepeatWrapping } );
+	var slits = [];
+	for(var i=0; i<15; i++)
+	{
+		slits[i] = new THREE.WebGLRenderTarget( 1280, 720, { minFilter: THREE.LinearFilter, magFilter: THREE.LinearFilter, format: THREE.RGBFormat, wrapS: THREE.RepeatWrapping, wrapT: THREE.RepeatWrapping } );
+	}
 
+	var slitIndex = 0;
+
+	var controls = {
+		blendMap: 'softNoise'
+	}
 
 	function setup() 
 	{
@@ -142,20 +145,11 @@ function APP( _useStats, _debug)
 		blendMaps ["randomGrid"] = THREE.ImageUtils.loadTexture( '../blendMaps/random_grid.png' );
 		blendMaps ["softNoise"] = THREE.ImageUtils.loadTexture( '../blendMaps/soft_noise.png' );
 		blendMaps ["Checker"] = THREE.ImageUtils.loadTexture( '../blendMaps/Checker.png' );
-		// blendMaps ["circlepattern"] = THREE.ImageUtils.loadTexture( '../blendMaps/circlepattern.png' );
-		// blendMaps ["floral"] = THREE.ImageUtils.loadTexture( '../blendMaps/floral.png' );
-		// blendMaps["greytiles"] = THREE.ImageUtils.loadTexture( '../blendMaps/greytiles.png');
-		// 
 		blendMaps["horizontal_stripes"] = THREE.ImageUtils.loadTexture( '../blendMaps/horizontal_stripes.png');
 		blendMaps["horizontalHardGradient"] = THREE.ImageUtils.loadTexture( '../blendMaps/horizontalHardGradient.png');
 		blendMaps["skinny-stripe"] = THREE.ImageUtils.loadTexture( '../blendMaps/skinny-stripe.png');
 		blendMaps["verticalHardGradient"] = THREE.ImageUtils.loadTexture( '../blendMaps/verticalHardGradient.png');
 		blendMaps["zigzag"] = THREE.ImageUtils.loadTexture( '../blendMaps/zigzag.png');
-
-		normalMaps["noise"] = THREE.ImageUtils.loadTexture( '../normalMaps/noise.png' );
-		normalMaps["noise1"] = THREE.ImageUtils.loadTexture( '../normalMaps/noise1.png' );
-		normalMaps["noiseSmooth"] = THREE.ImageUtils.loadTexture( '../normalMaps/noiseSmooth.png' );
-		
 
 		//VIDEOS TEXTURES
 		loadVideos();
@@ -170,27 +164,61 @@ function APP( _useStats, _debug)
 		videos['straightOn'].bIsActive = true;
 		videos['down'].bIsActive = true;
 
+
 		currentVid = videos['straightOn'];
 		previousVid = videos['down'];
 
-		texBlendMat = new TextureBlendShader(
-		{
+		//slit mat
+		slitMat = new SlitShader({
+			blendMap: blendMaps ['randomGrid'],
+			mixVal: 0,
+			slits: slits
+		});
+
+		//blend mesh
+		blendMat = new BlendShader({
 			previousTex: videos['straightOn'].texture,
 			currentTex:  videos['down'].texture,
 			blendMap: blendMaps [controls.blendMap],
-			mixVal: 0
+			mixVal: 0,
 		});
-		renderer.initMaterial( texBlendMat, scene.__lights, scene.fog );
 
-		//GUI
-		gui.add(controls, 'normalMap', Object.keys(blendMaps) )
+		//TODO: rename slit shader mixShader
+		//	make a slit shader that samples from an array of textures
+		//
+
+		var slitMesh = new THREE.Mesh( new THREE.PlaneGeometry( 2, 2, 12, 7 ), blendMat);
+		slitScene.add(slitMesh);
+
+		//draw slitTo Screen
+		vidPlane = new THREE.Mesh( new THREE.PlaneGeometry( 1, 1, 12, 7 ), slitMat);
+		scaleVidMesh();
+		scene.add(vidPlane);
+
+		console.log( vidPlane.material );
+
+		//kick off some random transitioning
+		startTransition( endTransition );
+
+		//loop the slit position
+		
+			// blendMat.uniforms.slitValue.value = 0;
+
+			// new TWEEN.Tween(blendMat.uniforms.slitValue)
+			// .to({value: 1200}, 1000)
+			// .onComplete( function()
+			// {
+			// 	// callback();
+			// })
+			// .start();
+			//
+			 
+		// GUI
+		gui.add(controls, 'blendMap', Object.keys(blendMaps) )
 		.onChange(function(value) {
 			this.uniforms.blendMap.value = blendMaps[value];
 			console.log( blendMaps[value] );
-		}.bind(texBlendMat));
-
-		//kick off some random transitioning
-		if(debug)	startTransition( endTransition );
+		}.bind(slitMat));
 	}
 
 	/**
@@ -201,65 +229,6 @@ function APP( _useStats, _debug)
 	{
 		TWEEN.update();
 
-		if (!bTransitioning)
-		{
-			if(nose.x < thresholds["left"])
-			{
-				if(currentVid != videos["left"])
-				{
-					setCurrentVideo("left");
-					startTransition();
-				}
-
-
-				// bleedDir: {type: 'v2', value: params.bleedDir || new THREE.Vector2( 0, -.0025 )},
-			}
-			else if(nose.x > thresholds["right"])
-			{
-				if(currentVid != videos["right"])
-				{
-					setCurrentVideo("right");
-					startTransition();
-				}
-			}
-			else
-			{
-				if(nose.y < thresholds["up"])
-				{
-
-					if(currentVid != videos["up"])
-					{
-						setCurrentVideo("up");
-						startTransition();
-					}
-				}
-				else if(nose.y > thresholds["down"])
-				{
-					if(currentVid != videos["down"])
-					{
-						setCurrentVideo("down");
-						startTransition();
-					}
-				}
-				else
-				{
-					if(currentVid != videos["straightOn"])
-					{
-						setCurrentVideo("straightOn");
-						startTransition();
-					}
-				}
-			}
-		}
-		else if(!bTransitioning)
-		{
-			var vids = ['straightOn', 'down', 'up', 'left', 'right'];
-
-			var i = THREE.Math.randInt( 0, vids.length-1 );
-			setCurrentVideo( vids[i] );
-			startTransition( endTransition, 1000);
-		}
-
 		//update videos 
 		for(var i in videos)
 		{
@@ -267,6 +236,8 @@ function APP( _useStats, _debug)
 				if ( videos[i].texture ) videos[i].texture.needsUpdate = true;
 			}
 		}
+
+		frame++;
 	}
 
 	function setCurrentVideo(name)
@@ -277,11 +248,6 @@ function APP( _useStats, _debug)
 		currentVid = videos[name];
 
 		currentVid.bIsActive = previousVid.bIsActive = true;
-
-
-		// if(previousVid != currentVid)
-		// {
-		// }
 	}
 
 	/**
@@ -290,6 +256,16 @@ function APP( _useStats, _debug)
 	 */
 	function draw()
 	{
+		//SLIT
+		// if(frame % 10 == 0)	slitIndex = (slitIndex+1) % slits.length; // maybe try modulating the index re-definition
+		if(frame % 4 == 0)	slits.push( slits.shift() );
+		renderer.render( slitScene, camera, slits[0], false );
+
+		slitMat.uniforms.slits.value = slits;
+		slitMat.uniforms.mixVal.value = blendMat.uniforms.mixVal.value;
+
+		// vidPlane.material.map = slits[slitIndex];
+		vidPlane.needsUpdate = true;
 
 		//to screen
 		renderer.render( scene, camera, null, true );
@@ -309,7 +285,12 @@ function APP( _useStats, _debug)
 	function loadVideo( name, url ){
 		var el = document.createElement( 'video' );
 		el.setAttribute("loop", "");
-		el.setAttribute("muted", "");
+		if(name != "StraightOnVideo")
+		{
+			el.setAttribute("muted", "");
+		}else{
+			console.log( "straightOn" );
+		}
 		el.setAttribute("id", name);
 		var source = document.createElement('source');
 		source.src = url;
@@ -323,17 +304,18 @@ function APP( _useStats, _debug)
 		callback = callback || endTransition;
 		delay = delay || 0;
 
-		texBlendMat.uniforms.mixVal.value = 0;
-		texBlendMat.uniforms.previousTex.value = previousVid.texture;
-		texBlendMat.uniforms.currentTex.value = currentVid.texture;
 
-		new TWEEN.Tween(controls)
-		.to({mixVal: 1}, controls.transitionSpeed)
+		blendMat.uniforms.mixVal.value = 0;
+		blendMat.uniforms.previousTex.value = previousVid.texture,
+		blendMat.uniforms.currentTex.value = currentVid.texture,
+
+		new TWEEN.Tween(blendMat.uniforms.mixVal)
+		.to({value: 1}, 1500)
 		.delay( delay )
 		.onUpdate( function( value )
 		{
-			controls.mixVal = value;
-			texBlendMat.uniforms.mixVal.value = value;
+			// controls.mixVal = value;
+			// texBlendMat.uniforms.mixVal.value = value;
 		})
 		.onComplete( function()
 		{
@@ -354,7 +336,7 @@ function APP( _useStats, _debug)
 
 	function randomtTransition(delay)
 	{
-		delay = delay || THREE.Math.randInt( 1500, 2500 );
+		delay = delay || THREE.Math.randInt( 2500, 3500 );
 		var vids = ['straightOn', 'down', 'up', 'left', 'right'];
 		var i = THREE.Math.randInt( 0, vids.length-1 );
 

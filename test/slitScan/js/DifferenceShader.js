@@ -69,7 +69,7 @@ var DifferenceShader = function(params)
 		'	vec2 sampleOffset = bleedDistance / (vec2(1280., 720.));',
 		'	vec4 lastDiff = vec4(0.);',
 
-		//	sample the delta texture to get a local vector. we could probably pass this off to onther pass later on
+		//sample the delta texture to get a local vector. we could probably pass this off to onther pass later on
 		'	vec2 sampleDirection = vec2(0.,0.);',
 		'	sampleDirection.x = getGray(texture2D(lastDiffTex, vec2(vUv.x - sampleOffset.x, vUv.y)).xyz);',
 		'	sampleDirection.x -= getGray(texture2D(lastDiffTex, vec2(vUv.x + sampleOffset.x, vUv.y)).xyz);',
