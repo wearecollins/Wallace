@@ -122,7 +122,9 @@ function APP( _useStats, _debug)
 	var slitIndex = 0;
 
 	var controls = {
-		blendMap: 'randomGrid'
+		blendMap: 'randomGrid',
+		slitStep: 3,
+		layerWeight: 0
 	}
 
 	function setup() 
@@ -219,6 +221,9 @@ function APP( _useStats, _debug)
 			this.uniforms.blendMap.value = blendMaps[value];
 			console.log( blendMaps[value] );
 		}.bind(slitMat));
+
+		gui.add(controls, 'slitStep', 1, 5).step(1);
+		gui.addFolder("layerWeight").add(slitMat.uniforms.layerWeight,"value", 0. ,.1 );
 	}
 
 	/**
@@ -258,7 +263,7 @@ function APP( _useStats, _debug)
 	{
 		//SLIT
 		// if(frame % 10 == 0)	slitIndex = (slitIndex+1) % slits.length; // maybe try modulating the index re-definition
-		if(frame % 4 == 0)	slits.push( slits.shift() );
+		if(frame % controls.slitStep == 0)	slits.push( slits.shift() );
 		renderer.render( slitScene, camera, slits[0], false );
 
 		slitMat.uniforms.slits.value = slits;
@@ -310,7 +315,7 @@ function APP( _useStats, _debug)
 		blendMat.uniforms.currentTex.value = currentVid.texture,
 
 		new TWEEN.Tween(blendMat.uniforms.mixVal)
-		.to({value: 1}, 1500)
+		.to({value: 1}, 1000)
 		.delay( delay )
 		.onUpdate( function( value )
 		{
@@ -324,12 +329,12 @@ function APP( _useStats, _debug)
 		.start();
 	
 		new TWEEN.Tween(slitMat.uniforms.bVal)
-		.to({value: 1}, 1500)
+		.to({value: 1}, 500)
 		.delay( delay )
 		.onComplete( function()
 		{
 			new TWEEN.Tween(slitMat.uniforms.bVal)
-			.to({value: 0}, 250)
+			.to({value: 0}, 500)
 			.start();
 		})
 		.start();
