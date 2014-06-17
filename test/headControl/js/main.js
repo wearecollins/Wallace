@@ -229,6 +229,8 @@ function APP( _useStats, _debug)
 		"UpVideo":"../WALLACE_TESTS/WALLACE_UP_H264.mp4",
 	}
 
+	var subtitles = "../WALLACE_TESTS/subtitles.vtt";
+
 	function setupVideos(){
 
 		// add video elements
@@ -352,12 +354,53 @@ function APP( _useStats, _debug)
 	function loadVideo( name, url ){
 		var el = document.createElement( 'video' );
 		el.setAttribute("loop", "");
-		el.setAttribute("muted", "");
+		if(name != "StraightOnVideo")
+		{
+			el.setAttribute("muted", "");
+		} else {
+			var sub = document.createElement('track');
+			sub.setAttribute("kind", "subtitles");
+			sub.setAttribute("label", "English subtitles");
+			sub.setAttribute("srclang", "en");
+			sub.setAttribute("default", "");
+			sub.setAttribute("src", subtitles);
+			sub.oncuechange = function (){
+			  // "this" is a textTrack
+			  var cue = sub.track.activeCues[0]; // assuming there is only one active cue
+			  if ( cue ){ 
+			  	var obj = cue.text;//JSON.parse(cue.text);
+			  	createFallingText(obj);
+			  }
+			}
+			el.appendChild(sub);
+		}
+		
 		el.setAttribute("id", name);
 		var source = document.createElement('source');
 		source.src = url;
 		el.appendChild(source);
 		document.body.appendChild(el);
+	}
+
+	var d;
+
+	function createFallingText( string ){
+		if ( d ){
+			d.style.top = "120%";
+			d.style["-webkit-transform"] = "rotateZ(" + (Math.floor( -300 + Math.random() * 600 )) + "deg)";
+		}
+		d = document.createElement("div");
+		d.style.fontFamily = "Helvetica";
+		d.style.color = "#fff";
+		d.style.position = "absolute";
+		d.style.zIndex = "1000";
+		d.style.padding = "5px";
+		d.style["background-color"] = "#000";
+		d.style.left = Math.floor(Math.random() * window.innerWidth) +"px";
+		d.style.top = "0px";
+		d.style["-webkit-transition"] = "top ease-out 5s, -webkit-transform 10s";
+		d.innerHTML = string;
+		document.body.appendChild(d);
 	}
 
 	/**
