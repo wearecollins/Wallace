@@ -4,7 +4,8 @@ var app;
 $(window).bind("load", function() {
 	var debug = getQuerystring('debug') == "true";
 	var useStats = getQuerystring('useStats') == "true";
-	app = new APP(useStats, debug );
+	var muteVideo = getQuerystring('mute') == "true";
+	app = new APP(useStats, debug, muteVideo );
 });
 
 var AzealiaVideoObject = function(params)
@@ -34,8 +35,11 @@ AzealiaVideoObject.prototype.play = function(position)
 }
 
 
-function APP( _useStats, _debug)
+function APP( _useStats, _debug, _muteVideo)
 {
+	var muteVideo = _muteVideo;
+
+	console.log( muteVideo );
 
 	//main container
 	var container = document.createElement( 'div' );
@@ -56,12 +60,25 @@ function APP( _useStats, _debug)
 
 	var videoFiles = {
 		"BackgroundVideo":"../WALLACE_TESTS/BacktotheCameraShotMontage_H264.mp4",
-		"StraightOnVideo":"../WALLACE_TESTS/WALLACE_STRAIGHT_ON_H264.mp4",
-		"DownVideo":"../WALLACE_TESTS/WALLACE_DOWN_H264.mp4",
-		"LeftVideo":"../WALLACE_TESTS/WALLACE_LEFT_H264.mp4",
-		"RightVideo":"../WALLACE_TESTS/WALLACE_RIGHT_H264.mp4",
-		"UpVideo":"../WALLACE_TESTS/WALLACE_UP_H264.mp4",
+		"StraightOnVideo":"../WALLACE_TESTS/00_ALPHA_STRAIGHT_01.mp4",
+		"UpVideo":"../WALLACE_TESTS/03_ALPHA_UP.mp4.mp4",
+		"DownVideo":"../WALLACE_TESTS/04_ALPHA_DOWN.mp4",
+		"LeftVideo":"../WALLACE_TESTS/05_ALPHA_LEFT.mp4",
+		"RightVideo":"../WALLACE_TESTS/06_ALPHA_RIGHT.mp4",
 	}
+
+	/*]
+00_ALPHA_STRAIGHT_01.mp4
+01_ALPHA_STRAIGHT_02.mp4
+02_ALPHA_STRAIGHT_03.mp4
+03_ALPHA_UP.mp4.mp4
+04_ALPHA_DOWN.mp4
+05_ALPHA_LEFT.mp4
+06_ALPHA_RIGHT.mp4
+07_ALPHA_UPPER_LEFT.mp4
+08_ALPHA_UPPER_RIGHT.mp4
+09_ALPHA_WEIRD_01.mp4
+*/
 
 	var vidAscpect = 1280 / 720;
 	var bTransitioning = false;
@@ -125,7 +142,11 @@ function APP( _useStats, _debug)
 	var controls = {
 		blendMap: 'randomGrid',
 		slitStep: 3,
-		layerWeight: 0
+		layerWeight: 0,
+		timeIn: 1000,
+		timeOut: 1000,
+		useBlendMapInBlendShader: true,
+		volume: .25
 	}
 
 	function setup() 
@@ -217,6 +238,10 @@ function APP( _useStats, _debug)
 			//
 			 
 		// GUI
+		gui.add(controls, 'volume', 0, 1).step(.025).onChange(function(value){	
+			videos['straightOn'].video.muted = false;
+			videos['straightOn'].video.volume = value;
+		});
 		gui.add(controls, 'blendMap', Object.keys(blendMaps) )
 		.onChange(function(value) {
 			this.uniforms.blendMap.value = blendMaps[value];
@@ -224,6 +249,11 @@ function APP( _useStats, _debug)
 		}.bind(slitMat));
 
 		gui.add(controls, 'slitStep', 1, 5).step(1);
+		gui.add(controls, 'timeIn', 1, 4000).step(1);
+		gui.add(controls, 'timeOut', 1, 4000).step(1);
+		gui.add(controls, 'useBlendMapInBlendShader').onChange(function(value){
+			blendMat.uniforms.useBlendMap.value = value? 1 : 0;
+		});
 		gui.addFolder("layerWeight").add(slitMat.uniforms.layerWeight,"value", 0. ,.1 );
 	}
 
@@ -293,7 +323,7 @@ function APP( _useStats, _debug)
 		var el = document.createElement( 'video' );
 		el.setAttribute("loop", "");
 		
-		if(name != "StraightOnVideo")
+		if(muteVideo == true || 	name != "StraightOnVideo")
 		{
 			el.setAttribute("muted", "");
 		}
@@ -317,7 +347,7 @@ function APP( _useStats, _debug)
 		blendMat.uniforms.currentTex.value = currentVid.texture,
 
 		new TWEEN.Tween(blendMat.uniforms.mixVal)
-		.to({value: 1}, 1000)
+		.to({value: 1}, controls.timeIn)
 		.delay( delay )
 		.onUpdate( function( value )
 		{
@@ -331,12 +361,12 @@ function APP( _useStats, _debug)
 		.start();
 	
 		new TWEEN.Tween(slitMat.uniforms.bVal)
-		.to({value: 1}, 1000)
+		.to({value: 1}, controls.timeIn)
 		.delay( delay )
 		.onComplete( function()
 		{
 			new TWEEN.Tween(slitMat.uniforms.bVal)
-			.to({value: 0}, 1000)
+			.to({value: 0}, controls.timeOut)
 			.start();
 		})
 		.start();

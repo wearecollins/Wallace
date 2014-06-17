@@ -20,7 +20,8 @@ var BlendShader = function(params)
 			blendMap: {type: 't', value: params.blendMap || undefined },
 			previousTex: {type: 't', value: params.previousTex || undefined },
 			currentTex: {type: 't', value: params.currentTex || undefined },
-			mixVal: {type: 'f', value: params.mixVal || .5}
+			mixVal: {type: 'f', value: params.mixVal || .5},
+			useBlendMap: {type: 'f', value: params.useBlendMap || 1}
 		},
 
 		vertexShader: [
@@ -37,6 +38,7 @@ var BlendShader = function(params)
 		'uniform sampler2D previousTex;',
 		'uniform sampler2D currentTex;',
 		'uniform float mixVal;',	
+		'uniform float useBlendMap;',
 
 		'varying vec2 vUv;',
 
@@ -51,29 +53,27 @@ var BlendShader = function(params)
 
 		'void main()',
 		'{',	
-		'	vec2 halfUv = vec2(vUv.x, mapLinear(vUv.y, 0.0, 1.0, .5, 1.0));',
-		'	vec4 blendSample = texture2D(currentTex, halfUv );',
-		// '	vec2 pUv = vUv;',
-		// '	vec2 cUv = vUv;// + vec2(0., .4 * (1. - mixVal) * (b*2. - 1.));',
+		'	vec2 alphaUv = vUv * vec2(1., .5);',
+		'	vec2 colorUv = vUv * vec2(1., .5) + vec2(0., .5);',
 
-<<<<<<< HEAD
-		'	float b = clamp( texture2D(blendMap, vUv).x + (mixVal * 2. - 1.), 0., 1.);',
+		'	float a0 = texture2D(previousTex, alphaUv).x;',
+		'	float a1 = texture2D(currentTex, alphaUv).x;',
 
-		'	vec2 pUv = vUv;',
-		'	vec2 cUv = vUv;// + vec2(0., .4 * (1. - mixVal) * (b*2. - 1.));',
-=======
-		'	vec2 pUv = halfUv;',
-		'	vec2 cUv = halfUv;// + vec2(0., .4 * (1. - mixVal) * (b*2. - 1.));',
+		'	vec4 p = texture2D(previousTex, colorUv);',
+		'	vec4 c = texture2D(currentTex, colorUv);',
 
-		'	vec2 uvLow = vec2(vUv.x, vUv.y/2.0);',
-		'	vec4 blendAlphaP = texture2D(previousTex, uvLow);',
-		'	vec4 blendAlphaC = texture2D(currentTex, uvLow);',
->>>>>>> FETCH_HEAD
+		// '	if(a0 < .1 && a1 < .1)	discard;',
 
-		'	vec4 p = texture2D(previousTex, pUv);',
-		'	vec4 c = texture2D(currentTex, cUv);',
-		'	p.w = blendAlphaP.x;',
-		'	c.w = blendAlphaC.x;',
+		'	float b = (int(useBlendMap) == 1)? clamp( texture2D(blendMap, vUv).x + (mixVal * 2. - 1.), 0., 1.) : mixVal;',
+		// '	float b = clamp( texture2D(blendMap, vUv).x + (mixVal * 2. - 1.), 0., 1.);',
+
+		//use these to mix with the background
+		'	float m0 = clamp(mapLinear(a0, 0., 1., 0., 1.), 0., 1.);',
+		'	float m1 = clamp(mapLinear(a1, 0., 1., 0., 1.), 0., 1.);',
+
+		//for now, we'll just map to black
+		'	p.xyz *= a0;',
+		'	c.xyz *= a1;',
 
 		'	vec4 mixed = mix(p, c, b);',
 
