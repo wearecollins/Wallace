@@ -77,14 +77,17 @@ var BlendShader = function(params)
 		'	float b = (int(useBlendMap) == 1)? clamp( texture2D(blendMap, bUv).x + (mixVal * 2. - 1.), 0., 1.) : mixVal;',
 		// '	float b = clamp( texture2D(blendMap, vUv).x + (mixVal * 2. - 1.), 0., 1.);',
 
+		//use these to mix with the background
+		'	float m0 = clamp(mapLinear(a0, 0., 1., 0., 1.), 0., 1.);',
+		'	float m1 = clamp(mapLinear(a1, 0., 1., 0., 1.), 0., 1.);',
+
 		//for now, we'll just map to black
 		'	p.xyz *= a0;',
-		// '	p.xyz += (bg.xyz * (1.0 - mix(a0, a1, b)));',
+		'	p.xyz += (bg.xyz * (1.0 - mix(a0, a1, b)));',
 		'	c.xyz *= a1;',
-		// '	c.xyz += (bg.xyz * (1.0 - mix(a0, a1, b)));',
+		'	c.xyz += (bg.xyz * (1.0 - mix(a0, a1, b)));',
 
 		'	vec4 mixed = mix(p, c, b);',
-		'	mixed = mix(mixed, bg, 1.0 - a0);',
 
 		'	gl_FragColor = mixed;',
 		'}'
