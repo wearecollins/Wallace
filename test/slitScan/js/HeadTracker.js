@@ -1,76 +1,74 @@
+// HeadTracker.js
 
-var HeadTracker = HeadTracker || function(){};
-
-HeadTracker.prototype.setup = function(div, canvas) 
+var HeadTracker = function(params)
 {
-	var vidWidth = 300;
-	var vidHeight = 240;
+	params = params || {};
 
-	// build video element
-	var parentDiv = null;
-	if ( div != null ){
-		parentDiv = div;
-	} else {
-		parentDiv = document.createElement("cameraParent");
-		document.body.appendChild(parentDiv);
-	}
-	var videoInput = document.createElement("video");
-	videoInput.id = "videoEl";
-	videoInput.width = vidWidth;
-	videoInput.height = vidHeight;
+		//HEAD TRACKING
+	this.parentDiv = null;
+	this.parentDiv = document.createElement("cameraParent");
+	document.body.appendChild(this.parentDiv);
 
-	this.canvasInput = document.createElement('compare');
-	this.canvasInput.id = "compare";
-	this.canvasInput.width = vidWidth;
-	this.canvasInput.height = vidHeight;
+	this.videoInput = document.createElement("video");
+	this.videoInput.id = "inputVideo";
+	this.videoInput.width = 300;
+	this.videoInput.height = 225;
+	this.parentDiv.appendChild(this.videoInput);
 
-	this.canvasOverlay = document.createElement('overlay')
-	this.canvasOverlay.width = vidWidth;
-	this.canvasOverlay.height = vidHeight;
+	this.canvasInput = document.createElement("canvas");
+	this.canvasInput.id 		= "inputCanvas";
+	this.canvasInput.width 	= this.videoInput.width;
+	this.canvasInput.height 	= this.videoInput.height;
+	this.canvasInput.style.position 	= "absolute";
+	this.canvasInput.style.left 		= "0px";
+	this.canvasInput.style.top 		= "0px";
+	this.canvasInput.style.webkitTransform = "scaleX(-1)";
+	this.parentDiv.appendChild(this.canvasInput);
 
-	this.debugOverlay = document.createElement('debug');
-	this.debugOverlay.width = vidWidth;
-	this.debugOverlay.height = vidHeight;
-
-	// this.overlayContext = this.canvasOverlay.getContext('2d');
-
+	this.canvasOverlay = document.createElement('canvas');
+	this.canvasOverlay.id = "this.canvasOverlay";
+	this.canvasOverlay.width 	= this.videoInput.width;
+	this.canvasOverlay.height 	= this.videoInput.height;
+	this.canvasOverlay.style.position 	= "absolute";
+	this.canvasOverlay.style.left 		= "0px";
+	this.canvasOverlay.style.top 		= "0px";
 	this.canvasOverlay.style.position = "absolute";
-	this.canvasOverlay.style.top = '0px';
-	this.canvasOverlay.style.zIndex = '100001';
-	this.canvasOverlay.style.display = 'block';
+	this.canvasOverlay.style.top = "0px";
+	this.canvasOverlay.style.zIndex = "100001";
+	this.canvasOverlay.style.display = "block";
+	this.canvasOverlay.style.webkitTransform = "scaleX(-1)";
+	this.parentDiv.appendChild(this.canvasOverlay);
 
-	this.debugOverlay.style.position = "absolute";
-	this.debugOverlay.style.top = '0px';
-	this.debugOverlay.style.zIndex = '100002';
-	this.debugOverlay.style.display = 'none';
+	this.overlayContext = this.canvasOverlay.getContext('2d');
+	this.htracker = new headtrackr.Tracker();
 
-	this.statusMessages = {
-		"whitebalance" : "checking for stability of camera whitebalance",
-		"detecting" : "Detecting face",
-		"hints" : "Hmm. Detecting the face is taking a long time",
-		"redetecting" : "Lost track of face, redetecting",
-		"lost" : "Lost track of face",
-		"found" : "Tracking face"
-	};
-	
-	this.supportMessages = {
-		"no getUserMedia" : "Unfortunately, <a href='http://dev.w3.org/2011/webrtc/editor/getusermedia.html'>getUserMedia</a> is not supported in your browser. Try <a href='http://www.opera.com/browser/'>downloading Opera 12</a> or <a href='http://caniuse.com/stream'>another browser that supports getUserMedia</a>. Now using fallback video for facedetection.",
-		"no camera" : "No camera found. Using fallback video for facedetection."
-	};
-
-	this.htracker = new headtrackr.Tracker({
-		altVideo : {ogv : "./media/capture5.ogv", mp4 : "./media/capture5.mp4"},
-		calcAngles : true,
-		ui : false,
-		headPosition : false,
-		debug : this.debugOverlay
-	});
-	this.htracker.init(this.videoInput, this.canvasInput);
-	this.htracker.start();
+	this.nose = new THREE.Vector2();
 }
 
-
-HeadTracker.prototype.getStatus = function()
+HeadTracker.prototype.setup = function()
 {
-	return this.htracker.status;
-}		
+	//HEAD tracking
+	this.htracker.init(this.videoInput, this.canvasInput);
+	console.log( this.htracker.status );
+	this.htracker.start();
+
+	document.addEventListener("facetrackingEvent", function( event )
+	{
+		// once we have stable tracking, draw rectangle
+		if (event.detection == "CS") 
+		{
+			// clear canvas
+			this.overlayContext.clearRect(0,0,320,240);
+
+			this.nose.x = 1. - event.x / this.videoInput.width;
+			this.nose.y = (event.y - event.height * .1) / this.videoInput.height;
+
+			this.overlayContext.translate(event.x, event.y)
+			this.overlayContext.rotate(event.angle-(Math.PI/2));
+			this.overlayContext.strokeStyle = "#00CC00";
+			this.overlayContext.strokeRect((-(event.width/2)) >> 0, (-(event.height/2)) >> 0, event.width, event.height);
+			this.overlayContext.rotate((Math.PI/2)-event.angle);
+			this.overlayContext.translate(-event.x, -event.y);
+		}
+	}.bind(this));
+}

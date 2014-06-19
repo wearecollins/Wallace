@@ -5,7 +5,8 @@ $(window).bind("load", function() {
 	var debug = getQuerystring('debug') == "true";
 	var useStats = getQuerystring('useStats') == "true";
 	var muteVideo = getQuerystring('mute') == "true";
-	app = new APP(useStats, debug, muteVideo );
+	var auto = getQuerystring('auto') == "true";
+	app = new APP(useStats, debug, muteVideo, auto );
 });
 
 var AzealiaVideoObject = function(params)
@@ -35,9 +36,10 @@ AzealiaVideoObject.prototype.play = function(position)
 }
 
 
-function APP( _useStats, _debug, _muteVideo)
+function APP( _useStats, _debug, _muteVideo, _auto)
 {
-	var muteVideo = _muteVideo;
+	var muteVideo = _muteVideo || false;
+	var auto = _auto || false;
 
 	console.log( muteVideo );
 
@@ -131,10 +133,11 @@ function APP( _useStats, _debug, _muteVideo)
 	var slitScene = new THREE.Scene();
 	var rt = new THREE.WebGLRenderTarget( 1280, 720, { minFilter: THREE.LinearFilter, magFilter: THREE.LinearFilter, format: THREE.RGBFormat, wrapS: THREE.RepeatWrapping, wrapT: THREE.RepeatWrapping } );
 	
+	var rtScale = 1.;
 	var slits = [];
 	for(var i=0; i<15; i++)
 	{
-		slits[i] = new THREE.WebGLRenderTarget( 1280, 720, { minFilter: THREE.LinearFilter, magFilter: THREE.LinearFilter, format: THREE.RGBFormat, wrapS: THREE.RepeatWrapping, wrapT: THREE.RepeatWrapping } );
+		slits[i] = new THREE.WebGLRenderTarget( 1280 * rtScale, 720 * rtScale, { minFilter: THREE.LinearFilter, magFilter: THREE.LinearFilter, format: THREE.RGBFormat, wrapS: THREE.RepeatWrapping, wrapT: THREE.RepeatWrapping } );
 	}
 
 	var slitIndex = 0;
@@ -143,11 +146,14 @@ function APP( _useStats, _debug, _muteVideo)
 		blendMap: 'softNoise',
 		slitStep: 3,
 		layerWeight: 0,
-		timeIn: 1000,
-		timeOut: 1000,
+		timeIn: 600,
+		timeOut: 600,
 		useBlendMapInBlendShader: true,
 		volume: .25
 	}
+
+	//HEAD TRACKING
+	var headtracker = new HeadTracker({});
 
 	function setup() 
 	{
@@ -223,7 +229,11 @@ function APP( _useStats, _debug, _muteVideo)
 		console.log( vidPlane.material );
 
 		//kick off some random transitioning
-		startTransition( endTransition );
+		if(auto)
+		{
+			console.log( "auto: startTransition( endTransition );" );
+			startTransition( endTransition );
+		}
 
 		//loop the slit position
 		
@@ -256,6 +266,9 @@ function APP( _useStats, _debug, _muteVideo)
 			blendMat.uniforms.useBlendMap.value = value? 1 : 0;
 		});
 		gui.addFolder("layerWeight").add(slitMat.uniforms.layerWeight,"value", 0. ,.1 );
+
+		//Head Tracking
+		headtracker.setup()
 	}
 
 	/**
@@ -268,6 +281,66 @@ function APP( _useStats, _debug, _muteVideo)
 
 		//TODO: reintroduce gesture direction 
 		slitMat.uniforms.time.value = clock.getElapsedTime() * -.1;
+
+
+		if (!bTransitioning)
+		{
+			if(headtracker.nose.x < thresholds["left"])
+			{
+				if(currentVid != videos["left"])
+				{
+					setCurrentVideo("left");
+					startTransition();
+				}
+
+
+				// bleedDir: {type: 'v2', value: params.bleedDir || new THREE.Vector2( 0, -.0025 )},
+			}
+			else if(headtracker.nose.x > thresholds["right"])
+			{
+				if(currentVid != videos["right"])
+				{
+					setCurrentVideo("right");
+					startTransition();
+				}
+			}
+			else
+			{
+				if(headtracker.nose.y < thresholds["up"])
+				{
+
+					if(currentVid != videos["up"])
+					{
+						setCurrentVideo("up");
+						startTransition();
+					}
+				}
+				else if(headtracker.nose.y > thresholds["down"])
+				{
+					if(currentVid != videos["down"])
+					{
+						setCurrentVideo("down");
+						startTransition();
+					}
+				}
+				else
+				{
+					if(currentVid != videos["straightOn"])
+					{
+						setCurrentVideo("straightOn");
+						startTransition();
+					}
+				}
+			}
+		}
+		// else if(!bTransitioning)
+		// {
+		// 	var vids = ['straightOn', 'down', 'up', 'left', 'right'];
+
+		// 	var i = THREE.Math.randInt( 0, vids.length-1 );
+		// 	setCurrentVideo( vids[i] );
+		// 	startTransition( endTransition, 1000);
+		// }
 
 		//update videos 
 		for(var i in videos)
@@ -299,6 +372,7 @@ function APP( _useStats, _debug, _muteVideo)
 		//SLIT
 		// if(frame % 10 == 0)	slitIndex = (slitIndex+1) % slits.length; // maybe try modulating the index re-definition
 
+		// if(frame % controls.slitStep == 0)	slits.unshift( slits.pop() );
 		if(frame % controls.slitStep == 0)	slits.push( slits.shift() );
 		renderer.render( slitScene, camera, slits[0], false );
 
@@ -327,7 +401,7 @@ function APP( _useStats, _debug, _muteVideo)
 		var el = document.createElement( 'video' );
 		el.setAttribute("loop", "");
 		
-		if(muteVideo == true || 	name != "StraightOnVideo")
+		if(muteVideo == true || name != "StraightOnVideo")
 		{
 			el.setAttribute("muted", "");
 		}
@@ -352,6 +426,9 @@ function APP( _useStats, _debug, _muteVideo)
 		blendMat.uniforms.backgroundTex.value = videos['background'].texture;
 
 		new TWEEN.Tween(blendMat.uniforms.mixVal)
+		.onStart(function(){
+			// blendMat.uniforms.mixVal.value = 0;
+		})
 		.to({value: 1}, controls.timeIn)
 		.delay( delay )
 		.onUpdate( function( value )
@@ -378,37 +455,13 @@ function APP( _useStats, _debug, _muteVideo)
 			.start();
 		})
 		.start();
-
-		// new TWEEN.Tween(slitMat.uniforms.bVal)
-		// .to({value: 1}, controls.timeIn)
-		// .delay( delay )
-		// .onStart(function(){
-
-		// 	slitMat.uniforms.bMin.value = 0;
-		// 	slitMat.uniforms.bMax.value = 0;
-
-		// })
-		// .onComplete( function()
-		// {
-		// 	// new TWEEN.Tween(slitMat.uniforms.bVal)
-		// 	// .to({value: 0}, controls.timeOut)
-		// 	// .start();
-			
-		// 	new TWEEN.Tween(slitMat.uniforms.bMin)
-		// 	.to({value: 1}, controls.timeOut)
-		// 	.start();
-		// })
-		// .onUpdate(function(value){
-		// 	slitMat.uniforms.bMax.value = value;
-		// })
-		// .start();
 	}
 
 	function endTransition()
 	{
 		bTransitioning = false;
 
-		if(debug == true)
+		if(auto == true)
 		{
 			randomtTransition();
 		}
