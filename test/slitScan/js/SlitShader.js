@@ -70,9 +70,9 @@ var SlitShader = function(params)
 		'	vec2 uv = vUv + vec2(0., time);',
 		'	uv.y -= floor(uv.y);',
 
-		'	float d = texture2D(blendMap, uv).x * 1.01;',
-		'	d -= floor(d);',
-		'	d = mapLinear(d, 0., 1., bMin, bMax);',
+		'	float d = texture2D(blendMap, uv).x;// * mixVal;',
+		// '	d -= floor(d * 1.02);',
+		'	d = mapLinear(clamp(d, 0. ,1.), 0., 1., bMin, bMax);',
 
 		'	int depthIndex = int(clamp(d * numSlits, 0., float(SLIT_COUNT-1)));',
 		'	for(int i=0; i<SLIT_COUNT; i++){',

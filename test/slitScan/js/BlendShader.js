@@ -75,10 +75,6 @@ var BlendShader = function(params)
 		'	float b = (int(useBlendMap) == 1)? clamp( texture2D(blendMap, bUv).x + (mixVal * 2. - 1.), 0., 1.) : mixVal;',
 		// '	float b = clamp( texture2D(blendMap, vUv).x + (mixVal * 2. - 1.), 0., 1.);',
 
-		//use these to mix with the background
-		'	float m0 = clamp(mapLinear(a0, 0., 1., 0., 1.), 0., 1.);',
-		'	float m1 = clamp(mapLinear(a1, 0., 1., 0., 1.), 0., 1.);',
-
 		//for now, we'll just map to black
 		'	p.xyz *= a0;',
 		'	c.xyz *= a1;',
