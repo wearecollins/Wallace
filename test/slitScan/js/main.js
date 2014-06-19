@@ -50,6 +50,8 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 	container.style.left = '0px';
 	container.style.top = '0px';
 	document.body.appendChild( container );
+
+
 	
 	//video
 	/*
@@ -434,10 +436,6 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 			// controls.mixVal = value;
 			// texBlendMat.uniforms.mixVal.value = value;
 		})
-		.onComplete( function()
-		{
-			callback();
-		})
 		.start();
 
 		new TWEEN.Tween(slitMat.uniforms.bMax)
@@ -450,6 +448,10 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 		.onComplete(function(){
 			new TWEEN.Tween(slitMat.uniforms.bMin)
 			.to({value: 1}, controls.timeOut)
+			.onComplete( function()
+			{
+				callback();
+			})
 			.start();
 		})
 		.start();
@@ -554,11 +556,12 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 
 	function onKeyDown( event )
 	{
-		// console.log( event );
+		console.log( event );
 		switch( event.keyCode )
 		{
 
 			case 32:
+				console.log( headtracker.getImageData() );
 				break;
 
 			case 67:

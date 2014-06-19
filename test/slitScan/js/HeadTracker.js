@@ -40,6 +40,7 @@ var HeadTracker = function(params)
 	this.parentDiv.appendChild(this.canvasOverlay);
 
 	this.overlayContext = this.canvasOverlay.getContext('2d');
+	this.inputContext = this.canvasInput.getContext('2d');
 	this.htracker = new headtrackr.Tracker();
 
 	this.nose = new THREE.Vector2();
@@ -71,4 +72,9 @@ HeadTracker.prototype.setup = function()
 			this.overlayContext.translate(-event.x, -event.y);
 		}
 	}.bind(this));
+}
+
+HeadTracker.prototype.getImageData = function() 
+{
+    return this.inputContext.getImageData( 0, 0, this.canvasOverlay.width, this.canvasOverlay.height );
 }
