@@ -22,9 +22,12 @@ var SlitShader = function(params)
 			blendMap: {type: 't', value: params.blendMap || undefined },
 			mixVal: {type: 'f', value: params.mixVal || .5},
 			bVal: {type: 'f', value: params.bVal || .5},
+			bMin: {type: 'f', value: params.bVal || 0},
+			bMax: {type: 'f', value: params.bVal || 1},
 			slitValue: {type: 'f', value: params.slitValue || 0},
 			numSlits: {type: 'f', value: params.slits.length},
 			layerWeight: {type:'f', value: params.layerWeight || 0},
+			time: {type:'f', value: params.time || 0},
 
 			slits : { type: "tv", value: params.slits } // texture array (regular)
           
@@ -44,21 +47,50 @@ var SlitShader = function(params)
 		'uniform sampler2D blendMap;',
 		'uniform float mixVal;',	
 		'uniform float bVal;',	
+
+		'uniform float bMin;',	
+		'uniform float bMax;',	
+
 		'uniform float slitValue;',	
 		'uniform float numSlits;',
 		'uniform float layerWeight;',
+		'uniform float time;',
 
 		'varying vec2 vUv;',
 
+		'#define SLIT_COUNT '+parseInt(slitCount) + '', 
+
+		'float mapLinear( in float x, in float a1, in float a2, in float b1, in float b2 ) {',
+		'	return b1 + ( x - a1 ) * ( b2 - b1 ) / ( a2 - a1 );',
+		'}',
+
+
 		'void main()',
 		'{',	
-		'	float d = mix(1., texture2D(blendMap, vUv).x * .99, 1. - pow(1. - bVal, 5.));',
+		'	vec2 uv = vUv + vec2(0., time);',
+		'	uv.y -= floor(uv.y);',
+
+		'	float d = texture2D(blendMap, uv).x * .99;//mix(1., texture2D(blendMap, uv).x * .99, 1. - pow(1. - bVal, 5.));',
 		'	d -= floor(d);',
-		'	int depthIndex = int(clamp(d * numSlits, 0., '+parseInt(slitCount-1)+'.));',
-		'	for(int i=0; i<'+parseInt(slitCount)+'; i++){',
+		'	d = mapLinear(d, 0., 1., bMin, bMax);',
+
+		'	int depthIndex = int(clamp(d * numSlits, 0., float(SLIT_COUNT-1)));',
+		'	for(int i=0; i<SLIT_COUNT; i++){',
+
 		'		if(depthIndex == i){',
 		'			gl_FragColor = texture2D(slits[i], vUv) + float(i) * layerWeight;',
 		'		}',
+
+		'		if(13 == i){',
+		// '			gl_FragColor = texture2D(slits[SLIT_COUNT-1], vUv) + float(i) * layerWeight;',
+		'		}',
+
+		// '		if('+parseInt(slitCount-1)+' == i){',
+		// '			gl_FragColor = texture2D(slits[], vUv) + float(i) * layerWeight;',
+		// '		}',
+		// '		else if(depthIndex == i){',
+		// '			gl_FragColor = texture2D(slits[i], vUv) + float(i) * layerWeight;',
+		// '		}',
 		'	}',
 		'}'
 		].join('\n'),

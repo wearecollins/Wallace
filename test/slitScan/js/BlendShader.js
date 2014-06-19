@@ -21,6 +21,7 @@ var BlendShader = function(params)
 			previousTex: {type: 't', value: params.previousTex || undefined },
 			currentTex: {type: 't', value: params.currentTex || undefined },
 			mixVal: {type: 'f', value: params.mixVal || .5},
+			time: {type:'f', value: params.time || 0},
 			useBlendMap: {type: 'f', value: params.useBlendMap || 1}
 		},
 
@@ -39,6 +40,7 @@ var BlendShader = function(params)
 		'uniform sampler2D currentTex;',
 		'uniform float mixVal;',	
 		'uniform float useBlendMap;',
+		'uniform float time;',
 
 		'varying vec2 vUv;',
 
@@ -56,6 +58,12 @@ var BlendShader = function(params)
 		'	vec2 alphaUv = vUv * vec2(1., .5);',
 		'	vec2 colorUv = vUv * vec2(1., .5) + vec2(0., .5);',
 
+		// '	colorUv.y = mapLinear(colorUv.y, .5, 1., mix(.5, colorUv.y, mixVal), mix(1., colorUv.y, mixVal));',
+
+		'	vec2 bUv = vUv;',
+		'	bUv.y += time;',
+		'	bUv.y -= floor(alphaUv.y);',
+
 		'	float a0 = texture2D(previousTex, alphaUv).x;',
 		'	float a1 = texture2D(currentTex, alphaUv).x;',
 
@@ -64,7 +72,7 @@ var BlendShader = function(params)
 
 		// '	if(a0 < .1 && a1 < .1)	discard;',
 
-		'	float b = (int(useBlendMap) == 1)? clamp( texture2D(blendMap, vUv).x + (mixVal * 2. - 1.), 0., 1.) : mixVal;',
+		'	float b = (int(useBlendMap) == 1)? clamp( texture2D(blendMap, bUv).x + (mixVal * 2. - 1.), 0., 1.) : mixVal;',
 		// '	float b = clamp( texture2D(blendMap, vUv).x + (mixVal * 2. - 1.), 0., 1.);',
 
 		//use these to mix with the background

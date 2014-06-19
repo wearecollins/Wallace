@@ -60,7 +60,7 @@ function APP( _useStats, _debug, _muteVideo)
 
 	var videoFiles = {
 		"BackgroundVideo":"../WALLACE_TESTS/BacktotheCameraShotMontage_H264.mp4",
-		"StraightOnVideo":"../WALLACE_TESTS/00_ALPHA_STRAIGHT_01.mp4",
+		"StraightOnVideo":"../WALLACE_TESTS/02_ALPHA_STRAIGHT_03.mp4",
 		"UpVideo":"../WALLACE_TESTS/03_ALPHA_UP.mp4.mp4",
 		"DownVideo":"../WALLACE_TESTS/04_ALPHA_DOWN.mp4",
 		"LeftVideo":"../WALLACE_TESTS/05_ALPHA_LEFT.mp4",
@@ -265,6 +265,9 @@ function APP( _useStats, _debug, _muteVideo)
 	{
 		TWEEN.update();
 
+		//TODO: reintroduce gesture direction 
+		slitMat.uniforms.time.value = clock.getElapsedTime() * -.1;
+
 		//update videos 
 		for(var i in videos)
 		{
@@ -359,17 +362,44 @@ function APP( _useStats, _debug, _muteVideo)
 			callback();
 		})
 		.start();
-	
-		new TWEEN.Tween(slitMat.uniforms.bVal)
-		.to({value: 1}, controls.timeIn)
-		.delay( delay )
-		.onComplete( function()
-		{
-			new TWEEN.Tween(slitMat.uniforms.bVal)
-			.to({value: 0}, controls.timeOut)
+
+		new TWEEN.Tween(slitMat.uniforms.bMax)
+		.to({value: 1.}, controls.timeIn)
+		.onStart(function(){
+			slitMat.uniforms.bMin.value = 0;
+			slitMat.uniforms.bMax.value = 0;
+		})
+		.delay(delay)
+		.onComplete(function(){
+			new TWEEN.Tween(slitMat.uniforms.bMin)
+			.to({value: 1}, controls.timeOut)
 			.start();
 		})
 		.start();
+
+		// new TWEEN.Tween(slitMat.uniforms.bVal)
+		// .to({value: 1}, controls.timeIn)
+		// .delay( delay )
+		// .onStart(function(){
+
+		// 	slitMat.uniforms.bMin.value = 0;
+		// 	slitMat.uniforms.bMax.value = 0;
+
+		// })
+		// .onComplete( function()
+		// {
+		// 	// new TWEEN.Tween(slitMat.uniforms.bVal)
+		// 	// .to({value: 0}, controls.timeOut)
+		// 	// .start();
+			
+		// 	new TWEEN.Tween(slitMat.uniforms.bMin)
+		// 	.to({value: 1}, controls.timeOut)
+		// 	.start();
+		// })
+		// .onUpdate(function(value){
+		// 	slitMat.uniforms.bMax.value = value;
+		// })
+		// .start();
 	}
 
 	function endTransition()
