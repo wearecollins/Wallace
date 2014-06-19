@@ -131,10 +131,11 @@ function APP( _useStats, _debug, _muteVideo)
 	var slitScene = new THREE.Scene();
 	var rt = new THREE.WebGLRenderTarget( 1280, 720, { minFilter: THREE.LinearFilter, magFilter: THREE.LinearFilter, format: THREE.RGBFormat, wrapS: THREE.RepeatWrapping, wrapT: THREE.RepeatWrapping } );
 	
+	var rtScale = 1.;
 	var slits = [];
 	for(var i=0; i<15; i++)
 	{
-		slits[i] = new THREE.WebGLRenderTarget( 1280, 720, { minFilter: THREE.LinearFilter, magFilter: THREE.LinearFilter, format: THREE.RGBFormat, wrapS: THREE.RepeatWrapping, wrapT: THREE.RepeatWrapping } );
+		slits[i] = new THREE.WebGLRenderTarget( 1280 * rtScale, 720 * rtScale, { minFilter: THREE.LinearFilter, magFilter: THREE.LinearFilter, format: THREE.RGBFormat, wrapS: THREE.RepeatWrapping, wrapT: THREE.RepeatWrapping } );
 	}
 
 	var slitIndex = 0;
@@ -298,6 +299,7 @@ function APP( _useStats, _debug, _muteVideo)
 		//SLIT
 		// if(frame % 10 == 0)	slitIndex = (slitIndex+1) % slits.length; // maybe try modulating the index re-definition
 
+		// if(frame % controls.slitStep == 0)	slits.unshift( slits.pop() );
 		if(frame % controls.slitStep == 0)	slits.push( slits.shift() );
 		renderer.render( slitScene, camera, slits[0], false );
 
@@ -326,7 +328,7 @@ function APP( _useStats, _debug, _muteVideo)
 		var el = document.createElement( 'video' );
 		el.setAttribute("loop", "");
 		
-		if(muteVideo == true || 	name != "StraightOnVideo")
+		if(muteVideo == true || name != "StraightOnVideo")
 		{
 			el.setAttribute("muted", "");
 		}
@@ -350,6 +352,9 @@ function APP( _useStats, _debug, _muteVideo)
 		blendMat.uniforms.currentTex.value = currentVid.texture,
 
 		new TWEEN.Tween(blendMat.uniforms.mixVal)
+		.onStart(function(){
+			// blendMat.uniforms.mixVal.value = 0;
+		})
 		.to({value: 1}, controls.timeIn)
 		.delay( delay )
 		.onUpdate( function( value )

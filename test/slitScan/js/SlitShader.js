@@ -70,27 +70,16 @@ var SlitShader = function(params)
 		'	vec2 uv = vUv + vec2(0., time);',
 		'	uv.y -= floor(uv.y);',
 
-		'	float d = texture2D(blendMap, uv).x * .99;//mix(1., texture2D(blendMap, uv).x * .99, 1. - pow(1. - bVal, 5.));',
+		'	float d = texture2D(blendMap, uv).x * 1.01;',
 		'	d -= floor(d);',
 		'	d = mapLinear(d, 0., 1., bMin, bMax);',
 
 		'	int depthIndex = int(clamp(d * numSlits, 0., float(SLIT_COUNT-1)));',
 		'	for(int i=0; i<SLIT_COUNT; i++){',
-
 		'		if(depthIndex == i){',
 		'			gl_FragColor = texture2D(slits[i], vUv) + float(i) * layerWeight;',
+		'			break;',
 		'		}',
-
-		'		if(13 == i){',
-		// '			gl_FragColor = texture2D(slits[SLIT_COUNT-1], vUv) + float(i) * layerWeight;',
-		'		}',
-
-		// '		if('+parseInt(slitCount-1)+' == i){',
-		// '			gl_FragColor = texture2D(slits[], vUv) + float(i) * layerWeight;',
-		// '		}',
-		// '		else if(depthIndex == i){',
-		// '			gl_FragColor = texture2D(slits[i], vUv) + float(i) * layerWeight;',
-		// '		}',
 		'	}',
 		'}'
 		].join('\n'),
