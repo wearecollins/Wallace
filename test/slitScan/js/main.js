@@ -59,7 +59,7 @@ function APP( _useStats, _debug, _muteVideo)
 	 */
 
 	var videoFiles = {
-		"BackgroundVideo":"../WALLACE_TESTS/BacktotheCameraShotMontage_H264.mp4",
+		"BackgroundVideo":"../WALLACE_TESTS/BG_PREVIEW_05_1.mp4",
 		"StraightOnVideo":"../WALLACE_TESTS/02_ALPHA_STRAIGHT_03.mp4",
 		"UpVideo":"../WALLACE_TESTS/03_ALPHA_UP.mp4.mp4",
 		"DownVideo":"../WALLACE_TESTS/04_ALPHA_DOWN.mp4",
@@ -140,7 +140,7 @@ function APP( _useStats, _debug, _muteVideo)
 	var slitIndex = 0;
 
 	var controls = {
-		blendMap: 'randomGrid',
+		blendMap: 'softNoise',
 		slitStep: 3,
 		layerWeight: 0,
 		timeIn: 1000,
@@ -194,7 +194,7 @@ function APP( _useStats, _debug, _muteVideo)
 
 		//slit mat
 		slitMat = new SlitShader({
-			blendMap: blendMaps ['randomGrid'],
+			blendMap: blendMaps ['softNoise'],
 			mixVal: 0,
 			slits: slits
 		});
@@ -203,6 +203,7 @@ function APP( _useStats, _debug, _muteVideo)
 		blendMat = new BlendShader({
 			previousTex: videos['straightOn'].texture,
 			currentTex:  videos['down'].texture,
+			backgroundTex: videos['background'].texture,
 			blendMap: blendMaps [controls.blendMap],
 			mixVal: 0,
 		});
@@ -346,8 +347,9 @@ function APP( _useStats, _debug, _muteVideo)
 
 
 		blendMat.uniforms.mixVal.value = 0.0;
-		blendMat.uniforms.previousTex.value = previousVid.texture,
-		blendMat.uniforms.currentTex.value = currentVid.texture,
+		blendMat.uniforms.previousTex.value = previousVid.texture;
+		blendMat.uniforms.currentTex.value = currentVid.texture;
+		blendMat.uniforms.backgroundTex.value = videos['background'].texture;
 
 		new TWEEN.Tween(blendMat.uniforms.mixVal)
 		.to({value: 1}, controls.timeIn)
