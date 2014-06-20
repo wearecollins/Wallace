@@ -52,7 +52,7 @@ var OpticalFlower = function(params)
 	this.texture = this.diffRT;
 
 
-	this.minMovement = 20;
+	this.minMovement = this.width * this.height * .1;
 	this.flowSmooothing = .95;
 	this.nose = new THREE.Vector2( .5, .5 );
 }
@@ -64,7 +64,7 @@ OpticalFlower.prototype.addToGui = function(gui)
 	folder.addFolder("diffThreshold").add(this.diffPlane.material.uniforms.threshold, "value", .001, .2);
 	folder.addFolder("persistance").add(this.inputPlane.material.uniforms.decay, "value", .01, .999);
 
-	folder.add(this, "minMovement", 1, 300).step(1);
+	folder.add(this, "minMovement", 1, this.width * this.height * .5).step(1);
 	folder.add(this, "flowSmooothing", 0., 1.).step(.01);
 }
 
