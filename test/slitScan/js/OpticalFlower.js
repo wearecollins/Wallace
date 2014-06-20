@@ -46,6 +46,8 @@ var OpticalFlower = function(params)
 	this.diffScene.add(this.diffPlane);
 
 	this.texture = this.diffRT;
+
+	this.nose = new THREE.Vector2( .5, .5 );
 }
 
 OpticalFlower.prototype.addToGui = function(gui)
@@ -63,6 +65,38 @@ OpticalFlower.prototype.update = function()
 {
 	if (this.video.readyState === this.video.HAVE_ENOUGH_DATA) {
 		this.cameraTexture.needsUpdate = true;
+
+		var minMovement = 20;
+		var data = this.getData();
+		var averagePos = new THREE.Vector2();
+		var i=0, pCount = 0;
+
+		for(var y=0; y<this.height; y++)
+		{
+			for(var x=0; x<this.width; x++)
+			{
+				if(data[i] > 0 )
+				{
+					averagePos.x += x;
+					averagePos.y += y;
+					pCount++;
+				}
+				i+=4;
+			}
+		}
+
+		if(pCount>minMovement)
+		{
+			averagePos.divideScalar(pCount);	
+			averagePos.x /= this.width;
+			averagePos.y /= this.height;	
+
+			averagePos.x = 1. - averagePos.x;
+
+			var mixVal = .9;
+			this.nose.x = this.nose.x * mixVal + averagePos.x * (1. - mixVal);
+			this.nose.y = this.nose.y * mixVal + averagePos.y * (1. - mixVal);
+		}
 	}
 }
 
@@ -81,6 +115,7 @@ OpticalFlower.prototype.draw = function( renderer, camera )
 	this.diffPlane.material.uniforms.background.value = this.ping;	
 	renderer.render( this.diffScene, camera, this.diffRT, false );
 
+	//TODO: this is such a slow call!! how can we get around the gl.readPixels?
 	var gl = renderer.getContext();
 	gl.readPixels(0, 0, this.width, this.height, gl.RGBA, gl.UNSIGNED_BYTE, this.pixels);
 

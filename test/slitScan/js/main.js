@@ -300,57 +300,57 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 		//TODO: reintroduce gesture direction 
 		slitMat.uniforms.time.value = clock.getElapsedTime() * -.1;
 
+		var inputThing = flow;//headtracker;
+		if (!bTransitioning)
+		{
+			if(inputThing.nose.x < thresholds["left"])
+			{
+				if(currentVid != videos["left"])
+				{
+					setCurrentVideo("left");
+					startTransition();
+				}
 
-		// if (!bTransitioning)
-		// {
-		// 	if(headtracker.nose.x < thresholds["left"])
-		// 	{
-		// 		if(currentVid != videos["left"])
-		// 		{
-		// 			setCurrentVideo("left");
-		// 			startTransition();
-		// 		}
 
+				// bleedDir: {type: 'v2', value: params.bleedDir || new THREE.Vector2( 0, -.0025 )},
+			}
+			else if(inputThing.nose.x > thresholds["right"])
+			{
+				if(currentVid != videos["right"])
+				{
+					setCurrentVideo("right");
+					startTransition();
+				}
+			}
+			else
+			{
+				if(inputThing.nose.y < thresholds["up"])
+				{
 
-		// 		// bleedDir: {type: 'v2', value: params.bleedDir || new THREE.Vector2( 0, -.0025 )},
-		// 	}
-		// 	else if(headtracker.nose.x > thresholds["right"])
-		// 	{
-		// 		if(currentVid != videos["right"])
-		// 		{
-		// 			setCurrentVideo("right");
-		// 			startTransition();
-		// 		}
-		// 	}
-		// 	else
-		// 	{
-		// 		if(headtracker.nose.y < thresholds["up"])
-		// 		{
-
-		// 			if(currentVid != videos["up"])
-		// 			{
-		// 				setCurrentVideo("up");
-		// 				startTransition();
-		// 			}
-		// 		}
-		// 		else if(headtracker.nose.y > thresholds["down"])
-		// 		{
-		// 			if(currentVid != videos["down"])
-		// 			{
-		// 				setCurrentVideo("down");
-		// 				startTransition();
-		// 			}
-		// 		}
-		// 		else
-		// 		{
-		// 			if(currentVid != videos["straightOn"])
-		// 			{
-		// 				setCurrentVideo("straightOn");
-		// 				startTransition();
-		// 			}
-		// 		}
-		// 	}
-		// }
+					if(currentVid != videos["up"])
+					{
+						setCurrentVideo("up");
+						startTransition();
+					}
+				}
+				else if(inputThing.nose.y > thresholds["down"])
+				{
+					if(currentVid != videos["down"])
+					{
+						setCurrentVideo("down");
+						startTransition();
+					}
+				}
+				else
+				{
+					if(currentVid != videos["straightOn"])
+					{
+						setCurrentVideo("straightOn");
+						startTransition();
+					}
+				}
+			}
+		}
 
 		// else if(!bTransitioning)
 		// {
@@ -583,41 +583,7 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 		{
 
 			case 32:
-				// console.log( flow.getData() );
 				
-				var data = flow.getData();
-
-				var averagePos = new THREE.Vector2();
-				var i=0;
-				var pCount = 0;
-
-				console.log( "data.length: " + data.length );
-				for(var y=0; y<flow.height; y++)
-				{
-					for(var x=0; x<flow.width; x++)
-					{
-					
-						if(data[i] > 0 )
-						{
-							// console.log( x, y, y * flow.width * 4 + x*4, i );
-							averagePos.x += x;
-							averagePos.y += y;
-							pCount++;
-						}
-						i+=4;
-					}
-				}
-
-				console.log( "i: " + i  );
-
-				if(pCount>0)
-				{
-					averagePos.divideScalar(pCount);	
-					averagePos.x /= flow.width;
-					averagePos.y /= flow.height;	
-
-					console.log("averagePos: ", averagePos);
-				}
 
 				break;
 
