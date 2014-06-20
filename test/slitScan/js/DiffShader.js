@@ -16,6 +16,7 @@ var DiffShader = function(params)
 			camera: {type: 't', value: params.camera || undefined },
 			background: {type: 't', value: params.background || undefined },
 			filter: {type: 't', value: params.filter ||THREE.ImageUtils.loadTexture( '../blendMaps/crap_vignette.png')},
+			filterWeight: {type: 'f', value: params.filterWeight || .75},
 			threshold: {type: 'f', value: params.threshold || .075},
 			flowScale: {type: 'f', value: params.flowScale || 3.},
 			step: {type: 'v2', value: params.step || new THREE.Vector2( 1/ 64, 1/48 )}
@@ -44,6 +45,7 @@ var DiffShader = function(params)
 		'uniform sampler2D camera;',
 		'uniform sampler2D background;',
 		'uniform sampler2D filter;',
+		'uniform float filterWeight;',
 		'uniform float threshold;',
 		'uniform float flowScale;',
 		'uniform vec2 step;',
@@ -62,7 +64,7 @@ var DiffShader = function(params)
 
 		'void main()',
 		'{',	
-		'	float delta = getDelta(vUv) * texture2D(filter, vUv).x;',
+		'	float delta = getDelta(vUv) * mix(1., texture2D(filter, vUv).x, filterWeight);',
 
 		//	sample neighbors to get flow direction
 		'	vec3 dir =  vec3(0.,0.,1.);',

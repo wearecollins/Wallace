@@ -63,6 +63,7 @@ OpticalFlower.prototype.addToGui = function(gui)
 
 	this.gui.addFolder("diffThreshold").add(this.diffPlane.material.uniforms.threshold, "value", .001, .2);
 	this.gui.addFolder("persistance").add(this.inputPlane.material.uniforms.decay, "value", .01, .999);
+	this.gui.addFolder("vignetteWeight").add(this.diffPlane.material.uniforms.filterWeight, "value", .01, 1.);
 
 	this.gui.add(this, "minMovement", 1, this.width * this.height * .5).step(1);
 	this.gui.add(this, "flowSmooothing", 0., 1.).step(.01);
