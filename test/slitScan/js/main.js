@@ -155,7 +155,10 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 	}
 
 	//HEAD TRACKING
-	var headtracker = new HeadTracker({});
+	// var headtracker = new HeadTracker({});
+	
+	//optical flow
+	var flow, flowScene, ping, pong;
 
 	function setup() 
 	{
@@ -269,7 +272,18 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 		gui.addFolder("layerWeight").add(slitMat.uniforms.layerWeight,"value", 0. ,.1 );
 
 		//Head Tracking
-		headtracker.setup()
+		// headtracker.setup()
+		
+
+		//optical flow
+		//
+		flow = new OpticalFlower();
+
+		var fst = new FullScreenTextureShader({map: flow.texture, width: 320, height: 240});
+		var fstPlane = new THREE.Mesh( new THREE.PlaneGeometry( 2, 2, 12, 7 ), fst);
+		scene.add(fstPlane);
+
+		flow.addToGui(gui);
 	}
 
 	/**
@@ -280,60 +294,63 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 	{
 		TWEEN.update();
 
+		flow.update();
+
 		//TODO: reintroduce gesture direction 
 		slitMat.uniforms.time.value = clock.getElapsedTime() * -.1;
 
 
-		if (!bTransitioning)
-		{
-			if(headtracker.nose.x < thresholds["left"])
-			{
-				if(currentVid != videos["left"])
-				{
-					setCurrentVideo("left");
-					startTransition();
-				}
+		// if (!bTransitioning)
+		// {
+		// 	if(headtracker.nose.x < thresholds["left"])
+		// 	{
+		// 		if(currentVid != videos["left"])
+		// 		{
+		// 			setCurrentVideo("left");
+		// 			startTransition();
+		// 		}
 
 
-				// bleedDir: {type: 'v2', value: params.bleedDir || new THREE.Vector2( 0, -.0025 )},
-			}
-			else if(headtracker.nose.x > thresholds["right"])
-			{
-				if(currentVid != videos["right"])
-				{
-					setCurrentVideo("right");
-					startTransition();
-				}
-			}
-			else
-			{
-				if(headtracker.nose.y < thresholds["up"])
-				{
+		// 		// bleedDir: {type: 'v2', value: params.bleedDir || new THREE.Vector2( 0, -.0025 )},
+		// 	}
+		// 	else if(headtracker.nose.x > thresholds["right"])
+		// 	{
+		// 		if(currentVid != videos["right"])
+		// 		{
+		// 			setCurrentVideo("right");
+		// 			startTransition();
+		// 		}
+		// 	}
+		// 	else
+		// 	{
+		// 		if(headtracker.nose.y < thresholds["up"])
+		// 		{
 
-					if(currentVid != videos["up"])
-					{
-						setCurrentVideo("up");
-						startTransition();
-					}
-				}
-				else if(headtracker.nose.y > thresholds["down"])
-				{
-					if(currentVid != videos["down"])
-					{
-						setCurrentVideo("down");
-						startTransition();
-					}
-				}
-				else
-				{
-					if(currentVid != videos["straightOn"])
-					{
-						setCurrentVideo("straightOn");
-						startTransition();
-					}
-				}
-			}
-		}
+		// 			if(currentVid != videos["up"])
+		// 			{
+		// 				setCurrentVideo("up");
+		// 				startTransition();
+		// 			}
+		// 		}
+		// 		else if(headtracker.nose.y > thresholds["down"])
+		// 		{
+		// 			if(currentVid != videos["down"])
+		// 			{
+		// 				setCurrentVideo("down");
+		// 				startTransition();
+		// 			}
+		// 		}
+		// 		else
+		// 		{
+		// 			if(currentVid != videos["straightOn"])
+		// 			{
+		// 				setCurrentVideo("straightOn");
+		// 				startTransition();
+		// 			}
+		// 		}
+		// 	}
+		// }
+
 		// else if(!bTransitioning)
 		// {
 		// 	var vids = ['straightOn', 'down', 'up', 'left', 'right'];
@@ -370,6 +387,9 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 	 */
 	function draw()
 	{
+		//flow
+		flow.draw(renderer, camera);
+
 		//SLIT
 		// if(frame % 10 == 0)	slitIndex = (slitIndex+1) % slits.length; // maybe try modulating the index re-definition
 
@@ -561,7 +581,42 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 		{
 
 			case 32:
-				console.log( headtracker.getImageData() );
+				// console.log( flow.getData() );
+				
+				var data = flow.getData();
+
+				var averagePos = new THREE.Vector2();
+				var i=0;
+				var pCount = 0;
+
+				console.log( "data.length: " + data.length );
+				for(var y=0; y<flow.height; y++)
+				{
+					for(var x=0; x<flow.width; x++)
+					{
+					
+						if(data[i] > 0 )
+						{
+							// console.log( x, y, y * flow.width * 4 + x*4, i );
+							averagePos.x += x;
+							averagePos.y += y;
+							pCount++;
+						}
+						i+=4;
+					}
+				}
+
+				console.log( "i: " + i  );
+
+				if(pCount>0)
+				{
+					averagePos.divideScalar(pCount);	
+					averagePos.x /= flow.width;
+					averagePos.y /= flow.height;	
+
+					console.log("averagePos: ", averagePos);
+				}
+
 				break;
 
 			case 67:
