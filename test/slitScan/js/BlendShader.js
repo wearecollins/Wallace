@@ -20,6 +20,7 @@ var BlendShader = function(params)
 			blendMap: {type: 't', value: params.blendMap || undefined },
 			previousTex: {type: 't', value: params.previousTex || undefined },
 			currentTex: {type: 't', value: params.currentTex || undefined },
+			backgroundTex: {type: 't', value: params.backgroundTex || undefined },
 			mixVal: {type: 'f', value: params.mixVal || .5},
 			time: {type:'f', value: params.time || 0},
 			useBlendMap: {type: 'f', value: params.useBlendMap || 1}
@@ -69,15 +70,22 @@ var BlendShader = function(params)
 
 		'	vec4 p = texture2D(previousTex, colorUv);',
 		'	vec4 c = texture2D(currentTex, colorUv);',
+		'	vec4 bg = texture2D(backgroundTex, vUv);',
 
 		// '	if(a0 < .1 && a1 < .1)	discard;',
 
 		'	float b = (int(useBlendMap) == 1)? clamp( texture2D(blendMap, bUv).x + (mixVal * 2. - 1.), 0., 1.) : mixVal;',
 		// '	float b = clamp( texture2D(blendMap, vUv).x + (mixVal * 2. - 1.), 0., 1.);',
 
+		//use these to mix with the background
+		'	float m0 = clamp(mapLinear(a0, 0., 1., 0., 1.), 0., 1.);',
+		'	float m1 = clamp(mapLinear(a1, 0., 1., 0., 1.), 0., 1.);',
+
 		//for now, we'll just map to black
 		'	p.xyz *= a0;',
+		'	p.xyz += (bg.xyz * (1.0 - mix(a0, a1, b)));',
 		'	c.xyz *= a1;',
+		'	c.xyz += (bg.xyz * (1.0 - mix(a0, a1, b)));',
 
 		'	vec4 mixed = mix(p, c, b);',
 
