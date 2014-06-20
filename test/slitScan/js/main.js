@@ -160,7 +160,7 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 	//optical flow
 	var flow, flowScene, ping, pong;
 
-	var debugSphere = new THREE.Mesh( new THREE.SphereGeometry(30), new THREE.MeshBasicMaterial( {color: 0xFF2201} ) );
+	var debugSphere = new THREE.Mesh( new THREE.SphereGeometry(30), new THREE.MeshBasicMaterial( {color: 0xFF2201, side: 2} ) );
 
 	function setup() 
 	{

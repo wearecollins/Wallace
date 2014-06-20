@@ -100,7 +100,7 @@ OpticalFlower.prototype.update = function()
 			averagePos.y /= this.height;	
 
 			averagePos.x = 1. - averagePos.x;
-			averagePos.y = 1. - averagePos.y;
+			// averagePos.y = 1. - averagePos.y;
 
 
 			this.nose.x = this.nose.x * this.flowSmooothing + averagePos.x * (1. - this.flowSmooothing);
