@@ -5,8 +5,8 @@ var OpticalFlower = function(params)
 	params = params || {};
 	this.cameraTexture = undefined;
 
-	this.width = params.width || 320;
-	this.height = params.height || 240;
+	this.width = params.width || 64;
+	this.height = params.height || 48;
 
     this.pixels = new Uint8Array(this.width * this.height * 4);
 
@@ -37,7 +37,7 @@ var OpticalFlower = function(params)
 	this.inputPlane = new THREE.Mesh( new THREE.PlaneGeometry( 2, 2, 12, 7 ), new BlurMotionShader({
 		map: this.cameraTexture,
 		previousMap: this.ping,
-		decay: .75
+		decay: .875
 	}));
 	this.inputScene = new THREE.Scene();
 	this.inputScene.add(this.inputPlane);
@@ -55,6 +55,7 @@ var OpticalFlower = function(params)
 	this.minMovement = this.width * this.height * .04;
 	this.smoothing = .95;
 	this.nose = new THREE.Vector2( .5, .5 );
+	this.dir = new THREE.Vector3(0, 1, 0);
 }
 
 OpticalFlower.prototype.addToGui = function(gui)
@@ -82,6 +83,7 @@ OpticalFlower.prototype.update = function()
 
 		var data = this.getData();
 		var averagePos = new THREE.Vector2();
+		var averageDir = new THREE.Vector2();
 		var i=0, pCount = 0;
 
 		for(var y=0; y<this.height; y++)
@@ -92,6 +94,9 @@ OpticalFlower.prototype.update = function()
 				{
 					averagePos.x += x;
 					averagePos.y += y;
+
+					averageDir.x += data[i];
+					averageDir.y += data[i+1];
 					pCount++;
 				}
 				i+=4;
@@ -104,12 +109,22 @@ OpticalFlower.prototype.update = function()
 			averagePos.x /= this.width;
 			averagePos.y /= this.height;	
 
+			averageDir.divideScalar(pCount * 255);	
+			averageDir.x = (averageDir.x * 2. - 1.);
+			averageDir.y = (averageDir.y * 2. - 1.);
+
 			averagePos.x = 1. - averagePos.x;
 			// averagePos.y = 1. - averagePos.y;
 
 
 			this.nose.x = this.nose.x * this.smoothing + averagePos.x * (1. - this.smoothing);
 			this.nose.y = this.nose.y * this.smoothing + averagePos.y * (1. - this.smoothing);
+
+			this.dir.x = this.dir.x * this.smoothing + averageDir.x * (1. - this.smoothing);
+			this.dir.y = this.dir.y * this.smoothing + averageDir.y * (1. - this.smoothing);
+
+			// this.nose.x -= averageDir.x * .1;
+			this.nose.y -= averageDir.y * .2;
 		}
 	}
 }

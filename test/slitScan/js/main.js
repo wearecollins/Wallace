@@ -129,6 +129,19 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 		down: .4,
 	}
 
+	//debug threshold lines
+	var horizontalLine = new THREE.Geometry();
+	var verticalLine = new THREE.Geometry();
+	horizontalLine.vertices = [new THREE.Vector3(-1000,0,100), new THREE.Vector3(1000,0,100)];
+	verticalLine.vertices = [new THREE.Vector3(0,-1000,100), new THREE.Vector3(0,1000,100)];
+	var thresholdLines = {
+		up: new THREE.Line( horizontalLine, new THREE.LineBasicMaterial({color: 0xFFFF00}) ),
+		down: new THREE.Line( horizontalLine, new THREE.LineBasicMaterial({color: 0xFF00FF}) ),
+		left: new THREE.Line( verticalLine, new THREE.LineBasicMaterial({color: 0x00FFFF}) ),
+		right: new THREE.Line( verticalLine, new THREE.LineBasicMaterial({color: 0xFFFFFF}) ),
+	}
+
+
 	var frame = 0;
 	var vidPlane;
 	var slitMat, blendMat;
@@ -161,6 +174,7 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 	var flow, flowScene, ping, pong, fstPlane;
 
 	var debugSphere = new THREE.Mesh( new THREE.SphereGeometry(5), new THREE.MeshBasicMaterial( {color: 0xFF2201, side: 2} ) );
+	debugSphere.scale.z = 2;
 
 	function setup() 
 	{
@@ -291,6 +305,18 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 		//debug sphere
 		scene.add(debugSphere);
 		gui.addFolder("debugSphere").add(debugSphere, "visible");	
+
+		//debug lines
+		for(var i in thresholdLines)
+		{
+			scene.add(thresholdLines[i]);
+		}
+
+		var thresholdFolder = gui.addFolder("thresholds");
+		for(var i in thresholds)
+		{
+			thresholdFolder.add(thresholds, i, 0, 1).onChange(updateDebugLines);
+		}
 	}
 
 	/**
@@ -313,6 +339,8 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 		{
 			debugSphere.position.x = THREE.Math.mapLinear( inputThing.nose.x, 0, 1, -vidPlane.scale.x*.5, vidPlane.scale.x*.5);
 			debugSphere.position.y = THREE.Math.mapLinear( inputThing.nose.y, 0, 1, -vidPlane.scale.y*.5, vidPlane.scale.y*.5);
+
+			debugSphere.lookAt(debugSphere.position.clone().add(flow.dir));
 		}
 
 		if (!bTransitioning)
@@ -521,10 +549,19 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 		startTransition( endTransition, delay);
 	}
 
+	function updateDebugLines()
+	{
+		thresholdLines["up"].position.y = THREE.Math.mapLinear(thresholds["up"], 0., 1, -vidPlane.scale.y * .5, vidPlane.scale.y * .5);
+		thresholdLines["down"].position.y = THREE.Math.mapLinear(thresholds["down"], 0., 1, -vidPlane.scale.y * .5, vidPlane.scale.y * .5);
+		thresholdLines["left"].position.x = THREE.Math.mapLinear(thresholds["left"], 0., 1, -vidPlane.scale.x * .5, vidPlane.scale.x * .5);
+		thresholdLines["right"].position.x = THREE.Math.mapLinear(thresholds["right"], 0., 1, -vidPlane.scale.x * .5, vidPlane.scale.x * .5);
+	}
 
 	function scaleVidMesh()
 	{
 		vidPlane.scale.set( window.innerWidth, -window.innerWidth / vidAscpect, 1);
+
+		updateDebugLines();
 	}
 
 	function resetCamera()
@@ -603,7 +640,7 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 		{
 
 			case 32:
-				
+				console.log( flow.dir );
 
 				break;
 
