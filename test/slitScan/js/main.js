@@ -313,6 +313,13 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 		}
 
 		var thresholdFolder = gui.addFolder("thresholds");
+		thresholdFolder.add(thresholdLines["up"], "visible").onChange(function(value){
+			for(var i in thresholdLines)
+			{
+				// console.log( thresholdLines[i] );
+				thresholdLines[i].visible = value;
+			}
+		})
 		for(var i in thresholds)
 		{
 			thresholdFolder.add(thresholds, i, 0, 1).onChange(updateDebugLines);
