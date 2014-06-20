@@ -5,8 +5,8 @@ var OpticalFlower = function(params)
 	params = params || {};
 	this.cameraTexture = undefined;
 
-	this.width = params.width || 640;
-	this.height = params.height || 480;
+	this.width = params.width || 40;
+	this.height = params.height || 30;
 
     this.pixels = new Uint8Array(this.width * this.height * 4);
 
@@ -27,8 +27,8 @@ var OpticalFlower = function(params)
 	}
 
 	//camera input
-	var minFilter = THREE.LinearFilter; //THREE.NearestFilter;
-	var magFilter = THREE.LinearFilter; //THREE.NearestFilter;
+	var minFilter = THREE.NearestFilter; // THREE.LinearFilter; //
+	var magFilter = THREE.NearestFilter; // THREE.LinearFilter; //
 	this.ping = new THREE.WebGLRenderTarget( this.width, this.height, { minFilter: minFilter, magFilter: magFilter, format: THREE.RGBFormat, wrapS: THREE.RepeatWrapping, wrapT: THREE.RepeatWrapping } );
 	this.pong = new THREE.WebGLRenderTarget( this.width, this.height, { minFilter: minFilter, magFilter: magFilter, format: THREE.RGBFormat, wrapS: THREE.RepeatWrapping, wrapT: THREE.RepeatWrapping } );
 	this.diffRT = new THREE.WebGLRenderTarget( this.width, this.height, { minFilter: minFilter, magFilter: magFilter, format: THREE.RGBAFormat, wrapS: THREE.RepeatWrapping, wrapT: THREE.RepeatWrapping } );
@@ -37,7 +37,7 @@ var OpticalFlower = function(params)
 	this.inputPlane = new THREE.Mesh( new THREE.PlaneGeometry( 2, 2, 12, 7 ), new BlurMotionShader({
 		map: this.cameraTexture,
 		previousMap: this.ping,
-		decay: .9
+		decay: .75
 	}));
 	this.inputScene = new THREE.Scene();
 	this.inputScene.add(this.inputPlane);
@@ -52,20 +52,20 @@ var OpticalFlower = function(params)
 	this.texture = this.diffRT;
 
 
-	this.minMovement = this.width * this.height * .1;
+	this.minMovement = this.width * this.height * .04;
 	this.flowSmooothing = .95;
 	this.nose = new THREE.Vector2( .5, .5 );
 }
 
 OpticalFlower.prototype.addToGui = function(gui)
 {
-	var folder = gui.addFolder("OpticalFlow");
+	this.gui = gui.addFolder("OpticalFlow");
 
-	folder.addFolder("diffThreshold").add(this.diffPlane.material.uniforms.threshold, "value", .001, .2);
-	folder.addFolder("persistance").add(this.inputPlane.material.uniforms.decay, "value", .01, .999);
+	this.gui.addFolder("diffThreshold").add(this.diffPlane.material.uniforms.threshold, "value", .001, .2);
+	this.gui.addFolder("persistance").add(this.inputPlane.material.uniforms.decay, "value", .01, .999);
 
-	folder.add(this, "minMovement", 1, this.width * this.height * .5).step(1);
-	folder.add(this, "flowSmooothing", 0., 1.).step(.01);
+	this.gui.add(this, "minMovement", 1, this.width * this.height * .5).step(1);
+	this.gui.add(this, "flowSmooothing", 0., 1.).step(.01);
 }
 
 OpticalFlower.prototype.getData = function()
@@ -126,7 +126,7 @@ OpticalFlower.prototype.draw = function( renderer, camera )
 	//differencing
 	this.diffPlane.material.uniforms.camera.value = this.cameraTexture;	
 	this.diffPlane.material.uniforms.background.value = this.ping;	
-	renderer.render( this.diffScene, camera, this.diffRT, false );
+	renderer.render( this.diffScene, camera, this.diffRT, true );
 
 	//TODO: this is such a slow call!! how can we get around the gl.readPixels?
 	var gl = renderer.getContext();

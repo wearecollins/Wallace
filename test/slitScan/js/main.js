@@ -281,14 +281,16 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 		//optical flow
 		//
 		flow = new OpticalFlower();
+		flow.addToGui(gui);
 
 		var fst = new FullScreenTextureShader({map: flow.texture, width: 320, height: 240});
 		var fstPlane = new THREE.Mesh( new THREE.PlaneGeometry( 2, 2, 12, 7 ), fst);
 		scene.add(fstPlane);
+		flow.gui.addFolder("debugMesh").add(fstPlane, "visible");
 
-		flow.addToGui(gui);
-
+		//debug sphere
 		scene.add(debugSphere);
+		gui.addFolder("debugSphere").add(debugSphere, "visible");	
 	}
 
 	/**

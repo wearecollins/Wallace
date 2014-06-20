@@ -8,7 +8,7 @@ var DiffShader = function(params)
 	var matParams = {
 		transparent: true,
 		blending: params.blending || 1,
-		depthTest: params.depthTest || true,
+		depthTest: params.depthTest || false,
 		side: params.side || 2,// 0 = backFaceCull, 1 = frontFaceCull, 2 = doubleSided
 
 
@@ -62,29 +62,10 @@ var DiffShader = function(params)
 		'{',	
 		'	float delta = getDelta(vUv);',
 
-		//sample neighbors
+		//	sample neighbors to get flow direction
 		'	vec3 dir =  vec3(0.,0.,1.);',
-
-		//4 samples
 		'	dir.x = flowScale * abs(getDelta(vUv - vec2(step.x, 0.)) - getDelta(vUv + vec2(step.x, 0.)));',
 		'	dir.y = flowScale * abs(getDelta(vUv - vec2(0., step.y)) - getDelta(vUv + vec2(0., step.y)));',
-		
-
-		// '	vec3 dir = vec3(0.,0., 0.);',
-		// '	for(int i=-1; i<2; i++){',
-		// '		for(int j=-1; j<2; j++){',
-		// '			float val = getGray(texture2D(camera, vUv + vec2(float(i) * step.x, float(j) * step.y)).xyz);',
-		// '			float valbg = getGray(texture2D(background, vUv + vec2(float(i) * step.x, float(j) * step.y)).xyz);',
-		// '			float valDelta = abs(val - valbg);',
-		// '			if(i != 0){',
-		// '				dir.x = float(i) * valDelta;',
-		// '			}',
-		// '			if(j != 0){',
-		// '				dir.y = float(j) * valDelta;',
-		// '			}',
-		// '		}',
-		// '	}',
-		// '	normalize(-dir);',
 
 		'	gl_FragColor = delta > threshold?  vec4(dir * .5 + .5, 1.) : vec4(0., 0., 0., 1.);',
 		'}'

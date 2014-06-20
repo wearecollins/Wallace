@@ -54,7 +54,8 @@ var BlurMotionShader = function(params)
 		'{',	
 		'	vec4 current = texture2D(map, vUv);',
 		'	vec4 previous = texture2D(previousMap, vUv);',
-		'	gl_FragColor = min( current, mix(current, previous, decay));',
+		'	gl_FragColor = mix(current, previous, decay);',
+		// '	gl_FragColor = min( current, mix(current, previous, decay));',
 		'}'
 		].join('\n'),
 
