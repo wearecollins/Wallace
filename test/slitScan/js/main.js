@@ -316,7 +316,6 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 		thresholdFolder.add(thresholdLines["up"], "visible").onChange(function(value){
 			for(var i in thresholdLines)
 			{
-				// console.log( thresholdLines[i] );
 				thresholdLines[i].visible = value;
 			}
 		})
