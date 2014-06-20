@@ -5,8 +5,8 @@ var OpticalFlower = function(params)
 	params = params || {};
 	this.cameraTexture = undefined;
 
-	this.width = params.width || 40;
-	this.height = params.height || 30;
+	this.width = params.width || 320;
+	this.height = params.height || 240;
 
     this.pixels = new Uint8Array(this.width * this.height * 4);
 

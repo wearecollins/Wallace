@@ -18,7 +18,7 @@ var DiffShader = function(params)
 			filter: {type: 't', value: params.filter ||THREE.ImageUtils.loadTexture( '../blendMaps/crap_vignette.png')},
 			filterWeight: {type: 'f', value: params.filterWeight || .75},
 			threshold: {type: 'f', value: params.threshold || .075},
-			flowScale: {type: 'f', value: params.flowScale || 3.},
+			flowScale: {type: 'f', value: params.flowScale || 10.},
 			step: {type: 'v2', value: params.step || new THREE.Vector2( 1/ 64, 1/48 )}
 		},
 
@@ -68,8 +68,8 @@ var DiffShader = function(params)
 
 		//	sample neighbors to get flow direction
 		'	vec3 dir =  vec3(0.,0.,1.);',
-		'	dir.x = flowScale * abs(getDelta(vUv - vec2(step.x, 0.)) - getDelta(vUv + vec2(step.x, 0.)));',
-		'	dir.y = flowScale * abs(getDelta(vUv - vec2(0., step.y)) - getDelta(vUv + vec2(0., step.y)));',
+		'	dir.x = flowScale * (getDelta(vUv - vec2(step.x, 0.)) - getDelta(vUv + vec2(step.x, 0.)));',
+		'	dir.y = flowScale * (getDelta(vUv - vec2(0., step.y)) - getDelta(vUv + vec2(0., step.y)));',
 
 		'	gl_FragColor = delta > threshold?  vec4(dir * .5 + .5, 1.) : vec4(0., 0., 0., 1.);',
 		'}'
