@@ -125,8 +125,8 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 	var thresholds = {
 		left: .45,
 		right: .55,
-		up: .4,
-		down: .55,
+		up: .55,
+		down: .4,
 	}
 
 	var frame = 0;
@@ -336,7 +336,7 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 			}
 			else
 			{
-				if(inputThing.nose.y < thresholds["up"])
+				if(inputThing.nose.y > thresholds["up"])
 				{
 
 					if(currentVid != videos["up"])
@@ -345,7 +345,7 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 						startTransition();
 					}
 				}
-				else if(inputThing.nose.y > thresholds["down"])
+				else if(inputThing.nose.y < thresholds["down"])
 				{
 					if(currentVid != videos["down"])
 					{

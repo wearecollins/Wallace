@@ -27,8 +27,8 @@ var OpticalFlower = function(params)
 	}
 
 	//camera input
-	var minFilter = THREE.NearestFilter;
-	var magFilter = THREE.NearestFilter;
+	var minFilter = THREE.LinearFilter; //THREE.NearestFilter;
+	var magFilter = THREE.LinearFilter; //THREE.NearestFilter;
 	this.ping = new THREE.WebGLRenderTarget( this.width, this.height, { minFilter: minFilter, magFilter: magFilter, format: THREE.RGBFormat, wrapS: THREE.RepeatWrapping, wrapT: THREE.RepeatWrapping } );
 	this.pong = new THREE.WebGLRenderTarget( this.width, this.height, { minFilter: minFilter, magFilter: magFilter, format: THREE.RGBFormat, wrapS: THREE.RepeatWrapping, wrapT: THREE.RepeatWrapping } );
 	this.diffRT = new THREE.WebGLRenderTarget( this.width, this.height, { minFilter: minFilter, magFilter: magFilter, format: THREE.RGBAFormat, wrapS: THREE.RepeatWrapping, wrapT: THREE.RepeatWrapping } );
