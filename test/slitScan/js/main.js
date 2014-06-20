@@ -158,7 +158,7 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 	// var headtracker = new HeadTracker({});
 	
 	//optical flow
-	var flow, flowScene, ping, pong;
+	var flow, flowScene, ping, pong, fstPlane;
 
 	var debugSphere = new THREE.Mesh( new THREE.SphereGeometry(5), new THREE.MeshBasicMaterial( {color: 0xFF2201, side: 2} ) );
 
@@ -284,7 +284,7 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 		flow.addToGui(gui);
 
 		var fst = new FullScreenTextureShader({map: flow.texture, width: 320, height: 240});
-		var fstPlane = new THREE.Mesh( new THREE.PlaneGeometry( 2, 2, 12, 7 ), fst);
+		fstPlane = new THREE.Mesh( new THREE.PlaneGeometry( 2, 2, 12, 7 ), fst);
 		scene.add(fstPlane);
 		flow.gui.addFolder("debugMesh").add(fstPlane, "visible");
 
@@ -557,6 +557,12 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 		// camera.updateProjectionMatrix();
 		resetCamera();
 		scaleVidMesh();
+
+		if(fstPlane)
+		{
+			fstPlane.material.uniforms.screendim.value.set(window.innerWidth, window.innerHeight );
+		}
+
 		renderer.setSize( window.innerWidth, window.innerHeight );
 	}
 

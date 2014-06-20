@@ -53,7 +53,7 @@ var OpticalFlower = function(params)
 
 
 	this.minMovement = this.width * this.height * .04;
-	this.flowSmooothing = .95;
+	this.smoothing = .95;
 	this.nose = new THREE.Vector2( .5, .5 );
 }
 
@@ -66,7 +66,7 @@ OpticalFlower.prototype.addToGui = function(gui)
 	this.gui.addFolder("vignetteWeight").add(this.diffPlane.material.uniforms.filterWeight, "value", .01, 1.);
 
 	this.gui.add(this, "minMovement", 1, this.width * this.height * .5).step(1);
-	this.gui.add(this, "flowSmooothing", 0., 1.).step(.01);
+	this.gui.add(this, "smoothing", 0., 1.).step(.01);
 }
 
 OpticalFlower.prototype.getData = function()
@@ -108,8 +108,8 @@ OpticalFlower.prototype.update = function()
 			// averagePos.y = 1. - averagePos.y;
 
 
-			this.nose.x = this.nose.x * this.flowSmooothing + averagePos.x * (1. - this.flowSmooothing);
-			this.nose.y = this.nose.y * this.flowSmooothing + averagePos.y * (1. - this.flowSmooothing);
+			this.nose.x = this.nose.x * this.smoothing + averagePos.x * (1. - this.smoothing);
+			this.nose.y = this.nose.y * this.smoothing + averagePos.y * (1. - this.smoothing);
 		}
 	}
 }

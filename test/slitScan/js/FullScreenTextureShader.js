@@ -57,3 +57,13 @@ var FullScreenTextureShader = function(params)
 
 
 FullScreenTextureShader.prototype = Object.create( THREE.ShaderMaterial.prototype );
+
+FullScreenTextureShader.prototype.setWidth = function( w )
+{
+	this.uniforms.width.value = w;
+}
+
+FullScreenTextureShader.prototype.setHeight = function( h )
+{
+	this.uniforms.height.value = h;
+}
