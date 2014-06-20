@@ -160,6 +160,8 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 	//optical flow
 	var flow, flowScene, ping, pong;
 
+	var debugSphere = new THREE.Mesh( new THREE.SphereGeometry(30), new THREE.MeshBasicMaterial( {color: 0xFF2201} ) );
+
 	function setup() 
 	{
 		//THREE SETUP
@@ -285,6 +287,8 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 		scene.add(fstPlane);
 
 		flow.addToGui(gui);
+
+		scene.add(debugSphere);
 	}
 
 	/**
@@ -300,7 +304,15 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 		//TODO: reintroduce gesture direction 
 		slitMat.uniforms.time.value = clock.getElapsedTime() * -.1;
 
+
 		var inputThing = flow;//headtracker;
+
+		if(debugSphere)
+		{
+			debugSphere.position.x = THREE.Math.mapLinear( inputThing.nose.x, 0, 1, -vidPlane.scale.x*.5, vidPlane.scale.x*.5);
+			debugSphere.position.y = THREE.Math.mapLinear( inputThing.nose.y, 0, 1, -vidPlane.scale.y*.5, vidPlane.scale.y*.5);
+		}
+
 		if (!bTransitioning)
 		{
 			if(inputThing.nose.x < thresholds["left"])

@@ -47,12 +47,21 @@ var OpticalFlower = function(params)
 
 	this.texture = this.diffRT;
 
+
+	this.minMovement = 20;
+	this.flowSmooothing = .95;
 	this.nose = new THREE.Vector2( .5, .5 );
 }
 
 OpticalFlower.prototype.addToGui = function(gui)
 {
 	var folder = gui.addFolder("OpticalFlow");
+
+	folder.addFolder("diffThreshold").add(this.diffPlane.material.uniforms.threshold, "value", .001, .2);
+	folder.addFolder("persistance").add(this.inputPlane.material.uniforms.decay, "value", .01, .999);
+
+	folder.add(this, "minMovement", 1, 300).step(1);
+	folder.add(this, "flowSmooothing", 0., 1.).step(.01);
 }
 
 OpticalFlower.prototype.getData = function()
@@ -66,7 +75,6 @@ OpticalFlower.prototype.update = function()
 	if (this.video.readyState === this.video.HAVE_ENOUGH_DATA) {
 		this.cameraTexture.needsUpdate = true;
 
-		var minMovement = 20;
 		var data = this.getData();
 		var averagePos = new THREE.Vector2();
 		var i=0, pCount = 0;
@@ -85,17 +93,18 @@ OpticalFlower.prototype.update = function()
 			}
 		}
 
-		if(pCount>minMovement)
+		if(pCount>this.minMovement)
 		{
 			averagePos.divideScalar(pCount);	
 			averagePos.x /= this.width;
 			averagePos.y /= this.height;	
 
 			averagePos.x = 1. - averagePos.x;
+			averagePos.y = 1. - averagePos.y;
 
-			var mixVal = .9;
-			this.nose.x = this.nose.x * mixVal + averagePos.x * (1. - mixVal);
-			this.nose.y = this.nose.y * mixVal + averagePos.y * (1. - mixVal);
+
+			this.nose.x = this.nose.x * this.flowSmooothing + averagePos.x * (1. - this.flowSmooothing);
+			this.nose.y = this.nose.y * this.flowSmooothing + averagePos.y * (1. - this.flowSmooothing);
 		}
 	}
 }
