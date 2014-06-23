@@ -114,8 +114,8 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 	var gui = new dat.GUI();
 
 	var thresholds = {
-		left: .45,
-		right: .55,
+		left: .4,
+		right: .6,
 		up: .6,
 		down: .4,
 	}
@@ -162,7 +162,8 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 	// var headtracker = new HeadTracker({});
 	
 	//optical flow
-	var flow, flowScene, ping, pong, fstPlane;
+	var flow, flowScene, fstPlane;
+	var flowDir = new THREE.Vector2( 0,0 ), flowSmoothing = .975;
 
 	var debugSphere = new THREE.Mesh( new THREE.SphereGeometry(5), new THREE.MeshBasicMaterial( {color: 0xFF2201, side: 2} ) );
 	debugSphere.scale.z = 2;
@@ -279,19 +280,27 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 		});
 		gui.addFolder("layerWeight").add(slitMat.uniforms.layerWeight,"value", 0. ,.1 );
 
-		//Head Tracking
-		// headtracker.setup()
-		
 
-		//optical flow
-		//
-		flow = new OpticalFlower();
-		flow.addToGui(gui);
+		//oflow
+		flow = new oflow.WebCamFlow();
+		// Every time when optical flow is calculated
+		// call the passed in callback:
+		flow.onCalculated(function (direction) 
+		{
+			flowDir.x = flowDir.x * flowSmoothing + (direction.u*-.5 + .5) * (1 - flowSmoothing);
+			flowDir.y = flowDir.y * flowSmoothing + (direction.v*-.5 + .5) * (1 - flowSmoothing);
 
-		var fst = new FullScreenTextureShader({map: flow.texture, width: 320, height: 240});
-		fstPlane = new THREE.Mesh( new THREE.PlaneGeometry( 2, 2, 12, 7 ), fst);
-		scene.add(fstPlane);
-		flow.gui.addFolder("debugMesh").add(fstPlane, "visible");
+		    // direction is an object which describes current flow:
+		    // direction.u, direction.v {floats} general flow vector
+		    // direction.zones {Array} is a collection of flowZones. 
+		    // Each flow zone describes optical flow direction inside of it.
+		    // flowZone : {
+		    //  x, y // zone center
+		    //  u, v // vector of flow in the zone
+		    // }
+		});
+		// Starts capturing the flow from webcamera:
+		flow.startCapture();
 
 		//debug sphere
 		scene.add(debugSphere);
@@ -324,25 +333,23 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 	{
 		TWEEN.update();
 
-		flow.update();
+		// flow.update();
 
 		//TODO: reintroduce gesture direction 
 		slitMat.uniforms.time.value = clock.getElapsedTime() * -.1;
 
 
-		var inputThing = flow;//headtracker;
+		// var inputThing = flow;//headtracker;
 
 		if(debugSphere)
 		{
-			debugSphere.position.x = THREE.Math.mapLinear( inputThing.nose.x, 0, 1, -vidPlane.scale.x*.5, vidPlane.scale.x*.5);
-			debugSphere.position.y = THREE.Math.mapLinear( inputThing.nose.y, 0, 1, -vidPlane.scale.y*.5, vidPlane.scale.y*.5);
-
-			debugSphere.lookAt(debugSphere.position.clone().add(flow.dir));
+			debugSphere.position.x = THREE.Math.mapLinear( flowDir.x, 0, 1, -vidPlane.scale.x*.5, vidPlane.scale.x*.5);
+			debugSphere.position.y = THREE.Math.mapLinear( flowDir.y, 0, 1, -vidPlane.scale.y*.5, vidPlane.scale.y*.5);
 		}
 
 		if (!bTransitioning)
 		{
-			if(inputThing.nose.x < thresholds["left"])
+			if(flowDir.x < thresholds["left"])
 			{
 				if(currentVid != videos["left"])
 				{
@@ -353,7 +360,7 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 
 				// bleedDir: {type: 'v2', value: params.bleedDir || new THREE.Vector2( 0, -.0025 )},
 			}
-			else if(inputThing.nose.x > thresholds["right"])
+			else if(flowDir.x > thresholds["right"])
 			{
 				if(currentVid != videos["right"])
 				{
@@ -363,7 +370,7 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 			}
 			else
 			{
-				if(inputThing.nose.y > thresholds["up"])
+				if(flowDir.y > thresholds["up"])
 				{
 
 					if(currentVid != videos["up"])
@@ -372,7 +379,7 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 						startTransition();
 					}
 				}
-				else if(inputThing.nose.y < thresholds["down"])
+				else if(flowDir.y < thresholds["down"])
 				{
 					if(currentVid != videos["down"])
 					{
@@ -390,15 +397,6 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 				}
 			}
 		}
-
-		// else if(!bTransitioning)
-		// {
-		// 	var vids = ['straightOn', 'down', 'up', 'left', 'right'];
-
-		// 	var i = THREE.Math.randInt( 0, vids.length-1 );
-		// 	setCurrentVideo( vids[i] );
-		// 	startTransition( endTransition, 1000);
-		// }
 
 		//update videos 
 		for(var i in videos)
@@ -428,7 +426,7 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 	function draw()
 	{
 		//flow
-		flow.draw(renderer, camera);
+		// flow.draw(renderer, camera);
 
 		//SLIT
 		// if(frame % 10 == 0)	slitIndex = (slitIndex+1) % slits.length; // maybe try modulating the index re-definition
@@ -637,7 +635,7 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 		{
 
 			case 32:
-				console.log( flow.dir );
+				// console.log( flow.dir );
 
 				break;
 
