@@ -164,6 +164,9 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 	//optical flow
 	var flow, flowScene, fstPlane;
 	var flowDir = new THREE.Vector2( .5, .5 ), targetDir = new THREE.Vector2( .5, .5 ), flowSmoothing = .975;
+	var flowValues = {
+		decay: .99
+	}
 
 	var debugSphere = new THREE.Mesh( new THREE.SphereGeometry(5), new THREE.MeshBasicMaterial( {color: 0xFF2201, side: 2} ) );
 	debugSphere.scale.z = 2;
@@ -283,7 +286,7 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 			flowDir.x = flowDir.x * flowSmoothing + (targetDir.x*-.5 + .5) * (1 - flowSmoothing);
 			flowDir.y = flowDir.y * flowSmoothing + (targetDir.y*-.5 + .5) * (1 - flowSmoothing);
 
-			targetDir.multiplyScalar( dirDecay );
+			targetDir.multiplyScalar( flowValues.decay );
 
 
 		    // direction is an object which describes current flow:
@@ -297,7 +300,9 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 		});
 		// Starts capturing the flow from webcamera:
 		flow.startCapture();
-		gui.addFolder("oflow").add(flow.getVideoFlow(), "smoothing", 0, 1);	
+		var ff = gui.addFolder("oflow");
+		ff.add(flow.getVideoFlow(), "smoothing", 0, 1);	
+		ff.add(flowValues, "decay", .9, 1.).step(.001);
 
 		//debug sphere
 		scene.add(debugSphere);
