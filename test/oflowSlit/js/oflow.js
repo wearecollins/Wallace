@@ -116,7 +116,7 @@ function WebCam(defaultVideoTag) {
                 });
             }
         } else {
-            console.log("wtf")
+            // console.log("wtf")
         }
     }
 

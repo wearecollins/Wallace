@@ -1,3 +1,18 @@
+//TODO: 
+//3 at once
+//
+//vingette
+//
+//video position
+//
+//fails get user media what then? mouse? auto pilot?
+//
+//finess tracking
+//
+//blendmap
+//
+//move bg video to div
+
 
 var app;
 
@@ -165,8 +180,8 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 	var flow, flowScene, fstPlane;
 	var flowDir = new THREE.Vector2( .5, .5 ), targetDir = new THREE.Vector2( .5, .5 ), flowSmoothing = .975;
 	var flowValues = {
-		decay: .99,
-		motionThreshold: 3000
+		decay: .945,
+		motionThreshold: 4500
 	}
 
 	var debugSphere = new THREE.Mesh( new THREE.SphereGeometry(5), new THREE.MeshBasicMaterial( {color: 0xFF2201, side: 2} ) );
@@ -233,7 +248,7 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 		// oflowFolder.add(flow.getVideoFlow(), "smoothing", 0, 1);	
 		oflowFolder.add(flowValues, "decay", .9, 1.).step(.001);	
 		oflowFolder.add(flowValues, "motionThreshold", 100, 6000).step(1);
-		
+
 		//THREE SETUP
 		resetCamera();
 
@@ -565,20 +580,22 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 
 	function randomtTransition(delay)
 	{
-		delay = delay || THREE.Math.randInt( 2500, 3500 );
-		var vids = ['straightOn', 'down', 'up', 'left', 'right'];
-		var i = THREE.Math.randInt( 0, vids.length-1 );
+		flowDir.x = THREE.Math.randFloat( .2, .8 );
+		flowDir.y = THREE.Math.randFloat( .2, .8 );
+		// delay = delay || (controls.timeIn + controls.timeOut + 500);
+		// var vids = ['straightOn', 'down', 'up', 'left', 'right'];
+		// var i = THREE.Math.randInt( 0, vids.length-1 );
 
-		var count = 0;
-		while(videos[vids[i]] === currentVid)
-		{
-			i = THREE.Math.randInt( 0, vids.length-1 );		
-			count++;
-			if(count >= 50)	break;
-		}
+		// var count = 0;
+		// while(videos[vids[i]] === currentVid)
+		// {
+		// 	i = THREE.Math.randInt( 0, vids.length-1 );		
+		// 	count++;
+		// 	if(count >= 50)	break;
+		// }
 
-		setCurrentVideo( vids[i] );
-		startTransition( endTransition, delay);
+		// setCurrentVideo( vids[i] );
+		// startTransition( endTransition, delay);
 	}
 
 	function updateDebugLines()
