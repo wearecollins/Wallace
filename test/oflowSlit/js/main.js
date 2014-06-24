@@ -137,13 +137,13 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 	var vidPlane;
 	var slitMat, blendMat;
 	var slitScene = new THREE.Scene();
-	var rt = new THREE.WebGLRenderTarget( 1280, 720, { minFilter: THREE.LinearFilter, magFilter: THREE.LinearFilter, format: THREE.RGBFormat, wrapS: THREE.RepeatWrapping, wrapT: THREE.RepeatWrapping } );
+	var rt = new THREE.WebGLRenderTarget( 1280, 720, { minFilter: THREE.LinearFilter, magFilter: THREE.LinearFilter, format: THREE.RGBAFormat, wrapS: THREE.RepeatWrapping, wrapT: THREE.RepeatWrapping } );
 	
 	var rtScale = 1.;
 	var slits = [];
 	for(var i=0; i<15; i++)
 	{
-		slits[i] = new THREE.WebGLRenderTarget( 1280 * rtScale, 720 * rtScale, { minFilter: THREE.LinearFilter, magFilter: THREE.LinearFilter, format: THREE.RGBFormat, wrapS: THREE.RepeatWrapping, wrapT: THREE.RepeatWrapping } );
+		slits[i] = new THREE.WebGLRenderTarget( 1280 * rtScale, 720 * rtScale, { minFilter: THREE.LinearFilter, magFilter: THREE.LinearFilter, format: THREE.RGBAFormat, wrapS: THREE.RepeatWrapping, wrapT: THREE.RepeatWrapping } );
 	}
 
 	var slitIndex = 0;
@@ -170,6 +170,8 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 
 	var debugSphere = new THREE.Mesh( new THREE.SphereGeometry(5), new THREE.MeshBasicMaterial( {color: 0xFF2201, side: 2} ) );
 	debugSphere.scale.z = 2;
+
+	var backgroundMesh;
 
 	function setup() 
 	{
@@ -230,19 +232,25 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 			mixVal: 0,
 		});
 
-		//TODO: rename slit shader mixShader
-		//	make a slit shader that samples from an array of textures
-		//
-
 		var slitMesh = new THREE.Mesh( new THREE.PlaneGeometry( 2, 2, 12, 7 ), blendMat);
 		slitScene.add(slitMesh);
 
 		//draw slitTo Screen
 		vidPlane = new THREE.Mesh( new THREE.PlaneGeometry( 1, 1, 12, 7 ), slitMat);
-		scaleVidMesh();
-		scene.add(vidPlane);
 
-		console.log( vidPlane.material );
+		backgroundMesh = new THREE.Mesh(vidPlane.geometry, new THREE.MeshBasicMaterial( {
+			side: 2,
+			transparent: false,
+			depthTest: true,
+			map: videos['background'].texture
+		}));
+
+		backgroundMesh.position.z = -1;
+
+		scaleVidMesh();
+
+		scene.add(vidPlane);
+		scene.add(backgroundMesh);
 
 		//kick off some random transitioning
 		if(auto)
@@ -271,38 +279,27 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 		gui.addFolder("layerWeight").add(slitMat.uniforms.layerWeight,"value", 0. ,.1 );
 
 
-		//oflow
+		//	oflow
 		var dirDecay = .995;
 		flow = new oflow.WebCamFlow();
-		// Every time when optical flow is calculated
-		// call the passed in callback:
 		flow.onCalculated(function (direction) 
 		{
 			if(direction.total_delta > 3000)
 			{
 				targetDir.set(direction.u, direction.v )
-				// console.log( direction.total_delta );
 			}
+
 			flowDir.x = flowDir.x * flowSmoothing + (targetDir.x*-.5 + .5) * (1 - flowSmoothing);
 			flowDir.y = flowDir.y * flowSmoothing + (targetDir.y*-.5 + .5) * (1 - flowSmoothing);
 
 			targetDir.multiplyScalar( flowValues.decay );
-
-
-		    // direction is an object which describes current flow:
-		    // direction.u, direction.v {floats} general flow vector
-		    // direction.zones {Array} is a collection of flowZones. 
-		    // Each flow zone describes optical flow direction inside of it.
-		    // flowZone : {
-		    //  x, y // zone center
-		    //  u, v // vector of flow in the zone
-		    // }
 		});
+
 		// Starts capturing the flow from webcamera:
 		flow.startCapture();
-		var ff = gui.addFolder("oflow");
-		ff.add(flow.getVideoFlow(), "smoothing", 0, 1);	
-		ff.add(flowValues, "decay", .9, 1.).step(.001);
+		var oflowFolder = gui.addFolder("oflow");
+		oflowFolder.add(flow.getVideoFlow(), "smoothing", 0, 1);	
+		oflowFolder.add(flowValues, "decay", .9, 1.).step(.001);
 
 		//debug sphere
 		scene.add(debugSphere);
@@ -425,15 +422,9 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 	 */
 	function draw()
 	{
-		//flow
-		// flow.draw(renderer, camera);
-
-		//SLIT
-		// if(frame % 10 == 0)	slitIndex = (slitIndex+1) % slits.length; // maybe try modulating the index re-definition
-
 		// if(frame % controls.slitStep == 0)	slits.unshift( slits.pop() );
 		if(frame % controls.slitStep == 0)	slits.push( slits.shift() );
-		renderer.render( slitScene, camera, slits[0], false );
+		renderer.render( slitScene, camera, slits[0], true );
 
 		slitMat.uniforms.slits.value = slits;
 		slitMat.uniforms.mixVal.value = blendMat.uniforms.mixVal.value;
@@ -555,6 +546,8 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 	function scaleVidMesh()
 	{
 		vidPlane.scale.set( window.innerWidth, -window.innerWidth / vidAscpect, 1);
+	
+		backgroundMesh.scale.set( window.innerWidth, -window.innerWidth / vidAscpect, 1);
 
 		updateDebugLines();
 	}
@@ -655,10 +648,10 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 	{
 
 		renderer = new THREE.WebGLRenderer( { antialias: true, devicePixelRatio: 1 } );
-		renderer.setClearColor( 0x444447 );
+		renderer.setClearColor( 0x444447, 0. );
 		renderer.sortObjects = false;
 		renderer.setSize( window.innerWidth, window.innerHeight );
-		renderer.autoClear = false;
+		renderer.autoClear = true;
 		container.appendChild( renderer.domElement );
 	}
 

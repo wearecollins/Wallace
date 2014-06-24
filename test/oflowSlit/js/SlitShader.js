@@ -64,6 +64,10 @@ var SlitShader = function(params)
 		'	return b1 + ( x - a1 ) * ( b2 - b1 ) / ( a2 - a1 );',
 		'}',
 
+		'float getGray(vec3 rgb)',
+		'{',
+		'	return rgb.x * .3 + rgb.x * .59 + rgb.x * .11;',
+		'}',
 
 		'void main()',
 		'{',	
@@ -72,15 +76,22 @@ var SlitShader = function(params)
 
 		'	float d = texture2D(blendMap, uv).x;// * mixVal;',
 		// '	d -= floor(d * 1.02);',
+		'gl_FragColor = vec4(0.);',
+		//the transition is more comkplicated than it seems, first the max goes from 0-1 then the min foes from 0-1
+		// so it starts at 0,0 then moves to 0,1m then to 1,1,
 		'	d = mapLinear(clamp(d, 0. ,1.), 0., 1., bMin, bMax);',
 
 		'	int depthIndex = int(clamp(d * numSlits, 0., float(SLIT_COUNT-1)));',
 		'	for(int i=0; i<SLIT_COUNT; i++){',
 		'		if(depthIndex == i){',
-		'			gl_FragColor = texture2D(slits[i], vUv) + float(i) * layerWeight;',
+		'			gl_FragColor = texture2D(slits[i], vUv);// + float(i) * layerWeight;',
 		'			break;',
 		'		}',
 		'	}',
+
+		//rough BW
+		'	gl_FragColor = vec4(vec3(pow(getGray(gl_FragColor.xyz), 1.2)), gl_FragColor.w);',
+		// '	gl_FragColor = mix(vec4(0., 1. ,0., 1.), gl_FragColor, gl_FragColor.w);',
 		'}'
 		].join('\n'),
 
