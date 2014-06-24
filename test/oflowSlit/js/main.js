@@ -165,7 +165,8 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 	var flow, flowScene, fstPlane;
 	var flowDir = new THREE.Vector2( .5, .5 ), targetDir = new THREE.Vector2( .5, .5 ), flowSmoothing = .975;
 	var flowValues = {
-		decay: .99
+		decay: .99,
+		motionThreshold: 3000
 	}
 
 	var debugSphere = new THREE.Mesh( new THREE.SphereGeometry(5), new THREE.MeshBasicMaterial( {color: 0xFF2201, side: 2} ) );
@@ -194,7 +195,11 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 		blendMaps ["softNoise"] = THREE.ImageUtils.loadTexture( '../blendMaps/soft_noise.png' );
 		blendMaps ["Checker"] = THREE.ImageUtils.loadTexture( '../blendMaps/Checker.png' );
 		blendMaps["horizontal_stripes"] = THREE.ImageUtils.loadTexture( '../blendMaps/horizontal_stripes.png');
-		blendMaps["horizontalHardGradient"] = THREE.ImageUtils.loadTexture( '../blendMaps/horizontalHardGradient.png');
+		// blendMaps["horizontalHardGradient"] = THREE.ImageUtils.loadTexture( '../blendMaps/horizontalHardGradient.png');
+blendMaps["hardGradientDownTop"] = THREE.ImageUtils.loadTexture('../blendMaps/hardGradientDownTop.png');
+blendMaps["hardGradientLeftRight"] = THREE.ImageUtils.loadTexture('../blendMaps/hardGradientLeftRight.png');
+blendMaps["hardGradientRightLeft"] = THREE.ImageUtils.loadTexture('../blendMaps/hardGradientRightLeft.png');
+blendMaps["hardGradientTopDown"] = THREE.ImageUtils.loadTexture('../blendMaps/hardGradientTopDown.png');
 		blendMaps["skinny-stripe"] = THREE.ImageUtils.loadTexture( '../blendMaps/skinny-stripe.png');
 		blendMaps["verticalHardGradient"] = THREE.ImageUtils.loadTexture( '../blendMaps/verticalHardGradient.png');
 		blendMaps["zigzag"] = THREE.ImageUtils.loadTexture( '../blendMaps/zigzag.png');
@@ -284,7 +289,7 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 		flow = new oflow.WebCamFlow();
 		flow.onCalculated(function (direction) 
 		{
-			if(direction.total_delta > 3000)
+			if(direction.total_delta > flowValues.motionThreshold)
 			{
 				targetDir.set(direction.u, direction.v )
 			}
@@ -299,7 +304,8 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 		flow.startCapture();
 		var oflowFolder = gui.addFolder("oflow");
 		oflowFolder.add(flow.getVideoFlow(), "smoothing", 0, 1);	
-		oflowFolder.add(flowValues, "decay", .9, 1.).step(.001);
+		oflowFolder.add(flowValues, "decay", .9, 1.).step(.001);	
+		oflowFolder.add(flowValues, "motionThreshold", 100, 6000).step(1);
 
 		//debug sphere
 		scene.add(debugSphere);

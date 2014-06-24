@@ -71,8 +71,8 @@ var SlitShader = function(params)
 
 		'void main()',
 		'{',	
-		'	vec2 uv = vUv + vec2(0., time);',
-		'	uv.y -= floor(uv.y);',
+		'	vec2 uv = vUv;// + vec2(0., time);',
+		// '	uv.y -= floor(uv.y);',
 
 		'	float d = texture2D(blendMap, uv).x;// * mixVal;',
 		// '	d -= floor(d * 1.02);',
