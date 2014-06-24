@@ -16,6 +16,17 @@ handlers:
 - url: /css
   static_dir: headControl/css
 
+- url: /dist
+  static_dir: oflow/dist
+
+- url: /oflow
+  static_dir: oflow
+
+- url: /oflowSlit
+  static_dir: oflowSlit
+  login: required
+  auth_fail_action: redirect
+
 - url: /WALLACE_TESTS
   static_dir: WALLACE_TESTS
   login: required

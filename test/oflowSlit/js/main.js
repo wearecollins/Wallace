@@ -174,8 +174,66 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 
 	var backgroundMesh;
 
+	var webcam;
+
 	function setup() 
 	{
+		// flow worker
+		webcam = new oflow.WebCam(),
+            worker = new Worker("js/flowWorker.js");
+
+        webcam.onUpdated( function(){
+            // console.log("yes")
+            if ( webcam.getLastPixels() ){
+                worker.postMessage({
+                    last: webcam.getLastPixels(),
+                    current: webcam.getCurrentPixels(),
+                    width: webcam.getWidth(),
+                    height: webcam.getHeight()
+                });
+            }
+        });
+
+        /* Setup WebWorker messaging */
+        worker.onmessage = function(event){
+            var direction = event.data.direction;
+
+			if(direction.total_delta > 3000)
+			{
+				targetDir.set(direction.u, direction.v )
+			}
+
+			flowDir.x = flowDir.x * flowSmoothing + (targetDir.x*-.5 + .5) * (1 - flowSmoothing);
+			flowDir.y = flowDir.y * flowSmoothing + (targetDir.y*-.5 + .5) * (1 - flowSmoothing);
+
+			targetDir.multiplyScalar( flowValues.decay );
+        };
+
+        webcam.startCapture(false);
+
+		//flow = new oflow.WebCamFlow();
+		// flow.onCalculated(function (direction) 
+		// {
+		// 	if(direction.total_delta > 3000)
+		// 	{
+		// 		targetDir.set(direction.u, direction.v )
+		// 	}
+
+		// 	flowDir.x = flowDir.x * flowSmoothing + (targetDir.x*-.5 + .5) * (1 - flowSmoothing);
+		// 	flowDir.y = flowDir.y * flowSmoothing + (targetDir.y*-.5 + .5) * (1 - flowSmoothing);
+
+		// 	targetDir.multiplyScalar( flowValues.decay );
+		// });
+
+		// Starts capturing the flow from webcamera:
+		//flow.startCapture();
+		var oflowFolder = gui.addFolder("oflow");
+		//oflowFolder.add(flow.getVideoFlow(), "smoothing", 0, 1);	
+
+		// oflowFolder.add(flow.getVideoFlow(), "smoothing", 0, 1);	
+		oflowFolder.add(flowValues, "decay", .9, 1.).step(.001);	
+		oflowFolder.add(flowValues, "motionThreshold", 100, 6000).step(1);
+		
 		//THREE SETUP
 		resetCamera();
 
@@ -195,11 +253,7 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 		blendMaps ["softNoise"] = THREE.ImageUtils.loadTexture( '../blendMaps/soft_noise.png' );
 		blendMaps ["Checker"] = THREE.ImageUtils.loadTexture( '../blendMaps/Checker.png' );
 		blendMaps["horizontal_stripes"] = THREE.ImageUtils.loadTexture( '../blendMaps/horizontal_stripes.png');
-		// blendMaps["horizontalHardGradient"] = THREE.ImageUtils.loadTexture( '../blendMaps/horizontalHardGradient.png');
-blendMaps["hardGradientDownTop"] = THREE.ImageUtils.loadTexture('../blendMaps/hardGradientDownTop.png');
-blendMaps["hardGradientLeftRight"] = THREE.ImageUtils.loadTexture('../blendMaps/hardGradientLeftRight.png');
-blendMaps["hardGradientRightLeft"] = THREE.ImageUtils.loadTexture('../blendMaps/hardGradientRightLeft.png');
-blendMaps["hardGradientTopDown"] = THREE.ImageUtils.loadTexture('../blendMaps/hardGradientTopDown.png');
+		blendMaps["horizontalHardGradient"] = THREE.ImageUtils.loadTexture( '../blendMaps/horizontalHardGradient.png');
 		blendMaps["skinny-stripe"] = THREE.ImageUtils.loadTexture( '../blendMaps/skinny-stripe.png');
 		blendMaps["verticalHardGradient"] = THREE.ImageUtils.loadTexture( '../blendMaps/verticalHardGradient.png');
 		blendMaps["zigzag"] = THREE.ImageUtils.loadTexture( '../blendMaps/zigzag.png');
@@ -284,29 +338,6 @@ blendMaps["hardGradientTopDown"] = THREE.ImageUtils.loadTexture('../blendMaps/ha
 		gui.addFolder("layerWeight").add(slitMat.uniforms.layerWeight,"value", 0. ,.1 );
 
 
-		//	oflow
-		var dirDecay = .995;
-		flow = new oflow.WebCamFlow();
-		flow.onCalculated(function (direction) 
-		{
-			if(direction.total_delta > flowValues.motionThreshold)
-			{
-				targetDir.set(direction.u, direction.v )
-			}
-
-			flowDir.x = flowDir.x * flowSmoothing + (targetDir.x*-.5 + .5) * (1 - flowSmoothing);
-			flowDir.y = flowDir.y * flowSmoothing + (targetDir.y*-.5 + .5) * (1 - flowSmoothing);
-
-			targetDir.multiplyScalar( flowValues.decay );
-		});
-
-		// Starts capturing the flow from webcamera:
-		flow.startCapture();
-		var oflowFolder = gui.addFolder("oflow");
-		oflowFolder.add(flow.getVideoFlow(), "smoothing", 0, 1);	
-		oflowFolder.add(flowValues, "decay", .9, 1.).step(.001);	
-		oflowFolder.add(flowValues, "motionThreshold", 100, 6000).step(1);
-
 		//debug sphere
 		scene.add(debugSphere);
 		gui.addFolder("debugSphere").add(debugSphere, "visible");	
@@ -334,8 +365,17 @@ blendMaps["hardGradientTopDown"] = THREE.ImageUtils.loadTexture('../blendMaps/ha
 	 * [update description]
 	 * @return {[type]} [description]
 	 */
+
+	 var rate = 2;
 	function update()
 	{
+		if ( frame % rate == 0 ){
+			webcam.updatePixels();
+			// console.log("update");
+		} else {
+			// console.log( frame );
+		}
+
 		TWEEN.update();
 
 		//TODO: reintroduce gesture direction 
