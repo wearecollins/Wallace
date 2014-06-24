@@ -100,7 +100,7 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 
 	var vidAscpect = 1280 / 720;
 	var bTransitioning = false;
-	var currentVid, previousVid;
+	var currentVid, previousVid, previousPreviouseVid;
 
 	var videos = {};
 	var blendMaps  = {};
@@ -167,8 +167,8 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 		blendMap: 'softNoise',
 		slitStep: 3,
 		layerWeight: 0,
-		timeIn: 600,
-		timeOut: 600,
+		timeIn: 1600,
+		timeOut: 1600,
 		useBlendMapInBlendShader: true,
 		volume: .25
 	}
@@ -289,6 +289,7 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 
 		currentVid = videos['straightOn'];
 		previousVid = videos['down'];
+		previousPreviousVid = videos['down'];
 
 		//slit mat
 		slitMat = new SlitShader({
@@ -469,12 +470,15 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 
 	function setCurrentVideo(name)
 	{
-		previousVid.bIsActive = false;
-		previousVid = currentVid;
+		// previousVid.bIsActive = false;
+		// 
+		previousPreviousVid.bIsActive = false;
 
+		previousPreviousVid = previousVid;
+		previousVid = currentVid;
 		currentVid = videos[name];
 
-		currentVid.bIsActive = previousVid.bIsActive = true;
+		currentVid.bIsActive = previousVid.bIsActive = previousPreviousVid.bIsActive = true;
 	}
 
 	/**
@@ -532,6 +536,7 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 
 
 		blendMat.uniforms.mixVal.value = 0.0;
+		blendMat.uniforms.previousPreviousTex.value = previousPreviousVid.texture;
 		blendMat.uniforms.previousTex.value = previousVid.texture;
 		blendMat.uniforms.currentTex.value = currentVid.texture;
 		blendMat.uniforms.backgroundTex.value = videos['background'].texture;
