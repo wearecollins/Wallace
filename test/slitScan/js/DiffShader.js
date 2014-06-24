@@ -16,7 +16,7 @@ var DiffShader = function(params)
 			camera: {type: 't', value: params.camera || undefined },
 			background: {type: 't', value: params.background || undefined },
 			filter: {type: 't', value: params.filter ||THREE.ImageUtils.loadTexture( '../blendMaps/crap_vignette.png')},
-			filterWeight: {type: 'f', value: params.filterWeight || 1},
+			filterWeight: {type: 'f', value: params.filterWeight || .7},
 			threshold: {type: 'f', value: params.threshold || .05},
 			flowScale: {type: 'f', value: params.flowScale || 10.},
 			step: {type: 'v2', value: params.step || new THREE.Vector2( 1/ 64, 1/48 )}
