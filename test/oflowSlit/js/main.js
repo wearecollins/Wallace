@@ -163,7 +163,7 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 	
 	//optical flow
 	var flow, flowScene, fstPlane;
-	var flowDir = new THREE.Vector2( 0,0 ), flowSmoothing = .975;
+	var flowDir = new THREE.Vector2( .5, .5 ), targetDir = new THREE.Vector2( .5, .5 ), flowSmoothing = .975;
 
 	var debugSphere = new THREE.Mesh( new THREE.SphereGeometry(5), new THREE.MeshBasicMaterial( {color: 0xFF2201, side: 2} ) );
 	debugSphere.scale.z = 2;
@@ -247,19 +247,6 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 			console.log( "auto: startTransition( endTransition );" );
 			startTransition( endTransition );
 		}
-
-		//loop the slit position
-		
-			// blendMat.uniforms.slitValue.value = 0;
-
-			// new TWEEN.Tween(blendMat.uniforms.slitValue)
-			// .to({value: 1200}, 1000)
-			// .onComplete( function()
-			// {
-			// 	// callback();
-			// })
-			// .start();
-			//
 			 
 		// GUI
 		gui.add(controls, 'volume', 0, 1).step(.025).onChange(function(value){	
@@ -282,13 +269,22 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 
 
 		//oflow
+		var dirDecay = .995;
 		flow = new oflow.WebCamFlow();
 		// Every time when optical flow is calculated
 		// call the passed in callback:
 		flow.onCalculated(function (direction) 
 		{
-			flowDir.x = flowDir.x * flowSmoothing + (direction.u*-.5 + .5) * (1 - flowSmoothing);
-			flowDir.y = flowDir.y * flowSmoothing + (direction.v*-.5 + .5) * (1 - flowSmoothing);
+			if(direction.total_delta > 3000)
+			{
+				targetDir.set(direction.u, direction.v )
+				// console.log( direction.total_delta );
+			}
+			flowDir.x = flowDir.x * flowSmoothing + (targetDir.x*-.5 + .5) * (1 - flowSmoothing);
+			flowDir.y = flowDir.y * flowSmoothing + (targetDir.y*-.5 + .5) * (1 - flowSmoothing);
+
+			targetDir.multiplyScalar( dirDecay );
+
 
 		    // direction is an object which describes current flow:
 		    // direction.u, direction.v {floats} general flow vector
@@ -301,6 +297,7 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 		});
 		// Starts capturing the flow from webcamera:
 		flow.startCapture();
+		gui.addFolder("oflow").add(flow.getVideoFlow(), "smoothing", 0, 1);	
 
 		//debug sphere
 		scene.add(debugSphere);
@@ -332,8 +329,6 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 	function update()
 	{
 		TWEEN.update();
-
-		// flow.update();
 
 		//TODO: reintroduce gesture direction 
 		slitMat.uniforms.time.value = clock.getElapsedTime() * -.1;
