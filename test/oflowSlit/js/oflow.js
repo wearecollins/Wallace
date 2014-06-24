@@ -55,6 +55,8 @@ function WebCam(defaultVideoTag) {
         initCapture = function() {
             videoTag = defaultVideoTag || window.document.createElement('video');
             videoTag.setAttribute('autoplay', true);
+            videoTag.setAttribute('width', 80);
+            videoTag.setAttribute('height', 60);
             
             // start capture
             navigator.getUserMedia({ video: true }, function(stream) {
