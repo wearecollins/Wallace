@@ -96,11 +96,13 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 		"DownVideo":"../WALLACE_TESTS/04_ALPHA_DOWN.mp4",
 		"LeftVideo":"../WALLACE_TESTS/05_ALPHA_LEFT.mp4",
 		"RightVideo":"../WALLACE_TESTS/06_ALPHA_RIGHT.mp4",
+		"upperLeftVideo":"../WALLACE_TESTS/07_ALPHA_UPPER_LEFT.mp4",
+		"upperRightVideo":"../WALLACE_TESTS/08_ALPHA_UPPER_RIGHT.mp4"
 	}
 
 	var vidAscpect = 1280 / 720;
 	var bTransitioning = false;
-	var currentVid, previousVid, previousPreviouseVid;
+	var currentVid, previousVid, tertiaryVid;
 
 	var videos = {};
 	var blendMaps  = {};
@@ -108,6 +110,12 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 	var videoTextures = {};
 	var texBlendMat;
 	var videoMixValue = 0;
+
+	var vidMap = {
+		0: { 0: {}, 1: {}, 2: {}},
+		1: { 0: {}, 1: {}, 2: {}},
+		2: { 0: {}, 1: {}, 2: {}}
+	}
 
 
 	var debug = _debug || false;
@@ -268,8 +276,13 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 		blendMaps ["softNoise"] = THREE.ImageUtils.loadTexture( '../blendMaps/soft_noise.png' );
 		blendMaps ["Checker"] = THREE.ImageUtils.loadTexture( '../blendMaps/Checker.png' );
 		blendMaps["horizontal_stripes"] = THREE.ImageUtils.loadTexture( '../blendMaps/horizontal_stripes.png');
-		blendMaps["horizontalHardGradient"] = THREE.ImageUtils.loadTexture( '../blendMaps/horizontalHardGradient.png');
-		blendMaps["skinny-stripe"] = THREE.ImageUtils.loadTexture( '../blendMaps/skinny-stripe.png');
+		// blendMaps["horizontalHardGradient"] = THREE.ImageUtils.loadTexture( '../blendMaps/horizontalHardGradient.png');
+		// blendMaps["skinny-stripe"] = THREE.ImageUtils.loadTexture( '../blendMaps/skinny-stripe.png');
+		blendMaps["hardGradientDownTop"] = THREE.ImageUtils.loadTexture('../blendMaps/hardGradientDownTop.png');
+		blendMaps["hardGradientLeftRight"] = THREE.ImageUtils.loadTexture('../blendMaps/hardGradientLeftRight.png');
+		blendMaps["hardGradientRightLeft"] = THREE.ImageUtils.loadTexture('../blendMaps/hardGradientRightLeft.png');
+		blendMaps["hardGradientTopDown"] = THREE.ImageUtils.loadTexture('../blendMaps/hardGradientTopDown.png');
+
 		blendMaps["verticalHardGradient"] = THREE.ImageUtils.loadTexture( '../blendMaps/verticalHardGradient.png');
 		blendMaps["zigzag"] = THREE.ImageUtils.loadTexture( '../blendMaps/zigzag.png');
 
@@ -281,14 +294,31 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 		videos['up'] = new AzealiaVideoObject({video: document.getElementById( 'UpVideo' ), dir: new THREE.Vector2(0,-1)});
 		videos['left'] = new AzealiaVideoObject({video: document.getElementById( 'LeftVideo' ), dir: new THREE.Vector2(-1,0)});
 		videos['right'] = new AzealiaVideoObject({video: document.getElementById( 'RightVideo' ), dir: new THREE.Vector2(1,0)});
+		videos['upperLeft'] = new AzealiaVideoObject({video: document.getElementById( 'upperLeftVideo' ), dir: new THREE.Vector2(-1,1)});
+		videos['upperRight'] = new AzealiaVideoObject({video: document.getElementById( 'upperRightVideo' ), dir: new THREE.Vector2(1,1)});
 		videos['background'] = new AzealiaVideoObject({video: document.getElementById( 'BackgroundVideo' ), bIsActive: true});
 
 		videos['straightOn'].bIsActive = true;
 		videos['down'].bIsActive = true;
 
+		
+		vidMap[1][1] = videos['straightOn']
+		vidMap[1][0] = videos['down']
+		vidMap[1][0] = videos['up']
+
+		vidMap[0][1] = videos['left']
+		vidMap[2][1] = videos['right']
+		vidMap[0][0] = videos['left']
+		vidMap[2][0] = videos['right']
+
+		vidMap[0][2] = videos['upperLeft']
+		vidMap[2][2] = videos['upperRight']
+
+
 
 		currentVid = videos['straightOn'];
 		previousVid = videos['down'];
+		tertiaryVid = previousVid;
 		previousPreviousVid = videos['down'];
 
 		//slit mat
@@ -534,9 +564,7 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 		callback = callback || endTransition;
 		delay = delay || 0;
 
-
 		blendMat.uniforms.mixVal.value = 0.0;
-		blendMat.uniforms.previousPreviousTex.value = previousPreviousVid.texture;
 		blendMat.uniforms.previousTex.value = previousVid.texture;
 		blendMat.uniforms.currentTex.value = currentVid.texture;
 		blendMat.uniforms.backgroundTex.value = videos['background'].texture;
