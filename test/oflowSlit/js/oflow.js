@@ -24,7 +24,6 @@
  */
  
 function WebCam(defaultVideoTag) {
-    console.log( "SHIT FUCK GODDAMN" );
     var videoTag,
         isCapturing = false,
         localStream,
@@ -206,35 +205,6 @@ FlowCalculator.prototype.calculate = function (oldImage, newImage, width, height
 
     var index = 0, total_delta = 0;
 
-    //newer 
-    //
-    var threshold = .1;
-    var averageMotionPos = {x: 0, y: 0};
-    var index = 0, tot_delta = 0, numVal = 0;
-    for(var i =0; i<height; i++)
-    {
-        for (var j = 0; j < width; j++) 
-        {
-            index = i*width * 4 + j * 4;
-            var delta = Math.abs(oldImage[index] - newImage[index]);
-
-            if(delta < threshold)
-            {
-                averageMotionPos.x += j / width;
-                averageMotionPos.y += i / height;
-            }
-        };
-    }
-
-    if(numVal > 0)
-    {
-        averageMotionPos.x /= numVal;
-        averageMotionPos.y /= numVal;
-    }
-    averageMotionPos.numVal = numVal;
-    averageMotionPos.tot_delta = tot_delta;
-
-    //....
     for (globalY = step + 1; globalY < hMax; globalY += winStep) {
         for (globalX = step + 1; globalX < wMax; globalX += winStep) {
             A2 = A1B2 = B1 = C1 = C2 = 0;
@@ -293,12 +263,11 @@ FlowCalculator.prototype.calculate = function (oldImage, newImage, width, height
     }
 
     return {
-        wtf: "WTF",
-        averageMotionPos: averageMotionPos,
         zones : zones,
         u : uu / zones.length,
         v : vv / zones.length,
-        total_delta: total_delta
+        total_delta: total_delta,
+        wtf: "wtf"
     };
 };
 exports.FlowCalculator = FlowCalculator;
@@ -363,7 +332,6 @@ function CanvasFlow(defaultCanvasTag, zoneSize) {
             var newImage = getCurrentPixels();
             if (oldImage && newImage) {
                 var zones = calculator.calculate(oldImage, newImage, width, height);
-                console.log( "zones: ", zones );
                 calculatedCallbacks.forEach(function (callback) {
                     callback(zones);
                 });
@@ -478,7 +446,6 @@ function VideoFlow(defaultVideoTag, zoneSize) {
             var newImage = getCurrentPixels();
             if (oldImage && newImage) {
                 var zones = calculator.calculate(oldImage, newImage, width, height);
-                console.log( "zones: ", zones );
                 calculatedCallbacks.forEach(function (callback) {
                     callback(zones);
                 });
