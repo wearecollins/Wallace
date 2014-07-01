@@ -191,7 +191,7 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 	var flowDir = new THREE.Vector2( .5, .5 ), targetDir = new THREE.Vector2( .5, .5 ), flowSmoothing = .975;
 	var flowValues = {
 		decay: .945,
-		motionThreshold: 4500
+		motionThreshold: 2500
 	}
 
 	var debugSphere = new THREE.Mesh( new THREE.SphereGeometry(5), new THREE.MeshBasicMaterial( {color: 0xFF2201, side: 2} ) );
@@ -223,20 +223,21 @@ function APP( _useStats, _debug, _muteVideo, _auto)
         /* Setup WebWorker messaging */
         worker.onmessage = function(event){
             var direction = event.data.direction;
-
+            
 			if(direction.total_delta > flowValues.motionThreshold)
 			{
-				// targetDir.set(direction.u, direction.v );
+				targetDir.set(direction.u, direction.v );
 				// console.log( event.data.direction.averageMotionPos );
-				targetDir.set(event.data.direction.averageMotionPos.x, event.data.direction.averageMotionPos.y );
-				console.log( event.data.direction.averageMotionPos );
+				// targetDir.set(event.data.direction.averageMotionPos.x, event.data.direction.averageMotionPos.y );
+				
+	            console.log( event.data.direction );
 			}
 
-			// flowDir.x = flowDir.x * flowSmoothing + (targetDir.x*-.5 + .5) * (1 - flowSmoothing);
-			// flowDir.y = flowDir.y * flowSmoothing + (targetDir.y*-.5 + .5) * (1 - flowSmoothing);
+			flowDir.x = flowDir.x * flowSmoothing + (targetDir.x*-.5 + .5) * (1 - flowSmoothing);
+			flowDir.y = flowDir.y * flowSmoothing + (targetDir.y*-.5 + .5) * (1 - flowSmoothing);
 
-			flowDir.x = flowDir.x * flowSmoothing + (targetDir.x) * (1 - flowSmoothing);
-			flowDir.y = flowDir.y * flowSmoothing + (targetDir.y) * (1 - flowSmoothing);
+			// flowDir.x = flowDir.x * flowSmoothing + (targetDir.x) * (1 - flowSmoothing);
+			// flowDir.y = flowDir.y * flowSmoothing + (targetDir.y) * (1 - flowSmoothing);
 
 			// targetDir.multiplyScalar( flowValues.decay );
         };
