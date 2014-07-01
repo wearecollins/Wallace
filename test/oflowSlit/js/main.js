@@ -188,9 +188,9 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 	
 	//optical flow
 	var flow, flowScene, fstPlane;
-	var flowDir = new THREE.Vector2( .5, .5 ), targetDir = new THREE.Vector2( .5, .5 ), flowSmoothing = .975;
+	var flowDir = new THREE.Vector2( .5, .5 ), targetDir = new THREE.Vector2( .5, .5 ), flowSmoothing = .5;
 	var flowValues = {
-		decay: .945,
+		decay: .85,
 		motionThreshold: 2500
 	}
 
@@ -223,30 +223,35 @@ function APP( _useStats, _debug, _muteVideo, _auto)
         /* Setup WebWorker messaging */
         worker.onmessage = function(event){
             var direction = event.data.direction;
-            
-			if(direction.total_delta > flowValues.motionThreshold)
+
+			if(direction.averageMotionPos.numVals > flowValues.motionThreshold)
 			{
-				targetDir.set(direction.u, direction.v );
-				// console.log( event.data.direction.averageMotionPos );
-				// targetDir.set(event.data.direction.averageMotionPos.x, event.data.direction.averageMotionPos.y );
+				// targetDir.set(direction.u, direction.v );
+				// // console.log( event.data.direction.averageMotionPos );
+				// // targetDir.set(event.data.direction.averageMotionPos.x, event.data.direction.averageMotionPos.y );
 				
-	            console.log( event.data.direction );
+	   //          console.log( event.data.direction.averageMotionPos );
+	   //          
+	            targetDir.x = 1. - event.data.direction.averageMotionPos.x;
+	            targetDir.y = 1. - event.data.direction.averageMotionPos.y;
+
+	            console.log( direction.averageMotionPos.numVals, flowValues.motionThreshold );
 			}
 
-			flowDir.x = flowDir.x * flowSmoothing + (targetDir.x*-.5 + .5) * (1 - flowSmoothing);
-			flowDir.y = flowDir.y * flowSmoothing + (targetDir.y*-.5 + .5) * (1 - flowSmoothing);
+			// flowDir.x = flowDir.x * flowSmoothing + (targetDir.x*-.5 + .5) * (1 - flowSmoothing);
+			// flowDir.y = flowDir.y * flowSmoothing + (targetDir.y*-.5 + .5) * (1 - flowSmoothing);
 
-			// flowDir.x = flowDir.x * flowSmoothing + (targetDir.x) * (1 - flowSmoothing);
-			// flowDir.y = flowDir.y * flowSmoothing + (targetDir.y) * (1 - flowSmoothing);
-
-			// targetDir.multiplyScalar( flowValues.decay );
+			flowDir.x = flowDir.x * flowSmoothing + (targetDir.x) * (1 - flowSmoothing);
+			flowDir.y = flowDir.y * flowSmoothing + (targetDir.y) * (1 - flowSmoothing);
         };
 
         webcam.startCapture(false);
 
 		// Starts capturing the flow from webcamera:
 		var oflowFolder = gui.addFolder("oflow");
-		oflowFolder.add(flowValues, "decay", .9, 1.).step(.001);	
+		oflowFolder.add(flowValues, "decay", .5, 1.).step(.001).onChange(function(value){
+			flowSmoothing = value;
+		});	
 		oflowFolder.add(flowValues, "motionThreshold", 100, 6000).step(1);
 
 		//THREE SETUP
