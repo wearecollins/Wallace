@@ -179,8 +179,9 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 	function setup() 
 	{
 		// flow worker
-		webcam = new oflow.WebCam(),
-            worker = new Worker("js/flowWorker.js");
+		worker = new Worker("js/flowWorker.js");
+
+		webcam = new oflow.WebCam();
 
         webcam.onUpdated( function(){
             // console.log("yes")

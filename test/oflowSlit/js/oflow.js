@@ -35,6 +35,7 @@ function WebCam(defaultVideoTag) {
         lastPixels,
         loopId,
         updatedCallbacks = [],
+        scale = .75,
 
         requestAnimFrame = window.requestAnimationFrame       ||
                            window.webkitRequestAnimationFrame ||
@@ -55,8 +56,8 @@ function WebCam(defaultVideoTag) {
         initCapture = function() {
             videoTag = defaultVideoTag || window.document.createElement('video');
             videoTag.setAttribute('autoplay', true);
-            videoTag.setAttribute('width', 80);
-            videoTag.setAttribute('height', 60);
+            videoTag.setAttribute('width', 160);
+            videoTag.setAttribute('height', 120);
             
             // start capture
             navigator.getUserMedia({ video: true }, function(stream) {
@@ -70,8 +71,10 @@ function WebCam(defaultVideoTag) {
         },
 
         initView = function () {
-            width = videoTag.videoWidth;
-            height = videoTag.videoHeight;
+            width = videoTag.width;
+            height = videoTag.height;
+            // width = videoTag.videoWidth;
+            // height = videoTag.videoHeight;
 
             if (!canvas) { canvas = window.document.createElement('canvas'); }
             ctx = canvas.getContext('2d');
@@ -109,8 +112,8 @@ function WebCam(defaultVideoTag) {
             if (width && height) {
                 lastPixels = currentPixels;
 
-                ctx.drawImage(videoTag, 0, 0);
-                var imgd = ctx.getImageData(0, 0, width, height);
+                ctx.drawImage(videoTag, 0, 0, width * scale, height * scale);
+                var imgd = ctx.getImageData(0, 0, width * scale, height * scale);
                 currentPixels = imgd.data;
 
                 updatedCallbacks.forEach(function (callback) {
@@ -118,7 +121,6 @@ function WebCam(defaultVideoTag) {
                 });
             }
         } else {
-            console.log("wtf")
         }
     }
 
@@ -142,11 +144,11 @@ function WebCam(defaultVideoTag) {
     };
 
     this.getWidth = function(){
-        return width;
+        return width * scale;
     };
 
     this.getHeight = function(){
-        return height;
+        return height * scale;
     }
 
 }

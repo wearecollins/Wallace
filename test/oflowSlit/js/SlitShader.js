@@ -90,7 +90,7 @@ var SlitShader = function(params)
 		'	}',
 
 		//rough BW
-		'	gl_FragColor = vec4(vec3(pow(getGray(gl_FragColor.xyz), 1.2)), gl_FragColor.w);',
+		// '	gl_FragColor = vec4(vec3(pow(getGray(gl_FragColor.xyz), 1.2)), gl_FragColor.w);',
 		// '	gl_FragColor = mix(vec4(0., 1. ,0., 1.), gl_FragColor, gl_FragColor.w);',
 		'}'
 		].join('\n'),
