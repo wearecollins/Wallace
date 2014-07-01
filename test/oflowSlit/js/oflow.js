@@ -56,13 +56,9 @@ function WebCam(defaultVideoTag) {
         initCapture = function() {
             videoTag = defaultVideoTag || window.document.createElement('video');
             videoTag.setAttribute('autoplay', true);
-<<<<<<< HEAD
             videoTag.setAttribute('width', 80);
             videoTag.setAttribute('height', 60);
-=======
-            videoTag.setAttribute('width', 160);
-            videoTag.setAttribute('height', 120);
->>>>>>> FETCH_HEAD
+
             
             // start capture
             navigator.getUserMedia({ video: true }, function(stream) {
@@ -126,10 +122,6 @@ function WebCam(defaultVideoTag) {
                 });
             }
         } else {
-<<<<<<< HEAD
-            // console.log("wtf")
-=======
->>>>>>> FETCH_HEAD
         }
     }
 
