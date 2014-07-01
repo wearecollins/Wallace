@@ -226,20 +226,9 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 
 			if(direction.averageMotionPos.numVals > flowValues.motionThreshold)
 			{
-				// targetDir.set(direction.u, direction.v );
-				// // console.log( event.data.direction.averageMotionPos );
-				// // targetDir.set(event.data.direction.averageMotionPos.x, event.data.direction.averageMotionPos.y );
-				
-	   //          console.log( event.data.direction.averageMotionPos );
-	   //          
 	            targetDir.x = 1. - event.data.direction.averageMotionPos.x;
 	            targetDir.y = 1. - event.data.direction.averageMotionPos.y;
-
-	            console.log( direction.averageMotionPos.numVals, flowValues.motionThreshold );
 			}
-
-			// flowDir.x = flowDir.x * flowSmoothing + (targetDir.x*-.5 + .5) * (1 - flowSmoothing);
-			// flowDir.y = flowDir.y * flowSmoothing + (targetDir.y*-.5 + .5) * (1 - flowSmoothing);
 
 			flowDir.x = flowDir.x * flowSmoothing + (targetDir.x) * (1 - flowSmoothing);
 			flowDir.y = flowDir.y * flowSmoothing + (targetDir.y) * (1 - flowSmoothing);
