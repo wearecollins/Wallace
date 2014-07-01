@@ -28,6 +28,7 @@ var AzealiaVideoObject = function(params)
 {
 	this.video = params.video;
 	this.texture = new THREE.Texture( this.video );
+	this.name = params.name || "blank";
 	
 	this.texture.minFilter = THREE.LinearFilter;
 	this.texture.magFilter = THREE.LinearFilter;
@@ -94,10 +95,11 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 		"StraightOnVideo":"../WALLACE_TESTS/02_ALPHA_STRAIGHT_03.mp4",
 		"UpVideo":"../WALLACE_TESTS/03_ALPHA_UP.mp4.mp4",
 		"DownVideo":"../WALLACE_TESTS/04_ALPHA_DOWN.mp4",
-		"LeftVideo":"../WALLACE_TESTS/05_ALPHA_LEFT.mp4",
-		"RightVideo":"../WALLACE_TESTS/06_ALPHA_RIGHT.mp4",
-		"upperLeftVideo":"../WALLACE_TESTS/07_ALPHA_UPPER_LEFT.mp4",
-		"upperRightVideo":"../WALLACE_TESTS/08_ALPHA_UPPER_RIGHT.mp4"
+		"LeftVideo":"../WALLACE_TESTS/07_ALPHA_UPPER_LEFT.mp4",
+		"RightVideo":"../WALLACE_TESTS/08_ALPHA_UPPER_RIGHT.mp4",
+		// "UpperLeftVideo":"../WALLACE_TESTS/07_ALPHA_UPPER_LEFT.mp4",
+		// "UpperRightVideo":"../WALLACE_TESTS/08_ALPHA_UPPER_RIGHT.mp4",
+		// "WeirdVideo":"../WALLACE_TESTS/09_ALPHA_WEIRD_01.mp4"
 	}
 
 	var vidAscpect = 1280 / 720;
@@ -175,8 +177,8 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 		blendMap: 'softNoise',
 		slitStep: 3,
 		layerWeight: 0,
-		timeIn: 1600,
-		timeOut: 1600,
+		timeIn: 600,
+		timeOut: 600,
 		useBlendMapInBlendShader: true,
 		volume: .25
 	}
@@ -221,39 +223,27 @@ function APP( _useStats, _debug, _muteVideo, _auto)
         worker.onmessage = function(event){
             var direction = event.data.direction;
 
-			if(direction.total_delta > 3000)
+			if(direction.total_delta > flowValues.motionThreshold)
 			{
-				targetDir.set(direction.u, direction.v )
+				// targetDir.set(direction.u, direction.v );
+				// console.log( event.data.direction.averageMotionPos );
+				targetDir.set(event.data.direction.averageMotionPos.x, event.data.direction.averageMotionPos.y );
+				console.log( event.data.direction.averageMotionPos );
 			}
 
-			flowDir.x = flowDir.x * flowSmoothing + (targetDir.x*-.5 + .5) * (1 - flowSmoothing);
-			flowDir.y = flowDir.y * flowSmoothing + (targetDir.y*-.5 + .5) * (1 - flowSmoothing);
+			// flowDir.x = flowDir.x * flowSmoothing + (targetDir.x*-.5 + .5) * (1 - flowSmoothing);
+			// flowDir.y = flowDir.y * flowSmoothing + (targetDir.y*-.5 + .5) * (1 - flowSmoothing);
 
-			targetDir.multiplyScalar( flowValues.decay );
+			flowDir.x = flowDir.x * flowSmoothing + (targetDir.x) * (1 - flowSmoothing);
+			flowDir.y = flowDir.y * flowSmoothing + (targetDir.y) * (1 - flowSmoothing);
+
+			// targetDir.multiplyScalar( flowValues.decay );
         };
 
         webcam.startCapture(false);
 
-		//flow = new oflow.WebCamFlow();
-		// flow.onCalculated(function (direction) 
-		// {
-		// 	if(direction.total_delta > 3000)
-		// 	{
-		// 		targetDir.set(direction.u, direction.v )
-		// 	}
-
-		// 	flowDir.x = flowDir.x * flowSmoothing + (targetDir.x*-.5 + .5) * (1 - flowSmoothing);
-		// 	flowDir.y = flowDir.y * flowSmoothing + (targetDir.y*-.5 + .5) * (1 - flowSmoothing);
-
-		// 	targetDir.multiplyScalar( flowValues.decay );
-		// });
-
 		// Starts capturing the flow from webcamera:
-		//flow.startCapture();
 		var oflowFolder = gui.addFolder("oflow");
-		//oflowFolder.add(flow.getVideoFlow(), "smoothing", 0, 1);	
-
-		// oflowFolder.add(flow.getVideoFlow(), "smoothing", 0, 1);	
 		oflowFolder.add(flowValues, "decay", .9, 1.).step(.001);	
 		oflowFolder.add(flowValues, "motionThreshold", 100, 6000).step(1);
 
@@ -289,30 +279,42 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 		//VIDEOS TEXTURES
 		loadVideos();
 
-		videos['straightOn'] = new AzealiaVideoObject({video: document.getElementById( 'StraightOnVideo' ), dir: new THREE.Vector2(0,0)});
-		videos['down'] = new AzealiaVideoObject({video: document.getElementById( 'DownVideo' ), dir: new THREE.Vector2(0,1)});
-		videos['up'] = new AzealiaVideoObject({video: document.getElementById( 'UpVideo' ), dir: new THREE.Vector2(0,-1)});
-		videos['left'] = new AzealiaVideoObject({video: document.getElementById( 'LeftVideo' ), dir: new THREE.Vector2(-1,0)});
-		videos['right'] = new AzealiaVideoObject({video: document.getElementById( 'RightVideo' ), dir: new THREE.Vector2(1,0)});
-		videos['upperLeft'] = new AzealiaVideoObject({video: document.getElementById( 'upperLeftVideo' ), dir: new THREE.Vector2(-1,1)});
-		videos['upperRight'] = new AzealiaVideoObject({video: document.getElementById( 'upperRightVideo' ), dir: new THREE.Vector2(1,1)});
-		videos['background'] = new AzealiaVideoObject({video: document.getElementById( 'BackgroundVideo' ), bIsActive: true});
+		videos['straightOn'] = new AzealiaVideoObject({video: document.getElementById( 'StraightOnVideo' ), dir: new THREE.Vector2(0,0), name: "straightOn"});
+		videos['down'] = new AzealiaVideoObject({video: document.getElementById( 'DownVideo' ), dir: new THREE.Vector2(0,1), name: "down"});
+		videos['up'] = new AzealiaVideoObject({video: document.getElementById( 'UpVideo' ), dir: new THREE.Vector2(0,-1), name: "up"});
+		videos['left'] = new AzealiaVideoObject({video: document.getElementById( 'LeftVideo' ), dir: new THREE.Vector2(-1,0), name: "left"});
+		videos['right'] = new AzealiaVideoObject({video: document.getElementById( 'RightVideo' ), dir: new THREE.Vector2(1,0), name: "right"});
+		videos['background'] = new AzealiaVideoObject({video: document.getElementById( 'BackgroundVideo' ), bIsActive: true, name: "background"});
+		// videos['upperLeft'] = new AzealiaVideoObject({video: document.getElementById( 'UpperLeftVideo' ), dir: new THREE.Vector2(-1,1), name: "upperLeft"});
+		// videos['upperRight'] = new AzealiaVideoObject({video: document.getElementById( 'UpperRightVideo' ), dir: new THREE.Vector2(1,1), name: "upperRight"});
+		
+		// videos['weird'] = new AzealiaVideoObject({video: document.getElementById( 'WeirdVideo' ), bIsActive: true, name: "weirdVideo"});
 
 		videos['straightOn'].bIsActive = true;
 		videos['down'].bIsActive = true;
 
-		
-		vidMap[1][1] = videos['straightOn']
-		vidMap[1][0] = videos['down']
-		vidMap[1][0] = videos['up']
+		vidMap[0][0] = videos['upperLeft'];//videos['left'];
+		vidMap[1][0] = videos['down'];
+		vidMap[2][0] = videos['upperRight'];//videos['right'];
+	
+		vidMap[0][1] = videos['upperLeft'];//videos['left'];
+		vidMap[1][1] = videos['straightOn'];
+		vidMap[2][1] = videos['upperRight'];//videos['right'];
 
-		vidMap[0][1] = videos['left']
-		vidMap[2][1] = videos['right']
-		vidMap[0][0] = videos['left']
-		vidMap[2][0] = videos['right']
+		vidMap[0][2] = videos['upperLeft'];
+		vidMap[1][2] = videos['up'];		
+		vidMap[2][2] = videos['upperRight'];
+		// vidMap[1][1] = videos['straightOn']
+		// vidMap[1][0] = videos['down']
+		// vidMap[1][0] = videos['up']
 
-		vidMap[0][2] = videos['upperLeft']
-		vidMap[2][2] = videos['upperRight']
+		// vidMap[0][1] = videos['left']
+		// vidMap[2][1] = videos['right']
+		// vidMap[0][0] = videos['left']
+		// vidMap[2][0] = videos['right']
+
+		// vidMap[0][2] = videos['upperLeft']
+		// vidMap[2][2] = videos['upperRight']
 
 
 
@@ -436,14 +438,17 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 			debugSphere.position.y = THREE.Math.mapLinear( flowDir.y, 0, 1, -vidPlane.scale.y*.5, vidPlane.scale.y*.5);
 		}
 
+		
+
 		if (!bTransitioning)
 		{
+
 			if(flowDir.x < thresholds["left"])
 			{
 				if(currentVid != videos["left"])
 				{
 					setCurrentVideo("left");
-					startTransition();
+					// startTransition();
 				}
 
 
@@ -454,7 +459,7 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 				if(currentVid != videos["right"])
 				{
 					setCurrentVideo("right");
-					startTransition();
+					// startTransition();
 				}
 			}
 			else
@@ -465,7 +470,7 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 					if(currentVid != videos["up"])
 					{
 						setCurrentVideo("up");
-						startTransition();
+						// startTransition();
 					}
 				}
 				else if(flowDir.y < thresholds["down"])
@@ -473,7 +478,7 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 					if(currentVid != videos["down"])
 					{
 						setCurrentVideo("down");
-						startTransition();
+						// startTransition();
 					}
 				}
 				else
@@ -481,7 +486,7 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 					if(currentVid != videos["straightOn"])
 					{
 						setCurrentVideo("straightOn");
-						startTransition();
+						// startTransition();
 					}
 				}
 			}
@@ -500,15 +505,18 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 
 	function setCurrentVideo(name)
 	{
-		// previousVid.bIsActive = false;
-		// 
-		previousPreviousVid.bIsActive = false;
+		if(currentVid.name != name)
+		{
+			previousPreviousVid.bIsActive = false;
 
-		previousPreviousVid = previousVid;
-		previousVid = currentVid;
-		currentVid = videos[name];
+			previousPreviousVid = previousVid;
+			previousVid = currentVid;
+			currentVid = videos[name];
 
-		currentVid.bIsActive = previousVid.bIsActive = previousPreviousVid.bIsActive = true;
+			currentVid.bIsActive = previousVid.bIsActive = previousPreviousVid.bIsActive = true;
+
+			startTransition();
+		}
 	}
 
 	/**

@@ -55,6 +55,8 @@ function WebCam(defaultVideoTag) {
         initCapture = function() {
             videoTag = defaultVideoTag || window.document.createElement('video');
             videoTag.setAttribute('autoplay', true);
+            videoTag.setAttribute('width', 80);
+            videoTag.setAttribute('height', 60);
             
             // start capture
             navigator.getUserMedia({ video: true }, function(stream) {
@@ -200,7 +202,35 @@ FlowCalculator.prototype.calculate = function (oldImage, newImage, width, height
     var globalY, globalX, localY, localX;
 
     var index = 0, total_delta = 0;
+    var threshold = .01;
 
+    var averageMotionPos = {x:0, y: 0};
+
+    //new school
+    var numVals = 1, delta=0, tot_delta;
+
+    for(var i=0; i<height; i++)
+    {
+        for(var j=0; j<width; j++)
+        {
+            index = i * width * 4 + j * 4;
+            delta = Math.abs(newImage[index] - oldImage[index]);
+            if(delta > threshold)
+            {
+                averageMotionPos.y += i / height;
+                averageMotionPos.x += j / width;
+                numVals++;
+                tot_delta+=delta;
+            }
+        }
+    }
+    if(numVals>0)
+    {
+        averageMotionPos.x /= numVals;
+        averageMotionPos.y /= numVals;   
+    }
+
+    //OLD SCHO0L
     for (globalY = step + 1; globalY < hMax; globalY += winStep) {
         for (globalX = step + 1; globalX < wMax; globalX += winStep) {
             A2 = A1B2 = B1 = C1 = C2 = 0;
@@ -262,7 +292,10 @@ FlowCalculator.prototype.calculate = function (oldImage, newImage, width, height
         zones : zones,
         u : uu / zones.length,
         v : vv / zones.length,
-        total_delta: total_delta
+        total_delta: total_delta,
+        averageMotionPos: averageMotionPos,
+        numVals: numVals,
+        tot_delta: tot_delta
     };
 };
 exports.FlowCalculator = FlowCalculator;
@@ -409,8 +442,8 @@ function VideoFlow(defaultVideoTag, zoneSize) {
         canvas,
         video = defaultVideoTag,
         ctx,
-        width,
-        height,
+        width = 80,
+        height = 60,
         oldImage,
         loopId,
         calculator = new FlowCalculator(zoneSize || 8),
@@ -556,6 +589,8 @@ function WebCamFlow(defaultVideoTag, zoneSize) {
             if (!videoFlow) {
                 videoTag = defaultVideoTag || window.document.createElement('video');
                 videoTag.setAttribute('autoplay', true);
+                videoTag.setAttribute('width', 80);
+                videoTag.setAttribute('height', 60);
                 videoFlow = new VideoFlow(videoTag, zoneSize);
             }
             
