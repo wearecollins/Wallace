@@ -214,16 +214,66 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 	{
 		if ( hasWebGL ){
 			// optical flow debug canvas
-			if ( debugCanvas ){
-				ofCanvas = document.createElement("canvas");
-				document.body.appendChild(ofCanvas);
-				ofCanvas.setAttribute("width", 640);
-				ofCanvas.setAttribute("height", 480);
-				ofCanvas.style.position = "absolute";
-				ofCanvas.style.top = "0px";
-				ofCanvas.style.left = "0px";
-				ofCanvas.style.zIndex = "1000";
-				ofCtx = ofCanvas.getContext("2d");
+			
+		// optical flow debug canvas
+		if ( debugCanvas ){
+			ofCanvas = document.createElement("canvas");
+			document.body.appendChild(ofCanvas);
+			ofCanvas.setAttribute("width", 640);
+			ofCanvas.setAttribute("height", 480);
+			ofCanvas.style.position = "absolute";
+			ofCanvas.style.top = "0px";
+			ofCanvas.style.left = "0px";
+			ofCanvas.style.zIndex = "1000";
+			ofCtx = ofCanvas.getContext("2d");
+		}
+		// setup web cam and optical flow worker
+		
+		worker = new Worker("js/flowWorker.js");
+
+		webcam = new oflow.WebCam();
+        webcam.onUpdated( function(){
+            // console.log("yes")
+            if ( webcam.getLastPixels() ){
+                worker.postMessage({
+                    last: webcam.getLastPixels(),
+                    current: webcam.getCurrentPixels(),
+                    width: webcam.getWidth(),
+                    height: webcam.getHeight()
+                });
+            }
+        });
+
+        /* Setup WebWorker messaging */
+        worker.onmessage = function(event){
+            var direction = event.data.direction;
+
+        	// draw
+        	if ( debugCanvas ){
+        		ofCtx.clearRect(0, 0, 640, 480);
+	            for(var i = 0; i < direction.zones.length; ++i) {
+	                var zone = direction.zones[i];
+	                ofCtx.strokeStyle = getDirectionalColor(zone.u, zone.v);
+	                ofCtx.beginPath();
+	                ofCtx.moveTo(zone.x,zone.y);
+	                ofCtx.lineTo((zone.x - zone.u), zone.y + zone.v);
+	                ofCtx.stroke();
+	            }
+        	}
+
+
+			if(direction.averageMotionPos.numVals > flowValues.motionThreshold)
+			{
+	            targetDir.x = 1. - event.data.direction.averageMotionPos.x;
+	            targetDir.y = 1. - event.data.direction.averageMotionPos.y;
+
+	            var nodMix = .25;
+				b1 = b1 * (1 - nodMix) + event.data.direction.averageMotionPos.B1 * nodMix;
+
+				console.log( event.data.direction );
+				var vScale = .1;
+				targetDir.y -= event.data.direction.v * vScale;//b1 * .3;
+>>>>>>> 8fa8f852f241d53eeff903a43937c7f260d2b88a
 			}
 			// setup web cam and optical flow worker
 			
@@ -784,14 +834,14 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 
 	function onMouseMove( event , still )
 	{
-		mouse.set( event.x, event.y );
+		// mouse.set( event.x, event.y );
 
-		if(mouseDown)
-		{
-			onMouseDragged( event );
-		}
+		// if(mouseDown)
+		// {
+		// 	onMouseDragged( event );
+		// }
 
-		lastMouse.set( mouse.x, mouse.y );
+		// lastMouse.set( mouse.x, mouse.y );
 	}
 
 	function onMouseUp( event )
