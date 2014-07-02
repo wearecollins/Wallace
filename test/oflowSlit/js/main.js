@@ -186,7 +186,12 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 	//HEAD TRACKING
 	// var headtracker = new HeadTracker({});
 	
+	// ABOUT
+	var hasWebGL 		= true;
+	var hasUserMedia 	= true;
+
 	//optical flow
+	var webcam;
 	var flow, flowScene, fstPlane;
 	var flowDir = new THREE.Vector2( .5, .5 ), targetDir = new THREE.Vector2( .5, .5 ), flowSmoothing = .5;
 	var flowValues = {
@@ -199,8 +204,6 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 
 	var backgroundMesh;
 
-	var webcam;
-
 	var b1 = 0;
 
 	// debug optical flow drawing
@@ -209,6 +212,7 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 
 	function setup() 
 	{
+		// optical flow debug canvas
 		if ( debugCanvas ){
 			ofCanvas = document.createElement("canvas");
 			document.body.appendChild(ofCanvas);
@@ -220,11 +224,11 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 			ofCanvas.style.zIndex = "1000";
 			ofCtx = ofCanvas.getContext("2d");
 		}
-		// flow worker
+		// setup web cam and optical flow worker
+		
 		worker = new Worker("js/flowWorker.js");
 
 		webcam = new oflow.WebCam();
-
         webcam.onUpdated( function(){
             // console.log("yes")
             if ( webcam.getLastPixels() ){
@@ -272,7 +276,20 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 			flowDir.y = flowDir.y * flowSmoothing + (targetDir.y) * (1 - flowSmoothing);
         };
 
-        webcam.startCapture(false);
+        // set up w/o starting animation
+        // error callback determines next stuff
+        webcam.startCapture(false, function (e){
+			hasUserMedia = false;
+
+			document.addEventListener( 'mousemove', onDocumentMouseMove, false );
+
+        	if(e.code === 1){
+                console.error('You have denied access to your camera. I cannot do anything.');
+                // here we could do an "are you sure?" pop up that would refresh the page?
+            } else { 
+            	// we just don't have it!
+            }
+        });
 
 		// Starts capturing the flow from webcamera:
 		var oflowFolder = gui.addFolder("oflow");
@@ -448,14 +465,22 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 	 * @return {[type]} [description]
 	 */
 
-	 var rate = 2;
+	var rate = 2;
+
 	function update()
 	{
-		if ( frame % rate == 0 ){
-			webcam.updatePixels();
-			// console.log("update");
+		if ( hasUserMedia ){
+			if ( frame % rate == 0 ){
+				webcam.updatePixels();
+				// console.log("update");
+			} else {
+				// console.log( frame );
+			}
+
+		// no user media (or they denied it), so check mouse
 		} else {
-			// console.log( frame );
+			flowDir.x = flowDir.x * .9 + mouse.x * .1;
+			flowDir.y = flowDir.y * .9 + mouse.y * .1;
 		}
 
 		TWEEN.update();
@@ -472,7 +497,6 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 			debugSphere.position.y = THREE.Math.mapLinear( flowDir.y, 0, 1, -vidPlane.scale.y*.5, vidPlane.scale.y*.5);
 		}
 
-		
 
 		if (!bTransitioning)
 		{
@@ -551,6 +575,13 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 
 			startTransition();
 		}
+	}
+
+	/** Listen to mouse, set last mouse */
+	var mouse = {x:0, y:0};
+	function onDocumentMouseMove(e){
+		mouse.x = THREE.Math.mapLinear( e.clientX, 0, window.innerWidth, 0.0, 1.0);
+		mouse.y = THREE.Math.mapLinear( e.clientY, 0, window.innerHeight, 1.0, 0.0);
 	}
 
 	/**

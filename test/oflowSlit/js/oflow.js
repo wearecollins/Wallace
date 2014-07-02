@@ -53,7 +53,7 @@ function WebCam(defaultVideoTag) {
                 console.error('getUserMedia() is not supported in your browser.');
             }
         },
-        initCapture = function() {
+        initCapture = function( errorCallback ) {
             videoTag = defaultVideoTag || window.document.createElement('video');
             videoTag.setAttribute('autoplay', true);
             videoTag.setAttribute('width', 160);
@@ -67,7 +67,7 @@ function WebCam(defaultVideoTag) {
                 if (stream) {
                     return true;
                 }
-            }, onWebCamFail);
+            }, errorCallback || onWebCamFail);
         },
 
         initView = function () {
@@ -93,9 +93,9 @@ function WebCam(defaultVideoTag) {
     }
     
     // our public API
-    this.startCapture = function ( bAnimate ) {
+    this.startCapture = function ( bAnimate, errorCallback ) {
         if (!isCapturing) {
-            initCapture(); // capture
+            initCapture(errorCallback); // capture
             initView();    // canvas
             if ( bAnimate !== undefined && bAnimate == true ) animloop();    // animation
         }
