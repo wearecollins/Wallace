@@ -235,9 +235,6 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 				b1 = b1 * (1 - nodMix) + event.data.direction.averageMotionPos.B1 * nodMix;
 
 				console.log( "b1: "+ b1 );
-			// b1 = THREE.Math.clamp( (b1 - 6) * .1, -.5, .5 );
-				console.log( "B1: " + b1);
-				
 				targetDir.y += b1 * .3;
 			}
 			
