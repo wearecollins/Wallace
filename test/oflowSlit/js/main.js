@@ -24,17 +24,17 @@ $(window).bind("load", function() {
 	app = new APP(useStats, debug, muteVideo, auto );
 });
 
-var AzealiaVideoObject = function(params)
+var AzealiaVideoObject = function(params, useWebGL)
 {
 	this.video = params.video;
-	this.texture = new THREE.Texture( this.video );
+	if ( useWebGL ) this.texture = new THREE.Texture( this.video );
 	this.name = params.name || "blank";
 	
-	this.texture.minFilter = THREE.LinearFilter;
-	this.texture.magFilter = THREE.LinearFilter;
-	this.texture.format = THREE.RGBFormat;
-	this.texture.generateMipmaps = false;
-	this.texture.needsUpdate = false;	//
+	if ( useWebGL ) this.texture.minFilter = THREE.LinearFilter;
+	if ( useWebGL ) this.texture.magFilter = THREE.LinearFilter;
+	if ( useWebGL ) this.texture.format = THREE.RGBFormat;
+	if ( useWebGL ) this.texture.generateMipmaps = false;
+	if ( useWebGL ) this.texture.needsUpdate = false;	//
 
 	this.bIsActive = params.bIsActive || false;
 
@@ -212,130 +212,130 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 
 	function setup() 
 	{
-		// optical flow debug canvas
-		if ( debugCanvas ){
-			ofCanvas = document.createElement("canvas");
-			document.body.appendChild(ofCanvas);
-			ofCanvas.setAttribute("width", 640);
-			ofCanvas.setAttribute("height", 480);
-			ofCanvas.style.position = "absolute";
-			ofCanvas.style.top = "0px";
-			ofCanvas.style.left = "0px";
-			ofCanvas.style.zIndex = "1000";
-			ofCtx = ofCanvas.getContext("2d");
-		}
-		// setup web cam and optical flow worker
-		
-		worker = new Worker("js/flowWorker.js");
-
-		webcam = new oflow.WebCam();
-        webcam.onUpdated( function(){
-            // console.log("yes")
-            if ( webcam.getLastPixels() ){
-                worker.postMessage({
-                    last: webcam.getLastPixels(),
-                    current: webcam.getCurrentPixels(),
-                    width: webcam.getWidth(),
-                    height: webcam.getHeight()
-                });
-            }
-        });
-
-        /* Setup WebWorker messaging */
-        worker.onmessage = function(event){
-            var direction = event.data.direction;
-
-        	// draw
-        	if ( debugCanvas ){
-        		ofCtx.clearRect(0, 0, 640, 480);
-	            for(var i = 0; i < direction.zones.length; ++i) {
-	                var zone = direction.zones[i];
-	                ofCtx.strokeStyle = getDirectionalColor(zone.u, zone.v);
-	                ofCtx.beginPath();
-	                ofCtx.moveTo(zone.x,zone.y);
-	                ofCtx.lineTo((zone.x - zone.u), zone.y + zone.v);
-	                ofCtx.stroke();
-	            }
-        	}
-
-
-			if(direction.averageMotionPos.numVals > flowValues.motionThreshold)
-			{
-	            targetDir.x = 1. - event.data.direction.averageMotionPos.x;
-	            targetDir.y = 1. - event.data.direction.averageMotionPos.y;
-
-	            var nodMix = .25;
-				b1 = b1 * (1 - nodMix) + event.data.direction.averageMotionPos.B1 * nodMix;
-
-				console.log( "b1: "+ b1 );
-				targetDir.y += b1 * .3;
+		if ( hasWebGL ){
+			// optical flow debug canvas
+			if ( debugCanvas ){
+				ofCanvas = document.createElement("canvas");
+				document.body.appendChild(ofCanvas);
+				ofCanvas.setAttribute("width", 640);
+				ofCanvas.setAttribute("height", 480);
+				ofCanvas.style.position = "absolute";
+				ofCanvas.style.top = "0px";
+				ofCanvas.style.left = "0px";
+				ofCanvas.style.zIndex = "1000";
+				ofCtx = ofCanvas.getContext("2d");
 			}
+			// setup web cam and optical flow worker
 			
+			worker = new Worker("js/flowWorker.js");
 
-			flowDir.x = flowDir.x * flowSmoothing + (targetDir.x) * (1 - flowSmoothing);
-			flowDir.y = flowDir.y * flowSmoothing + (targetDir.y) * (1 - flowSmoothing);
-        };
+			webcam = new oflow.WebCam();
+	        webcam.onUpdated( function(){
+	            // console.log("yes")
+	            if ( webcam.getLastPixels() ){
+	                worker.postMessage({
+	                    last: webcam.getLastPixels(),
+	                    current: webcam.getCurrentPixels(),
+	                    width: webcam.getWidth(),
+	                    height: webcam.getHeight()
+	                });
+	            }
+	        });
 
-        // set up w/o starting animation
-        // error callback determines next stuff
-        webcam.startCapture(false, function (e){
-			hasUserMedia = false;
+	        /* Setup WebWorker messaging */
+	        worker.onmessage = function(event){
+	            var direction = event.data.direction;
 
-			document.addEventListener( 'mousemove', onDocumentMouseMove, false );
+	        	// draw
+	        	if ( debugCanvas ){
+	        		ofCtx.clearRect(0, 0, 640, 480);
+		            for(var i = 0; i < direction.zones.length; ++i) {
+		                var zone = direction.zones[i];
+		                ofCtx.strokeStyle = getDirectionalColor(zone.u, zone.v);
+		                ofCtx.beginPath();
+		                ofCtx.moveTo(zone.x,zone.y);
+		                ofCtx.lineTo((zone.x - zone.u), zone.y + zone.v);
+		                ofCtx.stroke();
+		            }
+	        	}
 
-        	if(e.code === 1){
-                console.error('You have denied access to your camera. I cannot do anything.');
-                // here we could do an "are you sure?" pop up that would refresh the page?
-            } else { 
-            	// we just don't have it!
-            }
-        });
 
-		// Starts capturing the flow from webcamera:
-		var oflowFolder = gui.addFolder("oflow");
-		oflowFolder.add(flowValues, "decay", .5, 1.).step(.001).onChange(function(value){
-			flowSmoothing = value;
-		});	
-		oflowFolder.add(flowValues, "motionThreshold", 100, 6000).step(1);
+				if(direction.averageMotionPos.numVals > flowValues.motionThreshold)
+				{
+		            targetDir.x = 1. - event.data.direction.averageMotionPos.x;
+		            targetDir.y = 1. - event.data.direction.averageMotionPos.y;
 
-		//THREE SETUP
-		resetCamera();
+		            var nodMix = .25;
+					b1 = b1 * (1 - nodMix) + event.data.direction.averageMotionPos.B1 * nodMix;
 
-		projector = new THREE.Projector();
+					console.log( "b1: "+ b1 );
+					targetDir.y += b1 * .3;
+				}
+				
 
-		light = new THREE.PointLight();
-		light.position = camera.position;
+				flowDir.x = flowDir.x * flowSmoothing + (targetDir.x) * (1 - flowSmoothing);
+				flowDir.y = flowDir.y * flowSmoothing + (targetDir.y) * (1 - flowSmoothing);
+	        };
 
-		scene = new THREE.Scene();
-		scene.add( camera );
-		scene.add( light );
-		scene.add( group );	
+	        // set up w/o starting animation
+	        // error callback determines next stuff
+	        webcam.startCapture(false, function (e){
+				hasUserMedia = false;
 
-		//blend textures
-		blendMaps ["hardNoise"] = THREE.ImageUtils.loadTexture( '../blendMaps/hard_noise.png' );
-		blendMaps ["randomGrid"] = THREE.ImageUtils.loadTexture( '../blendMaps/random_grid.png' );
-		blendMaps ["softNoise"] = THREE.ImageUtils.loadTexture( '../blendMaps/soft_noise.png' );
-		blendMaps ["Checker"] = THREE.ImageUtils.loadTexture( '../blendMaps/Checker.png' );
-		blendMaps["horizontal_stripes"] = THREE.ImageUtils.loadTexture( '../blendMaps/horizontal_stripes.png');
-		// blendMaps["horizontalHardGradient"] = THREE.ImageUtils.loadTexture( '../blendMaps/horizontalHardGradient.png');
-		// blendMaps["skinny-stripe"] = THREE.ImageUtils.loadTexture( '../blendMaps/skinny-stripe.png');
-		blendMaps["hardGradientDownTop"] = THREE.ImageUtils.loadTexture('../blendMaps/hardGradientDownTop.png');
-		blendMaps["hardGradientLeftRight"] = THREE.ImageUtils.loadTexture('../blendMaps/hardGradientLeftRight.png');
-		blendMaps["hardGradientRightLeft"] = THREE.ImageUtils.loadTexture('../blendMaps/hardGradientRightLeft.png');
-		blendMaps["hardGradientTopDown"] = THREE.ImageUtils.loadTexture('../blendMaps/hardGradientTopDown.png');
+	        	if(e.code === 1){
+	                console.error('You have denied access to your camera. I cannot do anything.');
+	                // here we could do an "are you sure?" pop up that would refresh the page?
+	            } else { 
+	            	// we just don't have it!
+	            }
+	        });
 
-		blendMaps["verticalHardGradient"] = THREE.ImageUtils.loadTexture( '../blendMaps/verticalHardGradient.png');
-		blendMaps["zigzag"] = THREE.ImageUtils.loadTexture( '../blendMaps/zigzag.png');
+			// Starts capturing the flow from webcamera:
+			var oflowFolder = gui.addFolder("oflow");
+			oflowFolder.add(flowValues, "decay", .5, 1.).step(.001).onChange(function(value){
+				flowSmoothing = value;
+			});	
+			oflowFolder.add(flowValues, "motionThreshold", 100, 6000).step(1);
+
+			//THREE SETUP
+			resetCamera();
+
+			projector = new THREE.Projector();
+
+			light = new THREE.PointLight();
+			light.position = camera.position;
+
+			scene = new THREE.Scene();
+			scene.add( camera );
+			scene.add( light );
+			scene.add( group );	
+
+			//blend textures
+			blendMaps ["hardNoise"] = THREE.ImageUtils.loadTexture( '../blendMaps/hard_noise.png' );
+			blendMaps ["randomGrid"] = THREE.ImageUtils.loadTexture( '../blendMaps/random_grid.png' );
+			blendMaps ["softNoise"] = THREE.ImageUtils.loadTexture( '../blendMaps/soft_noise.png' );
+			blendMaps ["Checker"] = THREE.ImageUtils.loadTexture( '../blendMaps/Checker.png' );
+			blendMaps["horizontal_stripes"] = THREE.ImageUtils.loadTexture( '../blendMaps/horizontal_stripes.png');
+			// blendMaps["horizontalHardGradient"] = THREE.ImageUtils.loadTexture( '../blendMaps/horizontalHardGradient.png');
+			// blendMaps["skinny-stripe"] = THREE.ImageUtils.loadTexture( '../blendMaps/skinny-stripe.png');
+			blendMaps["hardGradientDownTop"] = THREE.ImageUtils.loadTexture('../blendMaps/hardGradientDownTop.png');
+			blendMaps["hardGradientLeftRight"] = THREE.ImageUtils.loadTexture('../blendMaps/hardGradientLeftRight.png');
+			blendMaps["hardGradientRightLeft"] = THREE.ImageUtils.loadTexture('../blendMaps/hardGradientRightLeft.png');
+			blendMaps["hardGradientTopDown"] = THREE.ImageUtils.loadTexture('../blendMaps/hardGradientTopDown.png');
+
+			blendMaps["verticalHardGradient"] = THREE.ImageUtils.loadTexture( '../blendMaps/verticalHardGradient.png');
+			blendMaps["zigzag"] = THREE.ImageUtils.loadTexture( '../blendMaps/zigzag.png');
+		}
 
 		//VIDEOS TEXTURES
 		loadVideos();
 
-		videos['straightOn'] = new AzealiaVideoObject({video: document.getElementById( 'StraightOnVideo' ), dir: new THREE.Vector2(0,0), name: "straightOn"});
-		videos['down'] = new AzealiaVideoObject({video: document.getElementById( 'DownVideo' ), dir: new THREE.Vector2(0,1), name: "down"});
-		videos['up'] = new AzealiaVideoObject({video: document.getElementById( 'UpVideo' ), dir: new THREE.Vector2(0,-1), name: "up"});
-		videos['left'] = new AzealiaVideoObject({video: document.getElementById( 'LeftVideo' ), dir: new THREE.Vector2(-1,0), name: "left"});
-		videos['right'] = new AzealiaVideoObject({video: document.getElementById( 'RightVideo' ), dir: new THREE.Vector2(1,0), name: "right"});
-		videos['background'] = new AzealiaVideoObject({video: document.getElementById( 'BackgroundVideo' ), bIsActive: true, name: "background"});
+		videos['straightOn'] = new AzealiaVideoObject({video: document.getElementById( 'StraightOnVideo' ), dir: new THREE.Vector2(0,0), name: "straightOn"}, hasWebGL);
+		videos['down'] = new AzealiaVideoObject({video: document.getElementById( 'DownVideo' ), dir: new THREE.Vector2(0,1), name: "down"}, hasWebGL);
+		videos['up'] = new AzealiaVideoObject({video: document.getElementById( 'UpVideo' ), dir: new THREE.Vector2(0,-1), name: "up"}, hasWebGL);
+		videos['left'] = new AzealiaVideoObject({video: document.getElementById( 'LeftVideo' ), dir: new THREE.Vector2(-1,0), name: "left"}, hasWebGL);
+		videos['right'] = new AzealiaVideoObject({video: document.getElementById( 'RightVideo' ), dir: new THREE.Vector2(1,0), name: "right"}, hasWebGL);
+		videos['background'] = new AzealiaVideoObject({video: document.getElementById( 'BackgroundVideo' ), bIsActive: true, name: "background"}, hasWebGL);
 		// videos['upperLeft'] = new AzealiaVideoObject({video: document.getElementById( 'UpperLeftVideo' ), dir: new THREE.Vector2(-1,1), name: "upperLeft"});
 		// videos['upperRight'] = new AzealiaVideoObject({video: document.getElementById( 'UpperRightVideo' ), dir: new THREE.Vector2(1,1), name: "upperRight"});
 		
@@ -374,89 +374,91 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 		tertiaryVid = previousVid;
 		previousPreviousVid = videos['down'];
 
-		//slit mat
-		slitMat = new SlitShader({
-			blendMap: blendMaps ['softNoise'],
-			mixVal: 0,
-			slits: slits
-		});
+		if ( hasWebGL ){
+			//slit mat
+			slitMat = new SlitShader({
+				blendMap: blendMaps ['softNoise'],
+				mixVal: 0,
+				slits: slits
+			});
 
-		//blend mesh
-		blendMat = new BlendShader({
-			previousTex: videos['straightOn'].texture,
-			currentTex:  videos['down'].texture,
-			backgroundTex: videos['background'].texture,
-			blendMap: blendMaps [controls.blendMap],
-			mixVal: 0,
-		});
+			//blend mesh
+			blendMat = new BlendShader({
+				previousTex: videos['straightOn'].texture,
+				currentTex:  videos['down'].texture,
+				backgroundTex: videos['background'].texture,
+				blendMap: blendMaps [controls.blendMap],
+				mixVal: 0,
+			});
 
-		var slitMesh = new THREE.Mesh( new THREE.PlaneGeometry( 2, 2, 12, 7 ), blendMat);
-		slitScene.add(slitMesh);
+			var slitMesh = new THREE.Mesh( new THREE.PlaneGeometry( 2, 2, 12, 7 ), blendMat);
+			slitScene.add(slitMesh);
 
-		//draw slitTo Screen
-		vidPlane = new THREE.Mesh( new THREE.PlaneGeometry( 1, 1, 12, 7 ), slitMat);
+			//draw slitTo Screen
+			vidPlane = new THREE.Mesh( new THREE.PlaneGeometry( 1, 1, 12, 7 ), slitMat);
 
-		backgroundMesh = new THREE.Mesh(vidPlane.geometry, new THREE.MeshBasicMaterial( {
-			side: 2,
-			transparent: false,
-			depthTest: true,
-			map: videos['background'].texture
-		}));
+			backgroundMesh = new THREE.Mesh(vidPlane.geometry, new THREE.MeshBasicMaterial( {
+				side: 2,
+				transparent: false,
+				depthTest: true,
+				map: videos['background'].texture
+			}));
 
-		backgroundMesh.position.z = -1;
+			backgroundMesh.position.z = -1;
 
-		scaleVidMesh();
+			scaleVidMesh();
 
-		scene.add(vidPlane);
-		scene.add(backgroundMesh);
+			scene.add(vidPlane);
+			scene.add(backgroundMesh);
 
-		//kick off some random transitioning
-		if(auto)
-		{
-			console.log( "auto: startTransition( endTransition );" );
-			startTransition( endTransition );
-		}
-			 
-		// GUI
-		gui.add(controls, 'volume', 0, 1).step(.025).onChange(function(value){	
-			videos['straightOn'].video.muted = false;
-			videos['straightOn'].video.volume = value;
-		});
-		gui.add(controls, 'blendMap', Object.keys(blendMaps) )
-		.onChange(function(value) {
-			this.uniforms.blendMap.value = blendMaps[value];
-			console.log( blendMaps[value] );
-		}.bind(slitMat));
+			//kick off some random transitioning
+			if(auto)
+			{
+				console.log( "auto: startTransition( endTransition );" );
+				startTransition( endTransition );
+			}
+				 
+			// GUI
+			gui.add(controls, 'volume', 0, 1).step(.025).onChange(function(value){	
+				videos['straightOn'].video.muted = false;
+				videos['straightOn'].video.volume = value;
+			});
+			gui.add(controls, 'blendMap', Object.keys(blendMaps) )
+			.onChange(function(value) {
+				this.uniforms.blendMap.value = blendMaps[value];
+				console.log( blendMaps[value] );
+			}.bind(slitMat));
 
-		gui.add(controls, 'slitStep', 1, 5).step(1);
-		gui.add(controls, 'timeIn', 1, 4000).step(1);
-		gui.add(controls, 'timeOut', 1, 4000).step(1);
-		gui.add(controls, 'useBlendMapInBlendShader').onChange(function(value){
-			blendMat.uniforms.useBlendMap.value = value? 1 : 0;
-		});
-		gui.addFolder("layerWeight").add(slitMat.uniforms.layerWeight,"value", 0. ,.1 );
+			gui.add(controls, 'slitStep', 1, 5).step(1);
+			gui.add(controls, 'timeIn', 1, 4000).step(1);
+			gui.add(controls, 'timeOut', 1, 4000).step(1);
+			gui.add(controls, 'useBlendMapInBlendShader').onChange(function(value){
+				blendMat.uniforms.useBlendMap.value = value? 1 : 0;
+			});
+			gui.addFolder("layerWeight").add(slitMat.uniforms.layerWeight,"value", 0. ,.1 );
 
 
-		//debug sphere
-		scene.add(debugSphere);
-		gui.addFolder("debugSphere").add(debugSphere, "visible");	
+			//debug sphere
+			scene.add(debugSphere);
+			gui.addFolder("debugSphere").add(debugSphere, "visible");	
 
-		//debug lines
-		for(var i in thresholdLines)
-		{
-			scene.add(thresholdLines[i]);
-		}
-
-		var thresholdFolder = gui.addFolder("thresholds");
-		thresholdFolder.add(thresholdLines["up"], "visible").onChange(function(value){
+			//debug lines
 			for(var i in thresholdLines)
 			{
-				thresholdLines[i].visible = value;
+				scene.add(thresholdLines[i]);
 			}
-		})
-		for(var i in thresholds)
-		{
-			thresholdFolder.add(thresholds, i, 0, 1).onChange(updateDebugLines);
+
+			var thresholdFolder = gui.addFolder("thresholds");
+			thresholdFolder.add(thresholdLines["up"], "visible").onChange(function(value){
+				for(var i in thresholdLines)
+				{
+					thresholdLines[i].visible = value;
+				}
+			})
+			for(var i in thresholds)
+			{
+				thresholdFolder.add(thresholds, i, 0, 1).onChange(updateDebugLines);
+			}
 		}
 	}
 
@@ -479,22 +481,24 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 
 		// no user media (or they denied it), so check mouse
 		} else {
-			flowDir.x = flowDir.x * .9 + mouse.x * .1;
-			flowDir.y = flowDir.y * .9 + mouse.y * .1;
+			flowDir.x = flowDir.x * .9 + THREE.Math.mapLinear(mouse.x, 0.0, window.innerWidth, 0.0, 1.0) * .1;
+			flowDir.y = flowDir.y * .9 + THREE.Math.mapLinear(mouse.y, 0.0, window.innerHeight, 1.0, 0.0) * .1;
 		}
 
 		TWEEN.update();
 
-		//TODO: reintroduce gesture direction 
-		slitMat.uniforms.time.value = clock.getElapsedTime() * -.1;
+		if ( hasWebGL ){
+			//TODO: reintroduce gesture direction 
+			slitMat.uniforms.time.value = clock.getElapsedTime() * -.1;
 
 
-		// var inputThing = flow;//headtracker;
+			// var inputThing = flow;//headtracker;
 
-		if(debugSphere)
-		{
-			debugSphere.position.x = THREE.Math.mapLinear( flowDir.x, 0, 1, -vidPlane.scale.x*.5, vidPlane.scale.x*.5);
-			debugSphere.position.y = THREE.Math.mapLinear( flowDir.y, 0, 1, -vidPlane.scale.y*.5, vidPlane.scale.y*.5);
+			if(debugSphere)
+			{
+				debugSphere.position.x = THREE.Math.mapLinear( flowDir.x, 0, 1, -vidPlane.scale.x*.5, vidPlane.scale.x*.5);
+				debugSphere.position.y = THREE.Math.mapLinear( flowDir.y, 0, 1, -vidPlane.scale.y*.5, vidPlane.scale.y*.5);
+			}
 		}
 
 
@@ -550,11 +554,13 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 			}
 		}
 
-		//update videos 
-		for(var i in videos)
-		{
-			if (videos[i].bIsActive && videos[i].video.readyState === videos[i].video.HAVE_ENOUGH_DATA ) {
-				if ( videos[i].texture ) videos[i].texture.needsUpdate = true;
+		if ( hasWebGL ){
+			//update videos 
+			for(var i in videos)
+			{
+				if (videos[i].bIsActive && videos[i].video.readyState === videos[i].video.HAVE_ENOUGH_DATA ) {
+					if ( videos[i].texture ) videos[i].texture.needsUpdate = true;
+				}
 			}
 		}
 
@@ -577,15 +583,9 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 		}
 	}
 
-	/** Listen to mouse, set last mouse */
-	var mouse = {x:0, y:0};
-	function onDocumentMouseMove(e){
-		mouse.x = THREE.Math.mapLinear( e.clientX, 0, window.innerWidth, 0.0, 1.0);
-		mouse.y = THREE.Math.mapLinear( e.clientY, 0, window.innerHeight, 1.0, 0.0);
-	}
-
 	/**
 	 * DRAW
+	 * NOT called if no WebGL
 	 * @return {none} 
 	 */
 	function draw()
@@ -637,41 +637,63 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 		callback = callback || endTransition;
 		delay = delay || 0;
 
-		blendMat.uniforms.mixVal.value = 0.0;
-		blendMat.uniforms.previousTex.value = previousVid.texture;
-		blendMat.uniforms.currentTex.value = currentVid.texture;
-		blendMat.uniforms.backgroundTex.value = videos['background'].texture;
+		if ( hasWebGL ){
+			blendMat.uniforms.mixVal.value = 0.0;
+			blendMat.uniforms.previousTex.value = previousVid.texture;
+			blendMat.uniforms.currentTex.value = currentVid.texture;
+			blendMat.uniforms.backgroundTex.value = videos['background'].texture;
 
-		new TWEEN.Tween(blendMat.uniforms.mixVal)
-		.onStart(function(){
-			// blendMat.uniforms.mixVal.value = 0;
-		})
-		.to({value: 1}, controls.timeIn)
-		.delay( delay )
-		.onUpdate( function( value )
-		{
-			// controls.mixVal = value;
-			// texBlendMat.uniforms.mixVal.value = value;
-		})
-		.start();
-
-		new TWEEN.Tween(slitMat.uniforms.bMax)
-		.to({value: 1.}, controls.timeIn)
-		.onStart(function(){
-			slitMat.uniforms.bMin.value = 0;
-			slitMat.uniforms.bMax.value = 0;
-		})
-		.delay(delay)
-		.onComplete(function(){
-			new TWEEN.Tween(slitMat.uniforms.bMin)
-			.to({value: 1}, controls.timeOut)
-			.onComplete( function()
+			new TWEEN.Tween(blendMat.uniforms.mixVal)
+			.onStart(function(){
+				// blendMat.uniforms.mixVal.value = 0;
+			})
+			.to({value: 1}, controls.timeIn)
+			.delay( delay )
+			.onUpdate( function( value )
 			{
-				callback();
+				// controls.mixVal = value;
+				// texBlendMat.uniforms.mixVal.value = value;
 			})
 			.start();
-		})
-		.start();
+
+			new TWEEN.Tween(slitMat.uniforms.bMax)
+			.to({value: 1.}, controls.timeIn)
+			.onStart(function(){
+				slitMat.uniforms.bMin.value = 0;
+				slitMat.uniforms.bMax.value = 0;
+			})
+			.delay(delay)
+			.onComplete(function(){
+				new TWEEN.Tween(slitMat.uniforms.bMin)
+				.to({value: 1}, controls.timeOut)
+				.onComplete( function()
+				{
+					callback();
+				})
+				.start();
+			})
+			.start();
+		} else {
+			new TWEEN.Tween( currentVid.style["opacity"] )
+			.onStart(function(){
+			})
+			.to({value: 1}, 500)
+			.delay( delay )
+			.onUpdate( function( value )
+			{
+				// controls.mixVal = value;
+				// texBlendMat.uniforms.mixVal.value = value;
+			})
+			.start();
+
+			new TWEEN.Tween(previousVid.style["opacity"] )
+			.to({value: 0.}, 500)
+			.delay(delay)
+			.onComplete(function(){
+				// nothin
+			})
+			.start();
+		}
 	}
 
 	function endTransition()
@@ -841,7 +863,7 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 		requestAnimationFrame( animate );
 		TWEEN.update();
 		update();
-		draw();
+		if ( hasWebGL ) draw();
 
 		if(useStats)
 		{
@@ -851,8 +873,10 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 
 	if ( ! Detector.webgl )
 	{
-		Detector.addGetWebGLMessage();
-		document.getElementById( container ).innerHTML = "";
+		hasWebGL = false;
+		hasUserMedia = false;
+		//Detector.addGetWebGLMessage();
+		//document.getElementById( container ).innerHTML = "";
 	}
 
 

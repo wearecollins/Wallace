@@ -59,6 +59,11 @@ function WebCam(defaultVideoTag) {
             videoTag.setAttribute('width', 160);
             videoTag.setAttribute('height', 120);
             
+            if ( navigator.getUserMedia == null ){
+                errorCallback({code:0});
+                return;
+            }
+
             // start capture
             navigator.getUserMedia({ video: true }, function(stream) {
                 isCapturing = true;
@@ -89,7 +94,7 @@ function WebCam(defaultVideoTag) {
         navigator.getUserMedia = navigator.getUserMedia ||
                                  navigator.webkitGetUserMedia ||
                                  navigator.mozGetUserMedia ||
-                                 navigator.msGetUserMedia;
+                                 navigator.msGetUserMedia || null;
     }
     
     // our public API
