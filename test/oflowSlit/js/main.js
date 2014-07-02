@@ -267,8 +267,9 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 	            var nodMix = .25;
 				b1 = b1 * (1 - nodMix) + event.data.direction.averageMotionPos.B1 * nodMix;
 
-				console.log( "b1: "+ b1 );
-				targetDir.y += b1 * .3;
+				console.log( event.data.direction );
+				var vScale = .1;
+				targetDir.y -= event.data.direction.v * vScale;//b1 * .3;
 			}
 			
 
@@ -762,14 +763,14 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 
 	function onMouseMove( event , still )
 	{
-		mouse.set( event.x, event.y );
+		// mouse.set( event.x, event.y );
 
-		if(mouseDown)
-		{
-			onMouseDragged( event );
-		}
+		// if(mouseDown)
+		// {
+		// 	onMouseDragged( event );
+		// }
 
-		lastMouse.set( mouse.x, mouse.y );
+		// lastMouse.set( mouse.x, mouse.y );
 	}
 
 	function onMouseUp( event )

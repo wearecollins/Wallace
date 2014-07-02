@@ -318,7 +318,7 @@ FlowCalculator.prototype.calculate = function (oldImage, newImage, width, height
     return {
         zones : zones,
         // u : uu / zones.length,
-        // v : vv / zones.length,
+        v : vv / zones.length,
         // total_delta: total_delta,
         averageMotionPos: averageMotionPos
     };
