@@ -273,7 +273,7 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 					// console.log( event.data.direction );
 					var vScale = .1;
 					b1 = b1 * (1 - nodMix) + event.data.direction.v * nodMix;
-					targetDir.y -= event.data.direction.v * vScale;//b1 * .3;
+					targetDir.y -= b1 * vScale;//b1 * .3;
 				}
 
 
