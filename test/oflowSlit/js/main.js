@@ -190,8 +190,8 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 	var flow, flowScene, fstPlane;
 	var flowDir = new THREE.Vector2( .5, .5 ), targetDir = new THREE.Vector2( .5, .5 ), flowSmoothing = .5;
 	var flowValues = {
-		decay: .85,
-		motionThreshold: 2500
+		decay: .95,
+		motionThreshold: 2000
 	}
 
 	var debugSphere = new THREE.Mesh( new THREE.SphereGeometry(5), new THREE.MeshBasicMaterial( {color: 0xFF2201, side: 2} ) );
@@ -200,6 +200,8 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 	var backgroundMesh;
 
 	var webcam;
+
+	var b1 = 0;
 
 	function setup() 
 	{
@@ -228,7 +230,17 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 			{
 	            targetDir.x = 1. - event.data.direction.averageMotionPos.x;
 	            targetDir.y = 1. - event.data.direction.averageMotionPos.y;
+
+	            var nodMix = .25;
+				b1 = b1 * (1 - nodMix) + event.data.direction.averageMotionPos.B1 * nodMix;
+
+				console.log( "b1: "+ b1 );
+			// b1 = THREE.Math.clamp( (b1 - 6) * .1, -.5, .5 );
+				console.log( "B1: " + b1);
+				
+				targetDir.y += b1 * .3;
 			}
+			
 
 			flowDir.x = flowDir.x * flowSmoothing + (targetDir.x) * (1 - flowSmoothing);
 			flowDir.y = flowDir.y * flowSmoothing + (targetDir.y) * (1 - flowSmoothing);
@@ -723,7 +735,7 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 
 	function onKeyDown( event )
 	{
-		console.log( event );
+		console.log( event.keyCode );
 		switch( event.keyCode )
 		{
 

@@ -204,7 +204,7 @@ FlowCalculator.prototype.getVingette = function(x, y, width, height)
     var xVal = this.vingetteTween(x / width);
     var yVal = this.vingetteTween(y / height);
 
-    return xVal + yVal;
+    return xVal * yVal;
 }
 
 FlowCalculator.prototype.calculate = function (oldImage, newImage, width, height) {
@@ -222,13 +222,13 @@ FlowCalculator.prototype.calculate = function (oldImage, newImage, width, height
     var total_delta = 0;
 
     //...
-    var index, averageMotionPos = {x: 0, y: 0, numVals: 0, tot: 0}, threshold = 10;
+    var index, averageMotionPos = {x: 0, y: 0, B1: 0, numVals: 0, tot: 0}, threshold = 10;
     // console.log( " " + width + " " + height );
     var max_delta = 0;
     for (var i = 0; i < height; i++) {
         for (var j = 0; j < width; j++) {
             index = i*width*4 + j * 4;
-            var vingette = 1.;//this.getVingette(j, i, width, height);
+            var vingette = 1;//this.getVingette(j, i, width, height);
             var delta = Math.abs(oldImage[index] - newImage[index]) * vingette;
             if(delta > threshold)
             {
@@ -236,11 +236,26 @@ FlowCalculator.prototype.calculate = function (oldImage, newImage, width, height
                 averageMotionPos.y += i / height;
                 averageMotionPos.numVals++;
                 averageMotionPos.tot += delta;
+
+                var stp = 8;
+                if(i>stp && i<height-stp-1)
+                {
+                    var vgrad = 0;
+                    for(var k=1; k<stp; k++)
+                    {
+                        var i0 = index - width * 4 * k;
+                        var i1 = index + width * 4 * k;
+                        var gradY = Math.abs(newImage[i0] - newImage[i1]) - Math.abs(oldImage[i0] - oldImage[i1]);
+                        vgrad += gradY;// * gradY;   
+                    }
+                    averageMotionPos.B1 += vgrad / (stp - 1);
+                }
             }
         };
     };
     averageMotionPos.x /= averageMotionPos.numVals;
     averageMotionPos.y /= averageMotionPos.numVals;
+    averageMotionPos.B1 /= averageMotionPos.numVals;
 
     //...
     // for (globalY = step + 1; globalY < hMax; globalY += winStep) {
