@@ -203,8 +203,23 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 
 	var b1 = 0;
 
+	// debug optical flow drawing
+	var ofCanvas, ofCtx;
+	var debugCanvas = true;
+
 	function setup() 
 	{
+		if ( debugCanvas ){
+			ofCanvas = document.createElement("canvas");
+			document.body.appendChild(ofCanvas);
+			ofCanvas.setAttribute("width", 640);
+			ofCanvas.setAttribute("height", 480);
+			ofCanvas.style.position = "absolute";
+			ofCanvas.style.top = "0px";
+			ofCanvas.style.left = "0px";
+			ofCanvas.style.zIndex = "1000";
+			ofCtx = ofCanvas.getContext("2d");
+		}
 		// flow worker
 		worker = new Worker("js/flowWorker.js");
 
@@ -225,6 +240,20 @@ function APP( _useStats, _debug, _muteVideo, _auto)
         /* Setup WebWorker messaging */
         worker.onmessage = function(event){
             var direction = event.data.direction;
+
+        	// draw
+        	if ( debugCanvas ){
+        		ofCtx.clearRect(0, 0, 640, 480);
+	            for(var i = 0; i < direction.zones.length; ++i) {
+	                var zone = direction.zones[i];
+	                ofCtx.strokeStyle = getDirectionalColor(zone.u, zone.v);
+	                ofCtx.beginPath();
+	                ofCtx.moveTo(zone.x,zone.y);
+	                ofCtx.lineTo((zone.x - zone.u), zone.y + zone.v);
+	                ofCtx.stroke();
+	            }
+        	}
+
 
 			if(direction.averageMotionPos.numVals > flowValues.motionThreshold)
 			{
