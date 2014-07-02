@@ -268,10 +268,11 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 		            targetDir.y = 1. - event.data.direction.averageMotionPos.y;
 
 		            var nodMix = .25;
-					b1 = b1 * (1 - nodMix) + event.data.direction.averageMotionPos.B1 * nodMix;
+					// b1 = b1 * (1 - nodMix) + event.data.direction.averageMotionPos.B1 * nodMix;
 
-					console.log( event.data.direction );
+					// console.log( event.data.direction );
 					var vScale = .1;
+					b1 = b1 * (1 - nodMix) + event.data.direction.v * nodMix;
 					targetDir.y -= event.data.direction.v * vScale;//b1 * .3;
 				}
 
