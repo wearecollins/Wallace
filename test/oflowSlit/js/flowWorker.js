@@ -237,19 +237,19 @@ FlowCalculator.prototype.calculate = function (oldImage, newImage, width, height
                 averageMotionPos.numVals++;
                 averageMotionPos.tot += delta;
 
-                var stp = 8;
-                if(i>stp && i<height-stp-1)
-                {
-                    var vgrad = 0;
-                    for(var k=1; k<stp; k++)
-                    {
-                        var i0 = index - width * 4 * k;
-                        var i1 = index + width * 4 * k;
-                        var gradY = Math.abs(newImage[i0] - newImage[i1]) - Math.abs(oldImage[i0] - oldImage[i1]);
-                        vgrad += gradY;// * gradY;   
-                    }
-                    averageMotionPos.B1 += vgrad / (stp - 1);
-                }
+                // var stp = 8;
+                // if(i>stp && i<height-stp-1)
+                // {
+                //     var vgrad = 0;
+                //     for(var k=1; k<stp; k++)
+                //     {
+                //         var i0 = index - width * 4 * k;
+                //         var i1 = index + width * 4 * k;
+                //         var gradY = Math.abs(newImage[i0] - newImage[i1]) - Math.abs(oldImage[i0] - oldImage[i1]);
+                //         vgrad += gradY;// * gradY;   
+                //     }
+                //     averageMotionPos.B1 += vgrad / (stp - 1);
+                // }
             }
         };
     };
@@ -683,5 +683,5 @@ self.addEventListener('message', function(e) {
 	var height 	= e.data.height;
 	var zones = self.calculator.calculate(last, current, width, height);
 
-  	self.postMessage( {direction:zones});
+  	self.postMessage( {direction:zones, time: e.data.time});
 }, false);
