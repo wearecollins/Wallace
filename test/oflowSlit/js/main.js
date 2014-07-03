@@ -102,6 +102,8 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 		// "WeirdVideo":"../WALLACE_TESTS/09_ALPHA_WEIRD_01.mp4"
 	}
 
+	var bPaused = true;
+	var videoDuration = 228.351646;
 	var vidAscpect = 1280 / 720;
 	var bTransitioning = false;
 	var currentVid, previousVid, tertiaryVid;
@@ -139,10 +141,10 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 	var gui = new dat.GUI();
 
 	var thresholds = {
-		left: .4,
-		right: .6,
-		up: .6,
-		down: .4,
+		left: .43,
+		right: .57,
+		up: .57,
+		down: .43,
 	}
 
 	//debug threshold lines
@@ -196,7 +198,9 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 	var flowDir = new THREE.Vector2( .5, .5 ), targetDir = new THREE.Vector2( .5, .5 ), flowSmoothing = .5;
 	var flowValues = {
 		decay: .95,
-		motionThreshold: 2000
+		motionThreshold: 2000,
+		nodMix: .3,
+		vScale: .2
 	}
 
 	var debugSphere = new THREE.Mesh( new THREE.SphereGeometry(5), new THREE.MeshBasicMaterial( {color: 0xFF2201, side: 2} ) );
@@ -208,8 +212,9 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 
 	// debug optical flow drawing
 	var ofCanvas, ofCtx;
-	var debugCanvas = true;
+	var debugCanvas = false;
 
+	var vidPosition = {position: 0.0001};
 	function setup() 
 	{
 		if ( hasWebGL ){
@@ -265,15 +270,10 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 				if(direction.averageMotionPos.numVals > flowValues.motionThreshold)
 				{
 		            targetDir.x = 1. - event.data.direction.averageMotionPos.x;
-		            targetDir.y = 1. - event.data.direction.averageMotionPos.y;
+		            // targetDir.y = 1. - event.data.direction.averageMotionPos.y;
 
-		            var nodMix = .25;
-					// b1 = b1 * (1 - nodMix) + event.data.direction.averageMotionPos.B1 * nodMix;
-
-					// console.log( event.data.direction );
-					var vScale = .1;
-					b1 = b1 * (1 - nodMix) + event.data.direction.v * nodMix;
-					targetDir.y -= b1 * vScale;//b1 * .3;
+					b1 = b1 * (1 - flowValues.nodMix) + event.data.direction.v * flowValues.nodMix;
+					targetDir.y = -b1 * flowValues.vScale + .5; 
 				}
 
 
@@ -300,6 +300,8 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 				flowSmoothing = value;
 			});	
 			oflowFolder.add(flowValues, "motionThreshold", 100, 6000).step(1);
+			oflowFolder.add(flowValues, "vScale", 0, 1).step(.01);
+			oflowFolder.add(flowValues, "nodMix", 0, 1).step(.01);
 
 			//THREE SETUP
 			resetCamera();
@@ -320,8 +322,6 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 			blendMaps ["softNoise"] = THREE.ImageUtils.loadTexture( '../blendMaps/soft_noise.png' );
 			blendMaps ["Checker"] = THREE.ImageUtils.loadTexture( '../blendMaps/Checker.png' );
 			blendMaps["horizontal_stripes"] = THREE.ImageUtils.loadTexture( '../blendMaps/horizontal_stripes.png');
-			// blendMaps["horizontalHardGradient"] = THREE.ImageUtils.loadTexture( '../blendMaps/horizontalHardGradient.png');
-			// blendMaps["skinny-stripe"] = THREE.ImageUtils.loadTexture( '../blendMaps/skinny-stripe.png');
 			blendMaps["hardGradientDownTop"] = THREE.ImageUtils.loadTexture('../blendMaps/hardGradientDownTop.png');
 			blendMaps["hardGradientLeftRight"] = THREE.ImageUtils.loadTexture('../blendMaps/hardGradientLeftRight.png');
 			blendMaps["hardGradientRightLeft"] = THREE.ImageUtils.loadTexture('../blendMaps/hardGradientRightLeft.png');
@@ -342,34 +342,22 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 		videos['background'] = new AzealiaVideoObject({video: document.getElementById( 'BackgroundVideo' ), bIsActive: true, name: "background"}, hasWebGL);
 		// videos['upperLeft'] = new AzealiaVideoObject({video: document.getElementById( 'UpperLeftVideo' ), dir: new THREE.Vector2(-1,1), name: "upperLeft"});
 		// videos['upperRight'] = new AzealiaVideoObject({video: document.getElementById( 'UpperRightVideo' ), dir: new THREE.Vector2(1,1), name: "upperRight"});
-		
 		// videos['weird'] = new AzealiaVideoObject({video: document.getElementById( 'WeirdVideo' ), bIsActive: true, name: "weirdVideo"});
 
 		videos['straightOn'].bIsActive = true;
 		videos['down'].bIsActive = true;
 
-		vidMap[0][0] = videos['upperLeft'];//videos['left'];
+		vidMap[0][0] = videos['upperLeft'];
 		vidMap[1][0] = videos['down'];
-		vidMap[2][0] = videos['upperRight'];//videos['right'];
+		vidMap[2][0] = videos['upperRight'];
 	
-		vidMap[0][1] = videos['upperLeft'];//videos['left'];
+		vidMap[0][1] = videos['upperLeft'];
 		vidMap[1][1] = videos['straightOn'];
-		vidMap[2][1] = videos['upperRight'];//videos['right'];
+		vidMap[2][1] = videos['upperRight'];
 
 		vidMap[0][2] = videos['upperLeft'];
 		vidMap[1][2] = videos['up'];		
 		vidMap[2][2] = videos['upperRight'];
-		// vidMap[1][1] = videos['straightOn']
-		// vidMap[1][0] = videos['down']
-		// vidMap[1][0] = videos['up']
-
-		// vidMap[0][1] = videos['left']
-		// vidMap[2][1] = videos['right']
-		// vidMap[0][0] = videos['left']
-		// vidMap[2][0] = videos['right']
-
-		// vidMap[0][2] = videos['upperLeft']
-		// vidMap[2][2] = videos['upperRight']
 
 
 
@@ -377,6 +365,13 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 		previousVid = videos['down'];
 		tertiaryVid = previousVid;
 		previousPreviousVid = videos['down'];
+
+		//video gui 
+		var videoFolder = gui.addFolder("videoControls");
+		var vp = videoFolder.add(vidPosition, "position", 0., 1.);
+		vp.onChange(function(value){setVideoPosition(value);});
+		vp.listen();
+		vp.step(.01);
 
 		if ( hasWebGL ){
 			//slit mat
@@ -489,12 +484,9 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 
 		TWEEN.update();
 
-		if ( hasWebGL ){
-			//TODO: reintroduce gesture direction 
+		if ( hasWebGL )
+		{
 			slitMat.uniforms.time.value = clock.getElapsedTime() * -.1;
-
-
-			// var inputThing = flow;//headtracker;
 
 			if(debugSphere)
 			{
@@ -562,6 +554,7 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 			{
 				if (videos[i].bIsActive && videos[i].video.readyState === videos[i].video.HAVE_ENOUGH_DATA ) {
 					if ( videos[i].texture ) videos[i].texture.needsUpdate = true;
+					vidPosition.position = videos[i].video.currentTime / videoDuration;
 				}
 			}
 		}
@@ -606,6 +599,35 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 		renderer.render( scene, camera, null, true );
 	}
 
+	function playVideos()
+	{
+		for(var v in videos)
+		{
+			videos[v].video.play();
+		}
+
+		bPaused = false;
+	}
+
+	function pauseVideos()
+	{
+		if(bPaused)
+		{
+			for(var v in videos)	videos[v].video.play();
+		}
+		else
+		{
+			for(var v in videos)	videos[v].video.pause();
+			// console.log( videos );
+		}
+
+		bPaused = !bPaused;
+	}
+
+	function setVideoPosition(percent)
+	{
+		for(var v in videos)	videos[v].video.currentTime = percent * videoDuration; 
+	}
 
 	function loadVideos(){
 		for( var id in videoFiles ){
@@ -821,7 +843,7 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 		{
 
 			case 32:
-				// console.log( flow.dir );
+				pauseVideos();
 
 				break;
 

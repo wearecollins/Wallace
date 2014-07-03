@@ -82,11 +82,18 @@ var SlitShader = function(params)
 		'	d = mapLinear(clamp(d, 0. ,1.), 0., 1., bMin, bMax);',
 
 		'	int depthIndex = int(clamp(d * numSlits, 0., float(SLIT_COUNT-1)));',
+		// '	for(int i=0; i<SLIT_COUNT; i++){',
+		// '		if(depthIndex == i){',
+		// '			gl_FragColor = texture2D(slits[i], vUv);// + float(i) * layerWeight;',
+		// // '			break;',
+		// '		}',
+		// '	}',
+		'	bool bBroken = false; ',
 		'	for(int i=0; i<SLIT_COUNT; i++){',
-		'		if(depthIndex == i){',
-		'			gl_FragColor = texture2D(slits[i], vUv);// + float(i) * layerWeight;',
-		'			break;',
-		'		}',
+		'	 if(depthIndex == i && !bBroken){',
+		'	 gl_FragColor = texture2D(slits[i], vUv);// + float(i) * layerWeight;',
+		'	 bBroken = true;',
+		'	 }',
 		'	}',
 
 		'}'
