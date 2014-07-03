@@ -57,8 +57,6 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 	var muteVideo = _muteVideo || false;
 	var auto = _auto || false;
 
-	console.log( muteVideo );
-
 	//main container
 	var container = document.createElement( 'div' );
 
@@ -244,13 +242,16 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 	                    last: webcam.getLastPixels(),
 	                    current: webcam.getCurrentPixels(),
 	                    width: webcam.getWidth(),
-	                    height: webcam.getHeight()
+	                    height: webcam.getHeight(),
+	                    time: new Date()
 	                });
 	            }
 	        });
 
 	        /* Setup WebWorker messaging */
+	        var lastTime = new Date();
 	        worker.onmessage = function(event){
+<<<<<<< HEAD
 	            var direction = event.data.direction;
 
 	        	// draw
@@ -275,10 +276,47 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 					b1 = b1 * (1 - flowValues.nodMix) + event.data.direction.v * flowValues.nodMix;
 					targetDir.y = -b1 * flowValues.vScale + .5; 
 				}
+=======
+	        	// console.log( event.data.time - lastTime );
+	        	if ( event.data.time - lastTime > 0 ){
+	        		lastTime = event.data.time;
+	        		var direction = event.data.direction;
+
+		        	// draw
+		        	if ( debugCanvas ){
+		        		ofCtx.clearRect(0, 0, 640, 480);
+			            for(var i = 0; i < direction.zones.length; ++i) {
+			                var zone = direction.zones[i];
+			                ofCtx.strokeStyle = getDirectionalColor(zone.u, zone.v);
+			                ofCtx.beginPath();
+			                ofCtx.moveTo(zone.x,zone.y);
+			                ofCtx.lineTo((zone.x - zone.u), zone.y + zone.v);
+			                ofCtx.stroke();
+			            }
+		        	}
 
 
-				flowDir.x = flowDir.x * flowSmoothing + (targetDir.x) * (1 - flowSmoothing);
-				flowDir.y = flowDir.y * flowSmoothing + (targetDir.y) * (1 - flowSmoothing);
+					if(direction.averageMotionPos.numVals > flowValues.motionThreshold)
+					{
+			            targetDir.x = 1. - event.data.direction.averageMotionPos.x;
+			            //targetDir.y = 1. - event.data.direction.averageMotionPos.y;
+
+			            var nodMix = .25;
+						// b1 = b1 * (1 - nodMix) + event.data.direction.averageMotionPos.B1 * nodMix;
+
+						// console.log( event.data.direction );
+						var vScale = .25;
+						b1 = b1 * (1 - nodMix) + event.data.direction.v * nodMix;
+						// targetDir.y -= b1 * vScale;//b1 * .3;
+						targetDir.y = -b1 * vScale + .5
+					}
+>>>>>>> FETCH_HEAD
+
+
+					flowDir.x = flowDir.x * flowSmoothing + (targetDir.x) * (1 - flowSmoothing);
+					flowDir.y = flowDir.y * flowSmoothing + (targetDir.y) * (1 - flowSmoothing);
+	        	}
+	            
 	        };
 
 	        // set up w/o starting animation
@@ -647,14 +685,17 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 			loadVideo( id, videoFiles[id]);
 		}
 		$('video').each(function() {
+			console.log("play?");
 		    $(this).get(0).play();
 		});
 		//el.play();
 	}
 
 	function loadVideo( name, url ){
+		// to-do: firefox
 		var el = document.createElement( 'video' );
 		el.setAttribute("loop", "");
+		el.setAttribute("type", "video/mp4");
 		
 		if(muteVideo == true || name != "StraightOnVideo")
 		{
@@ -917,7 +958,7 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 	}
 
 
-	rendererSetup();
+	if ( hasWebGL) rendererSetup();
 	if(useStats)
 	{	
 		stats = new Stats();
