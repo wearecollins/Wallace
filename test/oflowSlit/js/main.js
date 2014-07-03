@@ -251,32 +251,7 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 	        /* Setup WebWorker messaging */
 	        var lastTime = new Date();
 	        worker.onmessage = function(event){
-<<<<<<< HEAD
-	            var direction = event.data.direction;
 
-	        	// draw
-	        	if ( debugCanvas ){
-	        		ofCtx.clearRect(0, 0, 640, 480);
-		            for(var i = 0; i < direction.zones.length; ++i) {
-		                var zone = direction.zones[i];
-		                ofCtx.strokeStyle = getDirectionalColor(zone.u, zone.v);
-		                ofCtx.beginPath();
-		                ofCtx.moveTo(zone.x,zone.y);
-		                ofCtx.lineTo((zone.x - zone.u), zone.y + zone.v);
-		                ofCtx.stroke();
-		            }
-	        	}
-
-
-				if(direction.averageMotionPos.numVals > flowValues.motionThreshold)
-				{
-		            targetDir.x = 1. - event.data.direction.averageMotionPos.x;
-		            // targetDir.y = 1. - event.data.direction.averageMotionPos.y;
-
-					b1 = b1 * (1 - flowValues.nodMix) + event.data.direction.v * flowValues.nodMix;
-					targetDir.y = -b1 * flowValues.vScale + .5; 
-				}
-=======
 	        	// console.log( event.data.time - lastTime );
 	        	if ( event.data.time - lastTime > 0 ){
 	        		lastTime = event.data.time;
@@ -298,19 +273,12 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 
 					if(direction.averageMotionPos.numVals > flowValues.motionThreshold)
 					{
-			            targetDir.x = 1. - event.data.direction.averageMotionPos.x;
-			            //targetDir.y = 1. - event.data.direction.averageMotionPos.y;
+		            targetDir.x = 1. - event.data.direction.averageMotionPos.x;
+		            // targetDir.y = 1. - event.data.direction.averageMotionPos.y;
 
-			            var nodMix = .25;
-						// b1 = b1 * (1 - nodMix) + event.data.direction.averageMotionPos.B1 * nodMix;
-
-						// console.log( event.data.direction );
-						var vScale = .25;
-						b1 = b1 * (1 - nodMix) + event.data.direction.v * nodMix;
-						// targetDir.y -= b1 * vScale;//b1 * .3;
-						targetDir.y = -b1 * vScale + .5
+					b1 = b1 * (1 - flowValues.nodMix) + event.data.direction.v * flowValues.nodMix;
+					targetDir.y = -b1 * flowValues.vScale + .5; 
 					}
->>>>>>> FETCH_HEAD
 
 
 					flowDir.x = flowDir.x * flowSmoothing + (targetDir.x) * (1 - flowSmoothing);
