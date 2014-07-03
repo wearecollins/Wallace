@@ -102,7 +102,7 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 		// "WeirdVideo":"../WALLACE_TESTS/09_ALPHA_WEIRD_01.mp4"
 	}
 
-	var bPaused = true;
+	var bPaused = false;
 	var videoDuration = 228.351646;
 	var vidAscpect = 1280 / 720;
 	var bTransitioning = false;
@@ -373,6 +373,10 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 		vp.listen();
 		vp.step(.01);
 
+		videoFolder.add({ pause: pauseVideos},'pause');
+		videoFolder.add({ play: playVideos},'play');
+		videoFolder.add({ stop: stopVideos},'stop');
+
 		if ( hasWebGL ){
 			//slit mat
 			slitMat = new SlitShader({
@@ -627,6 +631,15 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 	function setVideoPosition(percent)
 	{
 		for(var v in videos)	videos[v].video.currentTime = percent * videoDuration; 
+	}
+
+	function stopVideos()
+	{
+		setVideoPosition(0);
+
+		for(var v in videos)	videos[v].video.pause();
+
+		bPaused = true;
 	}
 
 	function loadVideos(){
