@@ -345,19 +345,16 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 		loadVideos();
 
 		videos['straightOn'] = new AzealiaVideoObject({video: document.getElementById( 'straightOn' ), dir: new THREE.Vector2(0,0), name: "straightOn"}, hasWebGL);
-		videos['down'] = new AzealiaVideoObject({video: document.getElementById( 'down' ), dir: new THREE.Vector2(0,1), name: "down"}, hasWebGL);
-		videos['up'] = new AzealiaVideoObject({video: document.getElementById( 'up' ), dir: new THREE.Vector2(0,-1), name: "up"}, hasWebGL);
-		videos['left'] = new AzealiaVideoObject({video: document.getElementById( 'left' ), dir: new THREE.Vector2(-1,0), name: "left"}, hasWebGL);
-		videos['right'] = new AzealiaVideoObject({video: document.getElementById( 'right' ), dir: new THREE.Vector2(1,0), name: "right"}, hasWebGL);
-		videos['tiltLeft'] = new AzealiaVideoObject({video: document.getElementById( 'tiltLeft' ), dir: new THREE.Vector2(-1,1), name: "tiltLeft"});
-		videos['tiltRight'] = new AzealiaVideoObject({video: document.getElementById( 'tiltRight' ), dir: new THREE.Vector2(1,1), name: "tiltRight"});
-		videos['weird'] = new AzealiaVideoObject({video: document.getElementById( 'weird' ), bIsActive: true, name: "weirdVideo"});
+		videos['down'] = new AzealiaVideoObject({video: document.getElementById( 'down' ), name: "down"}, hasWebGL);
+		videos['up'] = new AzealiaVideoObject({video: document.getElementById( 'up' ), name: "up"}, hasWebGL);
+		videos['left'] = new AzealiaVideoObject({video: document.getElementById( 'left' ), name: "left"}, hasWebGL);
+		videos['right'] = new AzealiaVideoObject({video: document.getElementById( 'right' ), name: "right"}, hasWebGL);
+		videos['tiltLeft'] = new AzealiaVideoObject({video: document.getElementById( 'tiltLeft' ), name: "tiltLeft"});
+		videos['tiltRight'] =  new AzealiaVideoObject({video: document.getElementById( 'tiltRight' ), name: "tiltRight"});
+		videos['weird'] =  new AzealiaVideoObject({video: document.getElementById( 'weird' ), name: "weirdVideo"});
+		videos['background'] =  new AzealiaVideoObject({video: document.getElementById( 'BackgroundVideo' ), name: "background"}, hasWebGL);
 
-		videos['background'] = new AzealiaVideoObject({video: document.getElementById( 'BackgroundVideo' ), bIsActive: true, name: "background"}, hasWebGL);
-		
-		videos['tiltRight'] = new AzealiaVideoObject({video: document.getElementById( 'tiltRight' ), dir: new THREE.Vector2(1,1), name: "tiltRight"});
-		videos['weird'] = new AzealiaVideoObject({video: document.getElementById( 'weird' ), bIsActive: true, name: "weirdVideo"});
-
+		videos['background'].bIsActive = true;
 		videos['straightOn'].bIsActive = true;
 		videos['down'].bIsActive = true;
 
@@ -499,9 +496,6 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 			flowDir.y = flowDir.y * .9 + THREE.Math.mapLinear(mouse.y, 0.0, window.innerHeight, 1.0, 0.0) * .1;
 		}
 
-
-		TWEEN.update();
-
 		if ( hasWebGL )
 		{
 			slitMat.uniforms.time.value = clock.getElapsedTime() * -.1;
@@ -513,8 +507,28 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 			}
 		}
 
+		// if need be, start transitions 
+		updateTransions();
+
+		//update the videos
+		if ( hasWebGL ){
+			//update videos 
+			for(var i in videos)
+			{
+				if (videos[i].bIsActive && videos[i].video.readyState === videos[i].video.HAVE_ENOUGH_DATA ) {
+					if ( videos[i].texture ) videos[i].texture.needsUpdate = true;
+					vidPosition.position = videos[i].video.currentTime / videoDuration;
+				}
+			}
+		}
+
+		frame++;
+	}
+
+	function updateTransions()
+	{
 		// straightOn, down, up, left, right, tiltLeft, tiltRight, weird
-		if(!bTransitioning)
+		if(!bTransitioning) 
 		{
 			//turn left
 			if (flowDir.x < thresholds["farLeft"])
@@ -579,6 +593,7 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 					setCurrentVideo("tiltRight");
 				}
 			}
+
 			// turn right
 			else 
 			{
@@ -590,19 +605,6 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 			}
 
 		}
-
-		if ( hasWebGL ){
-			//update videos 
-			for(var i in videos)
-			{
-				if (videos[i].bIsActive && videos[i].video.readyState === videos[i].video.HAVE_ENOUGH_DATA ) {
-					if ( videos[i].texture ) videos[i].texture.needsUpdate = true;
-					vidPosition.position = videos[i].video.currentTime / videoDuration;
-				}
-			}
-		}
-
-		frame++;
 	}
 
 	function setCurrentVideo(name)
@@ -684,17 +686,21 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 		bPaused = true;
 	}
 
+	var videoLoadCount = 0;
+	var videoToLoadCount = 0;
 	function loadVideos(){
 		for( var id in videoFiles ){
 			loadVideo( id, videoFiles[id].path);
+			videoToLoadCount++;
 		}
 	}
+
 
 	function loadVideo( name, url ){
 		// to-do: firefox
 		var el = document.createElement( 'video' );
-		el.setAttribute("loop", "");
-		el.setAttribute("type", "video/mp4");
+		// el.setAttribute("loop", "");
+		// el.setAttribute("type", "video/mp4");
 		
 		if(muteVideo == true || name != "straightOn")
 		{
@@ -704,8 +710,28 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 		el.setAttribute("id", name);
 		var source = document.createElement('source');
 		source.src = url;
+		el.load();
 		el.appendChild(source);
 		document.body.appendChild(el);
+
+		el.addEventListener('loadeddata', function() {
+		   console.log( "\n" + name + " is loaded and can be played\n" );
+		   videoLoadCount++;
+
+		   console.log( "videoLoadCount: " + videoLoadCount );
+		   console.log( "videoToLoadCount: " + videoToLoadCount );
+		}, false);
+
+		// el.addEventListener('progress', function(e){
+		// 	console.log( name + " progress", e );
+		// }, false);
+
+		el.addEventListener('loadedmetadata', function(e){
+			// console.log( name + " loadedmetadata", e );
+		   console.log( "\n" + name + " metadata is loaded\n" );
+		}, false);
+
+		console.log( el );
 	}
 
 	function startTransition( callback, delay )
