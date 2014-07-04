@@ -89,15 +89,15 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 	 */
 
 	var videoFiles = {
-		"BackgroundVideo":"../WALLACE_TESTS/BG_PREVIEW_05_1.mp4",
-		"StraightOnVideo":"../WALLACE_TESTS/02_ALPHA_STRAIGHT_03.mp4",
-		"UpVideo":"../WALLACE_TESTS/03_ALPHA_UP.mp4.mp4",
-		"DownVideo":"../WALLACE_TESTS/04_ALPHA_DOWN.mp4",
-		"LeftVideo":"../WALLACE_TESTS/07_ALPHA_UPPER_LEFT.mp4",
-		"RightVideo":"../WALLACE_TESTS/08_ALPHA_UPPER_RIGHT.mp4",
-		// "UpperLeftVideo":"../WALLACE_TESTS/07_ALPHA_UPPER_LEFT.mp4",
-		// "UpperRightVideo":"../WALLACE_TESTS/08_ALPHA_UPPER_RIGHT.mp4",
-		// "WeirdVideo":"../WALLACE_TESTS/09_ALPHA_WEIRD_01.mp4"
+		"BackgroundVideo": {path: "../WALLACE_TESTS/BG_PREVIEW_05_1.mp4"},
+		"straightOn": {path: 	"../WALLACE_TESTS/02_ALPHA_STRAIGHT_03.mp4"},
+		"up": {path: "../WALLACE_TESTS/03_ALPHA_UP.mp4.mp4"},
+		"down": {path: "../WALLACE_TESTS/04_ALPHA_DOWN.mp4"},
+		"left": {path: "../WALLACE_TESTS/07_ALPHA_UPPER_LEFT.mp4"},
+		"right": {path: "../WALLACE_TESTS/08_ALPHA_UPPER_RIGHT.mp4"},
+		"tiltLeft": {path: "../WALLACE_TESTS/07_ALPHA_UPPER_LEFT.mp4"},
+		"tiltRight": {path: "../WALLACE_TESTS/08_ALPHA_UPPER_RIGHT.mp4"},
+		"weird": {path: "../WALLACE_TESTS/09_ALPHA_WEIRD_01.mp4"}
 	}
 
 	var bPaused = false;
@@ -139,8 +139,10 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 	var gui = new dat.GUI();
 
 	var thresholds = {
+		farLeft: .33,
 		left: .43,
 		right: .57,
+		farRight: .67,
 		up: .57,
 		down: .43,
 	}
@@ -155,6 +157,8 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 		down: new THREE.Line( horizontalLine, new THREE.LineBasicMaterial({color: 0xFF00FF}) ),
 		left: new THREE.Line( verticalLine, new THREE.LineBasicMaterial({color: 0x00FFFF}) ),
 		right: new THREE.Line( verticalLine, new THREE.LineBasicMaterial({color: 0xFFFFFF}) ),
+		farLeft: new THREE.Line( verticalLine, new THREE.LineBasicMaterial({color: 0x0000FF}) ),
+		farRight: new THREE.Line( verticalLine, new THREE.LineBasicMaterial({color: 0x00FF00}) ),
 	}
 
 
@@ -196,7 +200,7 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 	var flowDir = new THREE.Vector2( .5, .5 ), targetDir = new THREE.Vector2( .5, .5 ), flowSmoothing = .5;
 	var flowValues = {
 		decay: .95,
-		motionThreshold: 2000,
+		motionThreshold: 1000,
 		nodMix: .3,
 		vScale: .2
 	}
@@ -340,30 +344,34 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 		//VIDEOS TEXTURES
 		loadVideos();
 
-		videos['straightOn'] = new AzealiaVideoObject({video: document.getElementById( 'StraightOnVideo' ), dir: new THREE.Vector2(0,0), name: "straightOn"}, hasWebGL);
-		videos['down'] = new AzealiaVideoObject({video: document.getElementById( 'DownVideo' ), dir: new THREE.Vector2(0,1), name: "down"}, hasWebGL);
-		videos['up'] = new AzealiaVideoObject({video: document.getElementById( 'UpVideo' ), dir: new THREE.Vector2(0,-1), name: "up"}, hasWebGL);
-		videos['left'] = new AzealiaVideoObject({video: document.getElementById( 'LeftVideo' ), dir: new THREE.Vector2(-1,0), name: "left"}, hasWebGL);
-		videos['right'] = new AzealiaVideoObject({video: document.getElementById( 'RightVideo' ), dir: new THREE.Vector2(1,0), name: "right"}, hasWebGL);
+		videos['straightOn'] = new AzealiaVideoObject({video: document.getElementById( 'straightOn' ), dir: new THREE.Vector2(0,0), name: "straightOn"}, hasWebGL);
+		videos['down'] = new AzealiaVideoObject({video: document.getElementById( 'down' ), dir: new THREE.Vector2(0,1), name: "down"}, hasWebGL);
+		videos['up'] = new AzealiaVideoObject({video: document.getElementById( 'up' ), dir: new THREE.Vector2(0,-1), name: "up"}, hasWebGL);
+		videos['left'] = new AzealiaVideoObject({video: document.getElementById( 'left' ), dir: new THREE.Vector2(-1,0), name: "left"}, hasWebGL);
+		videos['right'] = new AzealiaVideoObject({video: document.getElementById( 'right' ), dir: new THREE.Vector2(1,0), name: "right"}, hasWebGL);
+		videos['tiltLeft'] = new AzealiaVideoObject({video: document.getElementById( 'tiltLeft' ), dir: new THREE.Vector2(-1,1), name: "tiltLeft"});
+		videos['tiltRight'] = new AzealiaVideoObject({video: document.getElementById( 'tiltRight' ), dir: new THREE.Vector2(1,1), name: "tiltRight"});
+		videos['weird'] = new AzealiaVideoObject({video: document.getElementById( 'weird' ), bIsActive: true, name: "weirdVideo"});
+
 		videos['background'] = new AzealiaVideoObject({video: document.getElementById( 'BackgroundVideo' ), bIsActive: true, name: "background"}, hasWebGL);
-		// videos['upperLeft'] = new AzealiaVideoObject({video: document.getElementById( 'UpperLeftVideo' ), dir: new THREE.Vector2(-1,1), name: "upperLeft"});
-		// videos['upperRight'] = new AzealiaVideoObject({video: document.getElementById( 'UpperRightVideo' ), dir: new THREE.Vector2(1,1), name: "upperRight"});
-		// videos['weird'] = new AzealiaVideoObject({video: document.getElementById( 'WeirdVideo' ), bIsActive: true, name: "weirdVideo"});
+		
+		videos['tiltRight'] = new AzealiaVideoObject({video: document.getElementById( 'tiltRight' ), dir: new THREE.Vector2(1,1), name: "tiltRight"});
+		videos['weird'] = new AzealiaVideoObject({video: document.getElementById( 'weird' ), bIsActive: true, name: "weirdVideo"});
 
 		videos['straightOn'].bIsActive = true;
 		videos['down'].bIsActive = true;
 
-		vidMap[0][0] = videos['upperLeft'];
+		vidMap[0][0] = videos['tiltLeft'];
 		vidMap[1][0] = videos['down'];
-		vidMap[2][0] = videos['upperRight'];
+		vidMap[2][0] = videos['tiltRight'];
 	
-		vidMap[0][1] = videos['upperLeft'];
+		vidMap[0][1] = videos['tiltLeft'];
 		vidMap[1][1] = videos['straightOn'];
-		vidMap[2][1] = videos['upperRight'];
+		vidMap[2][1] = videos['tiltRight'];
 
-		vidMap[0][2] = videos['upperLeft'];
+		vidMap[0][2] = videos['tiltLeft'];
 		vidMap[1][2] = videos['up'];		
-		vidMap[2][2] = videos['upperRight'];
+		vidMap[2][2] = videos['tiltRight'];
 
 
 
@@ -505,57 +513,82 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 			}
 		}
 
-
-		if (!bTransitioning)
+		// straightOn, down, up, left, right, tiltLeft, tiltRight, weird
+		if(!bTransitioning)
 		{
+			//turn left
+			if (flowDir.x < thresholds["farLeft"])
+			{
+				if(currentVid != videos["farLeft"])
+				{
+					console.log( "left transition" );
+					setCurrentVideo("left");	
+				}
+			}
 
-			if(flowDir.x < thresholds["left"])
+			//tilt left
+			else if(flowDir.x < thresholds["left"] )
 			{
 				if(currentVid != videos["left"])
 				{
-					setCurrentVideo("left");
-					// startTransition();
-				}
-
-
-				// bleedDir: {type: 'v2', value: params.bleedDir || new THREE.Vector2( 0, -.0025 )},
-			}
-			else if(flowDir.x > thresholds["right"])
-			{
-				if(currentVid != videos["right"])
-				{
-					setCurrentVideo("right");
-					// startTransition();
+					console.log( "tiltLeft transition" );
+					setCurrentVideo["tiltLeft"]	
 				}
 			}
-			else
-			{
-				if(flowDir.y > thresholds["up"])
-				{
 
+			//up, straightOn, down
+			else if(flowDir.x < thresholds["right"])
+			{
+				//up
+				if(flowDir.y > thresholds["up"] )
+				{
 					if(currentVid != videos["up"])
 					{
-						setCurrentVideo("up");
-						// startTransition();
+						console.log( "up transition" );
+						setCurrentVideo("up")	
 					}
 				}
-				else if(flowDir.y < thresholds["down"])
+
+				//down
+				else if(flowDir.y < thresholds["down"] )
 				{
 					if(currentVid != videos["down"])
 					{
-						setCurrentVideo("down");
-						// startTransition();
+						console.log( "down transition" );
+						setCurrentVideo("down");	
 					}
 				}
-				else
+
+				//straight
+				else 
 				{
 					if(currentVid != videos["straightOn"])
 					{
-						setCurrentVideo("straightOn");
-						// startTransition();
+						console.log( "straightOn transition" );
+						setCurrentVideo("straightOn");	
 					}
 				}
 			}
+
+			//tilt right
+			else if(flowDir.x < thresholds["farRight"] )
+			{
+				if(currentVid != videos["tiltRight"])
+				{
+					console.log( "tiltRight transition" );
+					setCurrentVideo("tiltRight");
+				}
+			}
+			// turn right
+			else 
+			{
+				if(currentVid != videos["right"])
+				{
+					console.log( "right transition" );
+					setCurrentVideo["right"];	
+				}
+			}
+
 		}
 
 		if ( hasWebGL ){
@@ -574,7 +607,7 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 
 	function setCurrentVideo(name)
 	{
-		if(currentVid.name != name)
+		if(videos[name])
 		{
 			previousPreviousVid.bIsActive = false;
 
@@ -585,6 +618,9 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 			currentVid.bIsActive = previousVid.bIsActive = previousPreviousVid.bIsActive = true;
 
 			startTransition();
+		}
+		else{
+			console.log( "videos[name] == ", videos[name] );
 		}
 	}
 
@@ -650,13 +686,8 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 
 	function loadVideos(){
 		for( var id in videoFiles ){
-			loadVideo( id, videoFiles[id]);
+			loadVideo( id, videoFiles[id].path);
 		}
-		$('video').each(function() {
-			console.log("play?");
-		    $(this).get(0).play();
-		});
-		//el.play();
 	}
 
 	function loadVideo( name, url ){
@@ -665,7 +696,7 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 		el.setAttribute("loop", "");
 		el.setAttribute("type", "video/mp4");
 		
-		if(muteVideo == true || name != "StraightOnVideo")
+		if(muteVideo == true || name != "straightOn")
 		{
 			el.setAttribute("muted", "");
 		}
@@ -719,11 +750,13 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 				.start();
 			})
 			.start();
-		} else {
+		} 
+		else
+		 {
 			new TWEEN.Tween( currentVid.style["opacity"] )
 			.onStart(function(){
 			})
-			.to({value: 1}, 500)
+			.to({value: 1}, controls.timeIn)
 			.delay( delay )
 			.onUpdate( function( value )
 			{
@@ -733,7 +766,7 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 			.start();
 
 			new TWEEN.Tween(previousVid.style["opacity"] )
-			.to({value: 0.}, 500)
+			.to({value: 0.}, controls.timeOut)
 			.delay(delay)
 			.onComplete(function(){
 				// nothin
@@ -756,20 +789,6 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 	{
 		flowDir.x = THREE.Math.randFloat( .2, .8 );
 		flowDir.y = THREE.Math.randFloat( .2, .8 );
-		// delay = delay || (controls.timeIn + controls.timeOut + 500);
-		// var vids = ['straightOn', 'down', 'up', 'left', 'right'];
-		// var i = THREE.Math.randInt( 0, vids.length-1 );
-
-		// var count = 0;
-		// while(videos[vids[i]] === currentVid)
-		// {
-		// 	i = THREE.Math.randInt( 0, vids.length-1 );		
-		// 	count++;
-		// 	if(count >= 50)	break;
-		// }
-
-		// setCurrentVideo( vids[i] );
-		// startTransition( endTransition, delay);
 	}
 
 	function updateDebugLines()
@@ -778,6 +797,8 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 		thresholdLines["down"].position.y = THREE.Math.mapLinear(thresholds["down"], 0., 1, -vidPlane.scale.y * .5, vidPlane.scale.y * .5);
 		thresholdLines["left"].position.x = THREE.Math.mapLinear(thresholds["left"], 0., 1, -vidPlane.scale.x * .5, vidPlane.scale.x * .5);
 		thresholdLines["right"].position.x = THREE.Math.mapLinear(thresholds["right"], 0., 1, -vidPlane.scale.x * .5, vidPlane.scale.x * .5);
+		thresholdLines["farLeft"].position.x = THREE.Math.mapLinear(thresholds["farLeft"], 0., 1, -vidPlane.scale.x * .5, vidPlane.scale.x * .5);
+		thresholdLines["farRight"].position.x = THREE.Math.mapLinear(thresholds["farRight"], 0., 1, -vidPlane.scale.x * .5, vidPlane.scale.x * .5);
 	}
 
 	function scaleVidMesh()
