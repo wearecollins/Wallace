@@ -354,9 +354,9 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 		videos['weird'] =  new AzealiaVideoObject({video: document.getElementById( 'weird' ), name: "weirdVideo"});
 		videos['background'] =  new AzealiaVideoObject({video: document.getElementById( 'BackgroundVideo' ), name: "background"}, hasWebGL);
 
-		videos['background'].bIsActive = true;
-		videos['straightOn'].bIsActive = true;
-		videos['down'].bIsActive = true;
+		// videos['background'].bIsActive = true;
+		// videos['straightOn'].bIsActive = true;
+		// videos['down'].bIsActive = true;
 
 		vidMap[0][0] = videos['tiltLeft'];
 		vidMap[1][0] = videos['down'];
@@ -696,11 +696,16 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 	}
 
 
-	function loadVideo( name, url ){
+	function loadVideo( name, url, onLoadComplete )
+	{
+
+		console.log( "\nload name: " + name);
+
+		onLoadComplete = onLoadComplete || function(){};
 		// to-do: firefox
 		var el = document.createElement( 'video' );
-		// el.setAttribute("loop", "");
-		// el.setAttribute("type", "video/mp4");
+		el.setAttribute("loop", "");
+		el.setAttribute("type", "video/mp4");
 		
 		if(muteVideo == true || name != "straightOn")
 		{
@@ -718,20 +723,13 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 		   console.log( "\n" + name + " is loaded and can be played\n" );
 		   videoLoadCount++;
 
-		   console.log( "videoLoadCount: " + videoLoadCount );
-		   console.log( "videoToLoadCount: " + videoToLoadCount );
-		}, false);
+		   onLoadComplete();
 
-		// el.addEventListener('progress', function(e){
-		// 	console.log( name + " progress", e );
-		// }, false);
+		}, false);
 
 		el.addEventListener('loadedmetadata', function(e){
-			// console.log( name + " loadedmetadata", e );
-		   console.log( "\n" + name + " metadata is loaded\n" );
+		   console.log( name + " metadata is loaded\n" );
 		}, false);
-
-		console.log( el );
 	}
 
 	function startTransition( callback, delay )
