@@ -100,6 +100,18 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 BG_PREVIEW_05_1.mp4
 	 */
 
+	// var videoFiles = {
+	// 	"BackgroundVideo": {path: "../WALLACE_TESTS/BG_PREVIEW_05_1.mp4"},
+	// 	"straightOn": {path: 	"../WALLACE_TESTS/02_B&W_STRAIGHT_03.mp4"},
+	// 	"up": {path: "../WALLACE_TESTS/03_B&W_UP.mp4"},
+	// 	"down": {path: "../WALLACE_TESTS/04_B&W_DOWN.mp4"},
+	// 	"left": {path: "../WALLACE_TESTS/05_B&W_LEFT.mp4"},
+	// 	"right": {path: "../WALLACE_TESTS/06_B&W_RIGHT.mp4"},
+	// 	"weird": {path: "../WALLACE_TESTS/09_B&W_WEIRD_01.mp4"},
+	// 	"tiltRight": {path: "../WALLACE_TESTS/08_B&W_UPPER_RIGHT.mp4"},
+	// 	"tiltLeft": {path: "../WALLACE_TESTS/07_B&W_UPPER_LEFT.mp4"}
+	// }
+
 	var videoFiles = {
 		"BackgroundVideo": {path: "../WALLACE_TESTS/BG_PREVIEW_05_1.mp4"},
 		"straightOn": {path: 	"../WALLACE_TESTS/02_ALPHA_STRAIGHT_03.mp4"},
@@ -356,14 +368,14 @@ BG_PREVIEW_05_1.mp4
 		//VIDEOS TEXTURES
 		loadVideos();
 
-		videos['straightOn'] = new AzealiaVideoObject({video: document.getElementById( 'straightOn' ), dir: new THREE.Vector2(0,0), name: "straightOn"}, hasWebGL);
+		videos['straightOn'] = new AzealiaVideoObject({video: document.getElementById( 'straightOn' ), name: "straightOn"}, hasWebGL);
 		videos['down'] = new AzealiaVideoObject({video: document.getElementById( 'down' ), name: "down"}, hasWebGL);
 		videos['up'] = new AzealiaVideoObject({video: document.getElementById( 'up' ), name: "up"}, hasWebGL);
 		videos['left'] = new AzealiaVideoObject({video: document.getElementById( 'left' ), name: "left"}, hasWebGL);
 		videos['right'] = new AzealiaVideoObject({video: document.getElementById( 'right' ), name: "right"}, hasWebGL);
-		videos['tiltLeft'] = new AzealiaVideoObject({video: document.getElementById( 'tiltLeft' ), name: "tiltLeft"});
-		videos['tiltRight'] =  new AzealiaVideoObject({video: document.getElementById( 'tiltRight' ), name: "tiltRight"});
-		videos['weird'] =  new AzealiaVideoObject({video: document.getElementById( 'weird' ), name: "weirdVideo"});
+		videos['tiltLeft'] = new AzealiaVideoObject({video: document.getElementById( 'tiltLeft' ), name: "tiltLeft"}, hasWebGL);
+		videos['tiltRight'] =  new AzealiaVideoObject({video: document.getElementById( 'tiltRight' ), name: "tiltRight"}, hasWebGL);
+		videos['weird'] =  new AzealiaVideoObject({video: document.getElementById( 'weird' ), name: "weirdVideo"}, hasWebGL);
 		videos['background'] =  new AzealiaVideoObject({video: document.getElementById( 'BackgroundVideo' ), name: "background"}, hasWebGL);
 
 		videos['background'].bIsActive = true;
@@ -623,7 +635,7 @@ BG_PREVIEW_05_1.mp4
 	{
 		if(videos[name])
 		{
-			previousPreviousVid.bIsActive = false;
+			// previousPreviousVid.bIsActive = false;
 
 			previousPreviousVid = previousVid;
 			previousVid = currentVid;
@@ -632,9 +644,6 @@ BG_PREVIEW_05_1.mp4
 			currentVid.bIsActive = previousVid.bIsActive = previousPreviousVid.bIsActive = true;
 
 			startTransition();
-		}
-		else{
-			console.log( "videos[name] == ", videos[name] );
 		}
 	}
 
@@ -732,14 +741,12 @@ BG_PREVIEW_05_1.mp4
 		document.body.appendChild(el);
 
 		el.addEventListener('loadeddata', function() {
-		   console.log( "\n" + name + " is loaded\n" );
 		   videoLoadCount++;
+		   console.log( "\n" + name + " is loaded. videoLoadCount = " +videoLoadCount+ "\n" );
 		   onLoadComplete();
 		}, false);
 
-
-
-		var otherListeners = [ "canplay", "stalled", "playing ", "waiting", "ended", "loadedmetadata", "suspend", "emptied", "stalled"]
+		var otherListeners = [ "canplay", "playing ", "waiting", "ended", "loadedmetadata", "suspend","stalled" ,"emptied"]
 		for(var i in otherListeners)
 		{
 			el.addEventListener(otherListeners[i], function() {
