@@ -86,18 +86,30 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 	07_ALPHA_UPPER_LEFT.mp4
 	08_ALPHA_UPPER_RIGHT.mp4
 	09_ALPHA_WEIRD_01.mp4
+
+00_ALPHA_STRAIGHT_01.mp4
+01_ALPHA_STRAIGHT_02.mp4
+02_ALPHA_STRAIGHT_03.mp4
+03_ALPHA_UP.mp4
+04_ALPHA_DOWN.mp4
+05_ALPHA_LEFT.mp4
+06_ALPHA_RIGHT.mp4
+07_ALPHA_UPPER_LEFT.mp4
+08_ALPHA_UPPER_RIGHT.mp4
+09_ALPHA_WEIRD_01.mp4
+BG_PREVIEW_05_1.mp4
 	 */
 
 	var videoFiles = {
 		"BackgroundVideo": {path: "../WALLACE_TESTS/BG_PREVIEW_05_1.mp4"},
 		"straightOn": {path: 	"../WALLACE_TESTS/02_ALPHA_STRAIGHT_03.mp4"},
-		"up": {path: "../WALLACE_TESTS/03_ALPHA_UP.mp4.mp4"},
+		"up": {path: "../WALLACE_TESTS/03_ALPHA_UP.mp4"},
 		"down": {path: "../WALLACE_TESTS/04_ALPHA_DOWN.mp4"},
-		"left": {path: "../WALLACE_TESTS/07_ALPHA_UPPER_LEFT.mp4"},
-		"right": {path: "../WALLACE_TESTS/08_ALPHA_UPPER_RIGHT.mp4"},
-		"tiltLeft": {path: "../WALLACE_TESTS/07_ALPHA_UPPER_LEFT.mp4"},
+		"left": {path: "../WALLACE_TESTS/05_ALPHA_LEFT.mp4"},
+		"right": {path: "../WALLACE_TESTS/06_ALPHA_RIGHT.mp4"},
+		"weird": {path: "../WALLACE_TESTS/09_ALPHA_WEIRD_01.mp4"},
 		"tiltRight": {path: "../WALLACE_TESTS/08_ALPHA_UPPER_RIGHT.mp4"},
-		"weird": {path: "../WALLACE_TESTS/09_ALPHA_WEIRD_01.mp4"}
+		"tiltLeft": {path: "../WALLACE_TESTS/07_ALPHA_UPPER_LEFT.mp4"}
 	}
 
 	var bPaused = false;
@@ -354,9 +366,9 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 		videos['weird'] =  new AzealiaVideoObject({video: document.getElementById( 'weird' ), name: "weirdVideo"});
 		videos['background'] =  new AzealiaVideoObject({video: document.getElementById( 'BackgroundVideo' ), name: "background"}, hasWebGL);
 
-		// videos['background'].bIsActive = true;
-		// videos['straightOn'].bIsActive = true;
-		// videos['down'].bIsActive = true;
+		videos['background'].bIsActive = true;
+		videos['straightOn'].bIsActive = true;
+		videos['down'].bIsActive = true;
 
 		vidMap[0][0] = videos['tiltLeft'];
 		vidMap[1][0] = videos['down'];
