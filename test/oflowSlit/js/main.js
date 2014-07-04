@@ -36,7 +36,7 @@ var AzealiaVideoObject = function(params, useWebGL)
 	if ( useWebGL ) this.texture.generateMipmaps = false;
 	if ( useWebGL ) this.texture.needsUpdate = false;	//
 
-	this.bIsActive = params.bIsActive || false;
+	this.bIsActive = params.bIsActive || true;
 
 	this.dir = params.dir || new THREE.Vector2( 0, 0 );
 }
@@ -714,7 +714,7 @@ BG_PREVIEW_05_1.mp4
 		console.log( "\nload name: " + name);
 
 		onLoadComplete = onLoadComplete || function(){};
-		// to-do: firefox
+
 		var el = document.createElement( 'video' );
 		el.setAttribute("loop", "");
 		el.setAttribute("type", "video/mp4");
@@ -732,16 +732,20 @@ BG_PREVIEW_05_1.mp4
 		document.body.appendChild(el);
 
 		el.addEventListener('loadeddata', function() {
-		   console.log( "\n" + name + " is loaded and can be played\n" );
+		   console.log( "\n" + name + " is loaded\n" );
 		   videoLoadCount++;
-
 		   onLoadComplete();
-
 		}, false);
 
-		el.addEventListener('loadedmetadata', function(e){
-		   console.log( name + " metadata is loaded\n" );
-		}, false);
+
+
+		var otherListeners = [ "canplay", "stalled", "playing ", "waiting", "ended", "loadedmetadata", "suspend", "emptied", "stalled"]
+		for(var i in otherListeners)
+		{
+			el.addEventListener(otherListeners[i], function() {
+			   console.log( "\n" + name + " " + otherListeners[i] + " \n" );
+			}, false);
+		}
 	}
 
 	function startTransition( callback, delay )
