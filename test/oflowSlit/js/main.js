@@ -14,14 +14,16 @@
 //move bg video to div
 
 
-var app;
+var app = null;
 
 $(window).bind("load", function() {
 	var debug = getQuerystring('debug') == "true";
 	var useStats = getQuerystring('useStats') == "true";
 	var muteVideo = getQuerystring('mute') == "true";
 	var auto = getQuerystring('auto') == "true";
-	app = new APP(useStats, debug, muteVideo, auto );
+	if ( app == null ){
+		app = new APP(useStats, debug, muteVideo, auto );
+	}
 });
 
 var AzealiaVideoObject = function(params, useWebGL)
