@@ -5,10 +5,10 @@ var MotionThresholds = function(params)
 	params = params || {};
 
 	this.thresholds = params.thresholds || {
-		farLeft: .33,
-		left: .43,
-		right: .57,
-		farRight: .67,
+		farLeft: .36,
+		left: .44,
+		right: .56,
+		farRight: .65,
 		up: .57,
 		down: .43,
 	}

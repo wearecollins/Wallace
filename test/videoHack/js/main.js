@@ -81,7 +81,7 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 	var flowDir = new THREE.Vector2( .5, .5 ), targetDir = new THREE.Vector2( .5, .5 ), flowSmoothing = .5, b1 = 0;
 	var flowValues = {
 		decay: .95,
-		motionThreshold: 1000,
+		motionThreshold: 1500,
 		nodMix: .3,
 		vScale: .2
 	}
