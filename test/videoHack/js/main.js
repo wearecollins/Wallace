@@ -74,6 +74,20 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 	var slits, bTransitioning = false;
 
 	var currentVideo = undefined, previousVideo = undefined;
+
+	//optical flow
+	var webcam;
+	var flow, flowScene, fstPlane;
+	var flowDir = new THREE.Vector2( .5, .5 ), targetDir = new THREE.Vector2( .5, .5 ), flowSmoothing = .5, b1 = 0;
+	var flowValues = {
+		decay: .95,
+		motionThreshold: 1000,
+		nodMix: .3,
+		vScale: .2
+	}
+
+	var debugSphere = new THREE.Mesh( new THREE.SphereGeometry(5), new THREE.MeshBasicMaterial( {color: 0xFF2201, side: 2} ) );
+	debugSphere.scale.z = 2;
 	
 	function setup() 
 	{
@@ -84,6 +98,71 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 		scene.add( camera );
 		scene.add( light );
 		scene.add( group );	
+
+
+		worker = new Worker("js/flowWorker.js");
+
+		webcam = new oflow.WebCam();
+        webcam.onUpdated( function(){
+            // console.log("yes")
+            if ( webcam.getLastPixels() ){
+                worker.postMessage({
+                    last: webcam.getLastPixels(),
+                    current: webcam.getCurrentPixels(),
+                    width: webcam.getWidth(),
+                    height: webcam.getHeight(),
+                    time: new Date()
+                });
+            }
+        });
+        	        /* Setup WebWorker messaging */
+	        var lastTime = new Date();
+	        worker.onmessage = function(event){
+
+	        	// console.log( event.data.time - lastTime );
+	        	if ( event.data.time - lastTime > 0 ){
+	        		lastTime = event.data.time;
+	        		var direction = event.data.direction;
+
+					if(direction.averageMotionPos.numVals > flowValues.motionThreshold)
+					{
+		            targetDir.x = 1. - event.data.direction.averageMotionPos.x;
+		            // targetDir.y = 1. - event.data.direction.averageMotionPos.y;
+
+					b1 = b1 * (1 - flowValues.nodMix) + event.data.direction.v * flowValues.nodMix;
+					targetDir.y = -b1 * flowValues.vScale + .5; 
+					}
+
+
+					flowDir.x = flowDir.x * flowSmoothing + (targetDir.x) * (1 - flowSmoothing);
+					flowDir.y = flowDir.y * flowSmoothing + (targetDir.y) * (1 - flowSmoothing);
+	        	}
+	            
+	        };
+
+
+	        // set up w/o starting animation
+	        // error callback determines next stuff
+	        webcam.startCapture(false, function (e){
+				hasUserMedia = false;
+
+	        	if(e.code === 1){
+	                console.error('You have denied access to your camera. I cannot do anything.');
+	                // here we could do an "are you sure?" pop up that would refresh the page?
+	            } else { 
+	            	// we just don't have it!
+	            }
+	        });
+
+			// Starts capturing the flow from webcamera:
+			var oflowFolder = gui.addFolder("oflow");
+			oflowFolder.add(flowValues, "decay", .5, 1.).step(.001).onChange(function(value){
+				flowSmoothing = value;
+			});	
+			oflowFolder.add(flowValues, "motionThreshold", 100, 6000).step(1);
+			oflowFolder.add(flowValues, "vScale", 0, 1).step(.01);
+			oflowFolder.add(flowValues, "nodMix", 0, 1).step(.01);
+
 
 
 		// if ( hasWebGL ){
@@ -213,14 +292,14 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 		videoContrller.playVideos();
 		
 		//BACKGROUND MESH
-		backgroundMesh = new THREE.Mesh(new THREE.PlaneGeometry( 1, 1, 12, 7 ), new THREE.MeshBasicMaterial( {
-			side: 2,
-			transparent: false,
-			depthTest: true,
-			color: 0xFFFFFF,
-			map: videoContrller.videos['BackgroundVideo'].texture
-		}));
-		backgroundMesh.position.z = -1;
+		// backgroundMesh = new THREE.Mesh(new THREE.PlaneGeometry( 1, 1, 12, 7 ), new THREE.MeshBasicMaterial( {
+		// 	side: 2,
+		// 	transparent: false,
+		// 	depthTest: true,
+		// 	color: 0xFFFFFF,
+		// 	map: videoContrller.videos['BackgroundVideo'].texture
+		// }));
+		// backgroundMesh.position.z = -1;
 
 		//scene.add(backgroundMesh);
 
@@ -229,11 +308,7 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 		slits = new Slitter({
 			renderer: renderer,
 			camera: camera,
-<<<<<<< HEAD
-			blendMap: blendMaps.randomGrid,//hardGradientDownTop,//
-=======
-			blendMap: blendMaps.softNoise,
->>>>>>> FETCH_HEAD
+			blendMap: blendMaps.randomGrid,//softNoise,//hardGradientDownTop,//
 			currentTex: videoContrller.videos['01'].texture,
 		});
 
@@ -245,14 +320,10 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 		//
 		//threshold lines
 		scene.add(motionThresholds.group);
+		scene.add(debugSphere);
 		
 		//resize the screen planes
 		scaleVidMesh();
-	}
-
-	function loadBackgroundVideo()
-	{
-
 	}
 
 	/**
@@ -265,6 +336,17 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 	function update()
 	{
 		frame++;
+
+		if ( hasUserMedia ){
+			if ( frame % rate == 0 ){
+				webcam.updatePixels();
+				// console.log("update");
+			}
+		// no user media (or they denied it), so check mouse
+		} else {
+			flowDir.x = flowDir.x * .9 + THREE.Math.mapLinear(mouse.x, 0.0, window.innerWidth, 0.0, 1.0) * .1;
+			flowDir.y = flowDir.y * .9 + THREE.Math.mapLinear(mouse.y, 0.0, window.innerHeight, 1.0, 0.0) * .1;
+		}
 
 		videoContrller.update();
 
@@ -314,11 +396,11 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 		// {
 		// 	slitMat.uniforms.time.value = clock.getElapsedTime() * -.1;
 
-		// 	if(debugSphere)
-		// 	{
-		// 		debugSphere.position.x = THREE.Math.mapLinear( flowDir.x, 0, 1, -vidPlane.scale.x*.5, vidPlane.scale.x*.5);
-		// 		debugSphere.position.y = THREE.Math.mapLinear( flowDir.y, 0, 1, -vidPlane.scale.y*.5, vidPlane.scale.y*.5);
-		// 	}
+			if(debugSphere)
+			{
+				debugSphere.position.x = THREE.Math.mapLinear( flowDir.x, 0, 1, -motionThresholds.group.scale.x*.5, motionThresholds.group.scale.x*.5);
+				debugSphere.position.y = THREE.Math.mapLinear( flowDir.y, 0, 1, -motionThresholds.group.scale.y*.5, motionThresholds.group.scale.y*.5);
+			}
 		// }
 	}
 
@@ -403,7 +485,7 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 	function getCurrentMotionPositionsCorrespondingVideoName()
 	{
 		//TODO: replace with motion tracking
-		return motionThresholds.getVideoName(mouse.x / window.innerWidth, mouse.y / window.innerHeight);
+		return motionThresholds.getVideoName(flowDir.x, flowDir.y);// mouse.x / window.innerWidth, mouse.y / window.innerHeight);
 	}
 
 	function setBlendVal(blendVal)
@@ -414,14 +496,11 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 	function scaleVidMesh()
 	{
 		var h = -window.innerWidth / vidAspect;
-	
-		backgroundMesh.scale.set( window.innerWidth, h, 1);
+
+		var yPos = 0;
 
 		slits.mesh.scale.set( window.innerWidth, h, 1);
-
 		motionThresholds.group.scale.set( window.innerWidth, h, 1);
-
-		//updateDebugLines();
 	}
 
 	function resetCamera()

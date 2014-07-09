@@ -56,11 +56,11 @@ MotionThresholds.prototype.getVideoName = function(x, y)
 	{
 		if(y < this.thresholds["down"])
 		{
-			return "up";
+			return "down";
 		}
 		else if(y > this.thresholds["up"])
 		{
-			return "down";
+			return "up";
 		}
 		else 
 		{

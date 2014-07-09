@@ -284,6 +284,7 @@ MirrorVideoController.prototype.loadVideo = function ( name, url, onLoadComplete
 		videoElement.style.visibility = "hidden";
 		videoElement.style.display = "none";
 	} else {
+		// videoElement.style.position = "absolute";
 		videoElement.style.width = "100%";
 	}
 	document.body.appendChild(videoElement);
