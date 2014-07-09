@@ -21,7 +21,6 @@ var SlitShader = function(params)
 		uniforms: {
 			slits : { type: "tv", value: params.slits }, // texture array (regular)
 			blendMap: {type: 't', value: params.blendMap || undefined },
-			bVal: {type: 'f', value: params.bVal || .5},
 			bMin: {type: 'f', value: params.bVal || 0},
 			bMax: {type: 'f', value: params.bVal || 1},
 			slitValue: {type: 'f', value: params.slitValue || 0},
@@ -42,7 +41,6 @@ var SlitShader = function(params)
 		fragmentShader: [
 		'uniform sampler2D slits[15];',
 		'uniform sampler2D blendMap;',
-		'uniform float bVal;',	
 
 		'uniform float bMin;',	
 		'uniform float bMax;',	
@@ -103,11 +101,6 @@ SlitShader.prototype = Object.create( THREE.ShaderMaterial.prototype );
 SlitShader.prototype.setNumSlits = function(numSlits)
 {
 	this.uniforms.numSlits.value = numSlits;
-}
-
-SlitShader.prototype.setBlendValue = function(value)
-{
-	this.uniforms.bVal.value = value;
 }
 
 SlitShader.prototype.setBlendMax = function(value)

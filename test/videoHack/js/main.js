@@ -229,7 +229,7 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 		slits = new Slitter({
 			renderer: renderer,
 			camera: camera,
-			blendMap: blendMaps["softNoise"],
+			blendMap: blendMaps.hardGradientDownTop,
 			currentTex: videoContrller.videos['01'].texture,
 		});
 
@@ -333,7 +333,7 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 	{
 		transitionTime = transitionTime || 1000;
 		delay = delay || 0;
-		ease = ease || TWEEN.Easing.Sinusoidal.InOut;
+		ease = ease || TWEEN.Easing.Sinusoidal.Out;
 		slits.setMixValue(0);
 
 		//tween for blending the current and previous videos
@@ -372,7 +372,7 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 		new TWEEN.Tween({value: 0})
 		.to({value: 1}, transitionTime * .5)
 		.delay(delay + transitionTime * .5)
-        .easing( ease )
+		.easing( ease )
 		.onUpdate(function(value)
 		{
 			slits.setSlitMin(value);
