@@ -84,7 +84,6 @@ var SlitShader = function(params)
 		'			gl_FragColor = texture2D(slits[i], vUv) + float(i) * layerWeight;',
 		'			bBroken = true;',
 		'		}',
-
 		'	}',
 
 		'}'
