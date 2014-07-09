@@ -222,14 +222,14 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 		}));
 		backgroundMesh.position.z = -1;
 
-		scene.add(backgroundMesh);
+		//scene.add(backgroundMesh);
 
 
 		//SLIT SCANNING
 		slits = new Slitter({
 			renderer: renderer,
 			camera: camera,
-			blendMap: blendMaps.hardGradientDownTop,
+			blendMap: blendMaps.softNoise,
 			currentTex: videoContrller.videos['01'].texture,
 		});
 
@@ -324,7 +324,6 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 		//draw the slits to thier render targets
 		slits.draw();
 		
-
 		//to the background & slitShader to screen
 		renderer.render( scene, camera, null, true );
 	}
@@ -500,12 +499,13 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 	function rendererSetup()
 	{
 
-		renderer = new THREE.WebGLRenderer( { antialias: true, devicePixelRatio: 1 } );
-		renderer.setClearColor( 0x444447, 0. );
+		renderer = new THREE.WebGLRenderer( { antialias: true, devicePixelRatio: 1, alpha: true } );
+		renderer.setClearColor( 0x000000, 0. );
 		renderer.sortObjects = false;
 		renderer.setSize( window.innerWidth, window.innerHeight );
 		renderer.autoClear = true;
 		container.appendChild( renderer.domElement );
+		container.style.zIndex = 1100;
 	}
 
 	function events()
@@ -535,8 +535,10 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 
 	if ( ! Detector.webgl )
 	{
-		hasWebGL = false;
-		hasUserMedia = false;
+		if ( !debug ){
+			hasWebGL = false;
+			hasUserMedia = false;
+		}
 		//Detector.addGetWebGLMessage();
 		//document.getElementById( container ).innerHTML = "";
 	}
