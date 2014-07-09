@@ -45,8 +45,10 @@ MirrorVideoController = function(params)
 		"02": {path: 	"../WALLACE_TESTS/02_UP_DOWN.mp4"},
 		"03": {path: 	"../WALLACE_TESTS/03_LEFT_RIGHT.mp4"},
 		"04": {path: 	"../WALLACE_TESTS/04_UL_UR.mp4"},
-
 	};
+
+	this.subtitles = params.subtitles || "../WALLACE_TESTS/subtitles.vtt";
+	this.subtitlesAttached = false; // only attach to one video element.
 
 
 	// 1 - straight / up / down (has audio)
@@ -259,12 +261,31 @@ MirrorVideoController.prototype.loadVideo = function ( name, url, onLoadComplete
 	{
 		videoElement.setAttribute("muted", "");
 	}
+
+	// create subtitles
+	if ( !this.subtitlesAttached ){
+		this.subtitlesAttached = true;
+		this.subtitleElement = document.createElement('track');
+		this.subtitleElement.setAttribute("kind", "subtitles");
+		this.subtitleElement.setAttribute("label", "English subtitles");
+		this.subtitleElement.setAttribute("srclang", "en");
+		this.subtitleElement.setAttribute("default", "");
+		this.subtitleElement.setAttribute("src", this.subtitles );
+		this.subtitleElement.oncuechange = this.onSubtitleTrigger.bind(this);
+		videoElement.appendChild(this.subtitleElement);
+	}
 	
 	videoElement.setAttribute("id", name);
 	var source = document.createElement('source');
 	source.src = url;
 	videoElement.load();
 	videoElement.appendChild(source);
+	if ( name != "BackgroundVideo" ){
+		videoElement.style.visibility = "hidden";
+		videoElement.style.display = "none";
+	} else {
+		videoElement.style.width = "100%";
+	}
 	document.body.appendChild(videoElement);
 
 	//debugging LISTENERS
@@ -285,4 +306,39 @@ MirrorVideoController.prototype.loadVideo = function ( name, url, onLoadComplete
 			}, false);
 		}
 	}
+}
+
+MirrorVideoController.prototype.onSubtitleTrigger = function(){
+	// override?
+	for ( var i=0; i<this.subtitleElement.track.activeCues.length; i++){
+		var cue = this.subtitleElement.track.activeCues[i]; // assuming there is only one active cue
+		if ( cue ){ 
+			var obj = cue.text;//JSON.parse(cue.text);
+			this.addFallingText(obj);
+		}
+	}
+}
+
+// this should probably be elsewhere?
+MirrorVideoController.prototype.addFallingText = function( string ){
+	console.log( string );
+	var d = document.createElement("div");
+	d.style.fontFamily = "Helvetica";
+	d.style.color = "#fff";
+	d.style.position = "absolute";
+	d.style.zIndex = "1000";
+	d.style.padding = "5px";
+	d.style["background-color"] = "#000";
+	d.style.left = Math.floor(Math.random() * window.innerWidth) +"px";
+	d.style.top = "0px";
+	d.style["-webkit-transition"] = "top ease-out 5s, -webkit-transform 10s";
+	d.innerHTML = string;
+	document.body.appendChild(d);
+	setTimeout( function(){
+		d.style.top = "120%";
+		d.style["-webkit-transform"] = "rotateZ(" + (Math.floor( -300 + Math.random() * 600 )) + "deg)";
+	}, 100);
+	setTimeout( function(){
+		document.body.removeChild(d);
+	}, 5100);
 }
