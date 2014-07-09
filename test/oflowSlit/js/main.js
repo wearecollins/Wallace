@@ -1,17 +1,3 @@
-//TODO: 
-//3 at once
-//
-//vingette
-//
-//video position
-//
-//fails get user media what then? mouse? auto pilot?
-//
-//finess tracking
-//
-//blendmap
-//
-//move bg video to div
 
 
 var app;
