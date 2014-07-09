@@ -67,6 +67,16 @@ Slitter.prototype.setSlitMin = function(value)
 	this.slitMaterial.uniforms.bMin.value = value;
 }
 
+Slitter.prototype.getSlitMax = function()
+{
+	return this.slitMaterial.uniforms.bMax.value;
+}
+
+Slitter.prototype.getSlitMin = function()
+{
+	return this.slitMaterial.uniforms.bMin.value;
+}
+
 Slitter.prototype.setCurrentTesture = function(currentTexture, textureCoordOffset)
 {
 	this.blendMaterial.setCurrentTexture( currentTexture, textureCoordOffset );

@@ -19,7 +19,7 @@ var AzealiaVideoObject = function(params, useWebGL)
 	if ( useWebGL ) this.texture.needsUpdate = false;	//
 
 	this.bIsActive = (params.bIsActive !== undefined)? params.bIsActive : true;
-	this.bIsActive = params.bIsActive || true;
+	this.bIsActive = params.bIsActive || false;
 
 	this.muteVideo = (params.muteVideo !== undefined)? params.muteVideo : false;
 
@@ -79,6 +79,17 @@ MirrorVideoController = function(params)
 		// weird2: 	{t: "03", channel: new THREE.Vector2( 0, 0, 1 )}
 	}
 
+	this.inverseVideoMap = {
+		straight: "01",
+		weird: "01",
+		up: "02",
+		down: "02",
+		left: "03",
+		right: "03",
+		tiltLeft: "04",
+		tiltRight: "04"
+	}
+
 	this.videos = {};
 
 	this.bPaused = false;
@@ -100,6 +111,11 @@ MirrorVideoController = function(params)
 	this.loadVideos();
 
 	this.playVideos();
+
+	if(!this.muteVideo)
+	{
+		this.setVolume(params.volume || .25);	
+	}
 }
 
 
@@ -146,6 +162,12 @@ MirrorVideoController.prototype.stopVideos = function ()
 	this.bPaused = true;
 }
 
+MirrorVideoController.prototype.setVolume = function(value)
+{
+	this.videos['01'].video.muted = false;
+	this.videos['01'].video.volume = value;
+};
+
 MirrorVideoController.prototype.update = function()
 {
 // if(this.videos["BackgroundVideo"].video.readyState === this.videos["BackgroundVideo"].video.HAVE_ENOUGH_DATA )
@@ -167,6 +189,17 @@ MirrorVideoController.prototype.update = function()
 			if ( this.videos[i].texture ) this.videos[i].texture.needsUpdate = true;
 			this.vidPosition.position = this.videos[i].video.currentTime / this.videoDuration;
 		}
+	}
+}
+
+MirrorVideoController.prototype.setVideoActive = function( name, bIsActive)
+{
+	if(this.inverseVideoMap[name] != undefined)
+	{
+		if(this.videos[this.inverseVideoMap[name]] != undefined)
+		{
+			this.videos[this.inverseVideoMap[name]].bIsActive = bIsActive;	
+		}	
 	}
 }
 

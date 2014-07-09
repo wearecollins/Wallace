@@ -78,11 +78,11 @@ var SlitShader = function(params)
 
 		'	int depthIndex = int(clamp(d * numSlits, 0., float(SLIT_COUNT-1)));',
 
-		'	bool bBroken = false; ',
+		// '	bool bBroken = false; ',
 		'	for(int i=0; i<SLIT_COUNT; i++){',
-		'		if(depthIndex == i && !bBroken){',
+		'		if(depthIndex == i ){//&& !bBroken){',
 		'			gl_FragColor = texture2D(slits[i], vUv) + float(i) * layerWeight;',
-		'			bBroken = true;',
+		// '			bBroken = true;',
 		'		}',
 		'	}',
 

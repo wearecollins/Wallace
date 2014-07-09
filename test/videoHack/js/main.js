@@ -229,7 +229,7 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 		slits = new Slitter({
 			renderer: renderer,
 			camera: camera,
-			blendMap: blendMaps.hardGradientDownTop,
+			blendMap: blendMaps.randomGrid,//hardGradientDownTop,//
 			currentTex: videoContrller.videos['01'].texture,
 		});
 
@@ -275,8 +275,12 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 
 			if( v != currentVideo)
 			{
+				videoContrller.setVideoActive(previousVideo, false);
 				previousVideo = currentVideo;
 				currentVideo = v;
+
+				videoContrller.setVideoActive(previousVideo, true);
+				videoContrller.setVideoActive(currentVideo, true);
 
 				var c = videoContrller.getVideo(currentVideo);
 				var p = videoContrller.getVideo(previousVideo);
@@ -357,27 +361,40 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 
 		//tweens for min and max sliting values
 		slits.setSlitMin(0);
-		slits.setSlitMax(0);
+		slits.setSlitMax(1);
+		var hlfTT = transitionTime;// * .5;
 
-		new TWEEN.Tween({value: 0})
-		.to({value: 1}, transitionTime * .5)
+
+
+		new TWEEN.Tween({value: slits.getSlitMin()})
+		.to({value: 1}, transitionTime)
 		.delay(delay)
-        .easing( ease )
-		.onUpdate(function(value)
-		{
-			slits.setSlitMax(value);
-		})
-		.start();
-
-		new TWEEN.Tween({value: 0})
-		.to({value: 1}, transitionTime * .5)
-		.delay(delay + transitionTime * .5)
 		.easing( ease )
 		.onUpdate(function(value)
 		{
 			slits.setSlitMin(value);
 		})
 		.start();
+
+		// new TWEEN.Tween({value: slits.getSlitMax()})
+		// .to({value: 1}, hlfTT * .5)
+		// .delay(delay)
+  //       .easing( ease )
+		// .onUpdate(function(value)
+		// {
+		// 	slits.setSlitMax(value);
+		// })
+		// .start();
+
+		// new TWEEN.Tween({value: slits.getSlitMin()})
+		// .to({value: 1}, hlfTT * .5)
+		// .delay(delay + hlfTT * .5)
+		// .easing( ease )
+		// .onUpdate(function(value)
+		// {
+		// 	slits.setSlitMin(value);
+		// })
+		// .start();
 	}
 
 	function getCurrentMotionPositionsCorrespondingVideoName()
@@ -481,7 +498,7 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 
 			case 32:
 				// pauseVideos();
-				videoContrller.setVideoTime(60);
+				videoContrller.setVideoTime(80);
 
 				break;
 
