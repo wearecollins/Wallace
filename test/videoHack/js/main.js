@@ -58,7 +58,9 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 
 	var motionThresholds = new MotionThresholds();
 
-	var videoContrller = new MirrorVideoController();
+	var videoContrller = new MirrorVideoController({
+		muteVideo: muteVideo
+	});
 
 	var blendMaps = {
 		randomGrid: THREE.ImageUtils.loadTexture( '../blendMaps/random_grid.png' ),
@@ -229,7 +231,6 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 			camera: camera,
 			blendMap: blendMaps["softNoise"],
 			currentTex: videoContrller.videos['01'].texture,
-			previousTex: videoContrller.videos['02'].texture
 		});
 
 		scene.add(slits.mesh);
@@ -311,8 +312,8 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 		// 		debugSphere.position.y = THREE.Math.mapLinear( flowDir.y, 0, 1, -vidPlane.scale.y*.5, vidPlane.scale.y*.5);
 		// 	}
 		// }
-
 	}
+
 	/**
 	 * DRAW
 	 * NOT called if no WebGL
@@ -361,40 +362,22 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 		new TWEEN.Tween({value: 0})
 		.to({value: 1}, transitionTime * .5)
 		.delay(delay)
+        .easing( ease )
 		.onUpdate(function(value)
 		{
 			slits.setSlitMax(value);
 		})
 		.start();
 
-
 		new TWEEN.Tween({value: 0})
 		.to({value: 1}, transitionTime * .5)
 		.delay(delay + transitionTime * .5)
+        .easing( ease )
 		.onUpdate(function(value)
 		{
 			slits.setSlitMin(value);
 		})
 		.start();
-
-
-		// new TWEEN.Tween(slitMat.uniforms.bMax)
-		// .to({value: 1.}, controls.timeIn)
-		// .onStart(function(){
-		// 	slitMat.uniforms.bMin.value = 0;
-		// 	slitMat.uniforms.bMax.value = 0;
-		// })
-		// .delay(delay)
-		// .onComplete(function(){
-		// 	new TWEEN.Tween(slitMat.uniforms.bMin)
-		// 	.to({value: 1}, controls.timeOut)
-		// 	.onComplete( function()
-		// 	{
-		// 		callback();
-		// 	})
-		// 	.start();
-		// })
-		// .start();
 	}
 
 	function getCurrentMotionPositionsCorrespondingVideoName()

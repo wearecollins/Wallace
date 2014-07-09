@@ -21,7 +21,7 @@ var AzealiaVideoObject = function(params, useWebGL)
 	this.bIsActive = (params.bIsActive !== undefined)? params.bIsActive : true;
 	this.bIsActive = params.bIsActive || true;
 
-	this.muteVideo = (params.muteVideo !== undefined)? params.muteVideo : true;
+	this.muteVideo = (params.muteVideo !== undefined)? params.muteVideo : false;
 
 	this.dir = params.dir || new THREE.Vector2( 0, 0 );
 
@@ -93,6 +93,9 @@ MirrorVideoController = function(params)
 	this.tertiaryVid = undefined;
 
 	this.vidPosition = {position: 0.0001};
+
+	this.muteVideo = (params.muteVideo !== undefined)? params.muteVideo : false;
+	console.log("this.muteVideo " + this.muteVideo)
 
 	this.loadVideos();
 
@@ -186,8 +189,7 @@ MirrorVideoController.prototype.loadVideos = function ()
 		console.log( 'info' );
 		this.videos[id] = new AzealiaVideoObject({
 			video: document.getElementById( id ),
-			name: id, 
-			// muteVideo: id == "01",
+			name: id
 		}, true);
 	}
 }

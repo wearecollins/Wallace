@@ -64,7 +64,7 @@ MotionThresholds.prototype.getVideoName = function(x, y)
 		}
 		else 
 		{
-			return "striaght";
+			return "straight";
 		}
 	}
 	else if(x < this.thresholds["farRight"])
@@ -75,26 +75,4 @@ MotionThresholds.prototype.getVideoName = function(x, y)
 	{
 		return "right";
 	}
-
-
-	// else if(x > this.thresholds["farRight"])
-	// {
-	// 	return "right";
-	// }
-	// else if(x < this.thresholds["right"])
-	// {
-	// 	return "tiltRight";
-	// }
-	// else if(y < this.thresholds["down"])
-	// {
-	// 	return "up";
-	// }
-	// else if(y > this.thresholds["up"])
-	// {
-	// 	return "down";
-	// }
-	// else 
-	// {
-	// 	return "striaght";
-	// }
 }
