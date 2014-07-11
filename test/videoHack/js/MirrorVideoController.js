@@ -239,6 +239,9 @@ MirrorVideoController.prototype.loadVideo = function ( name, url, onLoadComplete
 		this.subtitleElement.setAttribute("default", "");
 		this.subtitleElement.setAttribute("src", this.subtitles );
 		this.subtitleElement.oncuechange = this.onSubtitleTrigger.bind(this);
+		this.subtitleElement.onerror = function(e){
+			console.log(e);
+		}
 		videoElement.appendChild(this.subtitleElement);
 	}
 	
@@ -252,6 +255,12 @@ MirrorVideoController.prototype.loadVideo = function ( name, url, onLoadComplete
 		videoElement.style.display = "none";
 	} else {
 		videoElement.style.width = "100%";
+		videoElement.style.margin = "auto";
+		videoElement.style.position = "absolute";
+		videoElement.style.top= "0px";
+		videoElement.style.bottom = "0px";
+		videoElement.style.left = "0px";
+		videoElement.style.right = "0px";
 	}
 	document.body.appendChild(videoElement);
 
@@ -275,7 +284,8 @@ MirrorVideoController.prototype.loadVideo = function ( name, url, onLoadComplete
 	}
 }
 
-MirrorVideoController.prototype.onSubtitleTrigger = function(){
+MirrorVideoController.prototype.onSubtitleTrigger = function(e){
+	console.log(e);
 	// override?
 	for ( var i=0; i<this.subtitleElement.track.activeCues.length; i++){
 		var cue = this.subtitleElement.track.activeCues[i]; // assuming there is only one active cue

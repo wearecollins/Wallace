@@ -70,7 +70,7 @@ var BlendShader = function(params)
 
 		'	vec4 p = texture2D(previousTex, colorUv);',
 		'	vec4 c = texture2D(currentTex, colorUv);',
-		'	vec4 bg = texture2D(backgroundTex, vUv);',
+		'	vec4 bg = vec4(1.0,1.0,1.0,0.0);',//texture2D(backgroundTex, vUv);',
 
 		// '	if(a0 < .1 && a1 < .1)	discard;',
 

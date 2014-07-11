@@ -62,6 +62,8 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 		muteVideo: muteVideo
 	});
 
+	this.videoCon = videoContrller;
+
 	var blendMaps = {
 		randomGrid: THREE.ImageUtils.loadTexture( '../blendMaps/random_grid.png' ),
 		softNoise: THREE.ImageUtils.loadTexture( '../blendMaps/soft_noise.png' ),

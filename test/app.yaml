@@ -27,6 +27,11 @@ handlers:
   login: required
   auth_fail_action: redirect
 
+- url: /videoHack
+  static_dir: videoHack
+  login: required
+  auth_fail_action: redirect
+
 - url: /WALLACE_TESTS
   static_dir: WALLACE_TESTS
   login: required
@@ -65,6 +70,11 @@ handlers:
 - url: /blendMaps/(.*\.(gif|png|jpg|mp4))$
   static_files: blendMaps/\1
   upload: blendMaps/.*\.(gif|png|jpg|mp4)$
+
+- url: /WALLACE_TESTS/(.*\.(gif|png|jpg|mp4))$
+  static_files: WALLACE_TESTS/\1
+  upload: WALLACE_TESTS/.*\.(gif|png|jpg|mp4)$
+  mime_type: video/mp4
 
 - url: /(.*\.(gif|png|jpg|mp4))$
   static_files: headControl/\1
