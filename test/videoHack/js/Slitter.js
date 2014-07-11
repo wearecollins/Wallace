@@ -25,7 +25,7 @@ var Slitter = function(params)
 	// var slitMat, blendMat;
 	// var slitScene = new THREE.Scene();
 	
-	this.slitStep = 2;
+	this.slitStep = params.slitStep || 2;
 	this.frame = 0;
 
 	//blended videos input
@@ -67,9 +67,14 @@ Slitter.prototype.setSlitMin = function(value)
 	this.slitMaterial.uniforms.bMin.value = value;
 }
 
-Slitter.prototype.setSlitValue = function(value)
+Slitter.prototype.getSlitMax = function()
 {
-	this.slitMaterial.uniforms.bMin.value = value;
+	return this.slitMaterial.uniforms.bMax.value;
+}
+
+Slitter.prototype.getSlitMin = function()
+{
+	return this.slitMaterial.uniforms.bMin.value;
 }
 
 Slitter.prototype.setCurrentTesture = function(currentTexture, textureCoordOffset)
@@ -84,17 +89,16 @@ Slitter.prototype.setPreviousTesture = function(previousTexture, textureCoordOff
 
 Slitter.prototype.update = function()
 {
-
-}
-
-Slitter.prototype.draw = function()
-{
 	this.frame++;
 
 	if(this.frame % this.slitStep == 0){
 		this.slits.push( this.slits.shift() );
+		// this.slits.unshift( this.slits.pop() );
 	}
+}
 
+Slitter.prototype.draw = function()
+{
 	this.slitMaterial.uniforms.slits.value = this.slits;
 
 	this.renderer.render(this.scene, this.camera, this.slits[0], true );
