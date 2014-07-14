@@ -76,10 +76,10 @@ function WebCam(defaultVideoTag) {
         },
 
         initView = function () {
-            width = videoTag.width;
-            height = videoTag.height;
-            // width = videoTag.videoWidth;
-            // height = videoTag.videoHeight;
+            // width = videoTag.width;
+            // height = videoTag.height;
+            width = videoTag.videoWidth;
+            height = videoTag.videoHeight;
 
             if (!canvas) { canvas = window.document.createElement('canvas'); }
             ctx = canvas.getContext('2d');
@@ -111,20 +111,55 @@ function WebCam(defaultVideoTag) {
             // current pixels
             width = videoTag.videoWidth;
             height = videoTag.videoHeight;
-            canvas.width  = width;
-            canvas.height = height;
+            canvas.width  = width * scale;
+            canvas.height = height * scale;
+
+
+            var useWeirdOptimization = true;
 
             if (width && height) {
                 lastPixels = currentPixels;
 
                 ctx.drawImage(videoTag, 0, 0, width * scale, height * scale);
-                var imgd = ctx.getImageData(0, 0, width * scale, height * scale).data;
                 var data = [];
+                var pix;
 
-                for(var i = 0; i < imgd.length; i += 4) {
-                  var brightness = 0.34 * imgd[i] + 0.5 * imgd[i + 1] + 0.16 * imgd[i + 2];
-                  // red
-                  data[i/4] = brightness;
+                if ( useWeirdOptimization ){
+                    pix = new Uint8ClampedArray( width * height * scale );
+                    var offset = 0
+                    for (var y = 0; y < height * scale; y++) {
+                        var d = ctx.getImageData(0, y, width * scale, 1).data;
+                        pix.set(d, offset);
+                        offset += d.length;
+                    }
+
+                    var ind = 0;
+                    var brightness = 0.34 * pix[0] + 0.5 * pix[0 + 1] + 0.16 * pix[0 + 2];
+
+                    for(var i = 0; i < pix.length; i += 4) {
+                        var brightness = 0.34 * pix[i] + 0.5 * pix[i + 1] + 0.16 * pix[i + 2];
+                        // red
+                        data[ind] = brightness;
+                        ind++;
+                    }
+                    //delete pix;
+
+                } else {
+                    var imgd = ctx.getImageData(0, 0, width * scale, height * scale);
+                    pix = imgd.data;
+
+                    for(var i = 0; i < pix.length; i += 4) {
+                      var brightness = 0.34 * pix[i] + 0.5 * pix[i + 1] + 0.16 * pix[i + 2];
+                      // red
+                      data[i/4] = brightness;
+                    }
+                    delete pix;
+                }
+
+                if ( window.drawDebug ){
+                    var id = ctx.createImageData( width * scale, height * scale );
+                    id.data = pix;
+                    ctx.putImageData( id, 0, 0 );
                 }
 
                 currentPixels = data;

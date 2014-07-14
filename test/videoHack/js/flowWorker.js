@@ -259,7 +259,7 @@ FlowCalculator.prototype.calculate = function (oldImage, newImage, width, height
     averageMotionPos.y /= averageMotionPos.numVals;
     averageMotionPos.B1 /= averageMotionPos.numVals;
 
-    if ( calculate_zones ){
+    if ( calculate_zones == true ){
         //...
         for (globalY = step + 1; globalY < hMax; globalY += winStep) {
             for (globalX = step + 1; globalX < wMax; globalX += winStep) {
@@ -685,8 +685,9 @@ self.addEventListener('message', function(e) {
     // var last     = e.data.last;
     var width   = e.data.width;
     var height  = e.data.height;
+    var zones;
     if ( self.last != null ){
-       var zones = self.calculator.calculate(self.last, current, width, height, true);
+       zones = self.calculator.calculate(self.last, current, width, height, false);
     }
     self.last = current;
 
