@@ -316,7 +316,6 @@ MirrorVideoController.prototype.onSubtitleTrigger = function(e){
 	for ( var i=0; i<this.subtitleElement.track.activeCues.length; i++){
 		var cue = this.subtitleElement.track.activeCues[i]; // assuming there is only one active cue
 		if ( cue ){ 
-			console.log(cue.text);
 			if ( cue.id == "159" || cue.id == "316" || cue.id == "362" || cue.id == "426" ){
 				this.subTitleInvert = !this.subTitleInvert;
 			}
@@ -351,7 +350,7 @@ MirrorVideoController.prototype.addFallingText = function( string ){
 		this.divs[ind].style.top = "0px";
 	}
 	this.divs[ind].style["-webkit-transition"] = "top ease-out 5s, -webkit-transform 10s";
-	this.divs[ind].style.left = Math.floor(window.innerWidth * .1 + Math.random() * (window.innerWidth * .8)) +"px";
+	this.divs[ind].style.left = (Math.random() > .5 ? Math.floor(window.innerWidth * .1 + Math.random() * (window.innerWidth * .3)) : Math.floor(window.innerWidth * .6 + Math.random() * (window.innerWidth * .3))) +"px";
 	console.log( string +":"+ this.divs[ind].style.left );
 	this.divs[ind].innerHTML = string;
 	document.body.appendChild(this.divs[ind]);

@@ -48,7 +48,7 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 
 	// ABOUT
 	var hasWebGL 		= true;
-	var hasUserMedia 	= false;
+	var hasUserMedia 	= true;
 
 	var backgroundMesh;
 
