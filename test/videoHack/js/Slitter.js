@@ -97,6 +97,12 @@ Slitter.prototype.update = function()
 	}
 }
 
+Slitter.prototype.setBlendMap = function(texture)
+{
+	this.blendMaterial.uniforms.blendMap.value = texture;
+	this.slitMaterial.uniforms.blendMap.value = texture;
+}
+
 Slitter.prototype.draw = function()
 {
 	this.slitMaterial.uniforms.slits.value = this.slits;
