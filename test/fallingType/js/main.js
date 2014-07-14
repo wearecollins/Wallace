@@ -1,8 +1,17 @@
-var text = ["money", "cash", "hoes"];
+var subElement;
 
 window.onload = function(){
-	gen();
-	setInterval( gen, 1000);
+	subElement = document.getElementById("subs");
+	subElement.oncuechange = function( e ){
+		for ( var i=0; i<subElement.track.activeCues.length; i++){
+			console.log( subElement.track.activeCues[i] )
+		}
+	}
+
+	console.log(document.getElementById("video").currentTime);
+
+	document.getElementById("video").currentTime = 15000;
+	document.getElementById("video").play();
 }
 
 var d;
