@@ -356,10 +356,10 @@ MirrorVideoController.prototype.addFallingText = function( string ){
 	this.divs[ind].innerHTML = string;
 	document.body.appendChild(this.divs[ind]);
 
-	setTimeout( function(d){
-		d.style.top = this.subTitleInvert ? window.innerHeight * -.25 +"px" : window.innerHeight * 1.2 +"px";
+	setTimeout( function(d, invert){
+		d.style.top = invert ? window.innerHeight * -.25 +"px" : window.innerHeight * 1.2 +"px";
 		d.style["-webkit-transform"] = "rotateZ(" + (Math.floor( -300 + Math.random() * 600 )) + "deg)";
-	}, 100, this.divs[ind]);
+	}, 100, this.divs[ind], this.subTitleInvert);
 
 	setTimeout( function(d){
 		document.body.removeChild(d);
