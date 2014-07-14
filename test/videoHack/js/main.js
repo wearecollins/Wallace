@@ -107,15 +107,15 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 		webcam = new oflow.WebCam();
         webcam.onUpdated( function(){
             // console.log("yes")
-            if ( webcam.getLastPixels() ){
+           // if ( webcam.getLastPixels() ){
                 worker.postMessage({
-                    last: webcam.getLastPixels(),
+                    // last: webcam.getLastPixels(),
                     current: webcam.getCurrentPixels(),
                     width: webcam.getWidth(),
                     height: webcam.getHeight(),
                     time: new Date()
                 });
-            }
+            //}
         });
         	        /* Setup WebWorker messaging */
 	        var lastTime = new Date();
@@ -344,6 +344,10 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 	function update()
 	{
 		frame++;
+		// if ( parseInt(document.getElementById("fpsText").innerHTML.substr(0,2)) < 30 ){
+		// 	rate++;
+		// 	console.log(rate);
+		// }
 
 		if ( hasUserMedia ){
 			if ( frame % rate == 0 ){

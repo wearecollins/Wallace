@@ -35,7 +35,7 @@ function WebCam(defaultVideoTag) {
         lastPixels,
         loopId,
         updatedCallbacks = [],
-        scale = .25,
+        scale = .2,
 
         requestAnimFrame = window.requestAnimationFrame       ||
                            window.webkitRequestAnimationFrame ||
@@ -118,8 +118,16 @@ function WebCam(defaultVideoTag) {
                 lastPixels = currentPixels;
 
                 ctx.drawImage(videoTag, 0, 0, width * scale, height * scale);
-                var imgd = ctx.getImageData(0, 0, width * scale, height * scale);
-                currentPixels = imgd.data;
+                var imgd = ctx.getImageData(0, 0, width * scale, height * scale).data;
+                var data = [];
+
+                for(var i = 0; i < imgd.length; i += 4) {
+                  var brightness = 0.34 * imgd[i] + 0.5 * imgd[i + 1] + 0.16 * imgd[i + 2];
+                  // red
+                  data[i/4] = brightness;
+                }
+
+                currentPixels = data;
 
                 updatedCallbacks.forEach(function (callback) {
                     callback();

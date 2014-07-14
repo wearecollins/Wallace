@@ -351,7 +351,6 @@ MirrorVideoController.prototype.addFallingText = function( string ){
 	}
 	this.divs[ind].style["-webkit-transition"] = "top ease-out 5s, -webkit-transform 10s";
 	this.divs[ind].style.left = (Math.random() > .5 ? Math.floor(window.innerWidth * .1 + Math.random() * (window.innerWidth * .3)) : Math.floor(window.innerWidth * .6 + Math.random() * (window.innerWidth * .3))) +"px";
-	console.log( string +":"+ this.divs[ind].style.left );
 	this.divs[ind].innerHTML = string;
 	document.body.appendChild(this.divs[ind]);
 

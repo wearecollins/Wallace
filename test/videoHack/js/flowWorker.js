@@ -207,8 +207,9 @@ FlowCalculator.prototype.getVingette = function(x, y, width, height)
     return xVal * yVal;
 }
 
-FlowCalculator.prototype.calculate = function (oldImage, newImage, width, height) {
+FlowCalculator.prototype.calculate = function (oldImage, newImage, width, height, calcZones) {
     var zones = [];
+    var calculate_zones = calcZones !== undefined ? calcZones : true;
     var step = this.step;
     var winStep = step * 2 + 1;
 
@@ -220,6 +221,7 @@ FlowCalculator.prototype.calculate = function (oldImage, newImage, width, height
     var globalY, globalX, localY, localX;
 
     var total_delta = 0;
+    var num_channels = 1;
 
     //...
     var index, averageMotionPos = {x: 0, y: 0, B1: 0, numVals: 0, tot: 0}, threshold = 10;
@@ -227,7 +229,7 @@ FlowCalculator.prototype.calculate = function (oldImage, newImage, width, height
     var max_delta = 0;
     for (var i = 0; i < height; i++) {
         for (var j = 0; j < width; j++) {
-            index = i*width*4 + j * 4;
+            index = i*width*num_channels + j * num_channels;
             var vingette = 1;//this.getVingette(j, i, width, height);
             var delta = Math.abs(oldImage[index] - newImage[index]) * vingette;
             if(delta > threshold)
@@ -257,60 +259,62 @@ FlowCalculator.prototype.calculate = function (oldImage, newImage, width, height
     averageMotionPos.y /= averageMotionPos.numVals;
     averageMotionPos.B1 /= averageMotionPos.numVals;
 
-    //...
-    for (globalY = step + 1; globalY < hMax; globalY += winStep) {
-        for (globalX = step + 1; globalX < wMax; globalX += winStep) {
-            A2 = A1B2 = B1 = C1 = C2 = 0;
+    if ( calculate_zones ){
+        //...
+        for (globalY = step + 1; globalY < hMax; globalY += winStep) {
+            for (globalX = step + 1; globalX < wMax; globalX += winStep) {
+                A2 = A1B2 = B1 = C1 = C2 = 0;
 
-            // TODO: probably should use grey scale, for now it's red val I think...
-            index = globalY * width * 4 + globalX * 4;
-            total_delta += Math.abs(newImage[index] - oldImage[index]);
+                // TODO: probably should use grey scale, for now it's red val I think...
+                index = globalY * width * num_channels + globalX * num_channels;
+                total_delta += Math.abs(newImage[index] - oldImage[index]);
 
-            for (localY = -step; localY <= step; localY++) {
-                for (localX = -step; localX <= step; localX++) {
-                    var address = (globalY + localY) * width + globalX + localX;
+                for (localY = -step; localY <= step; localY++) {
+                    for (localX = -step; localX <= step; localX++) {
+                        var address = (globalY + localY) * width + globalX + localX;
 
-                    var gradX = (newImage[(address - 1) * 4]) - (newImage[(address + 1) * 4]);
-                    var gradY = (newImage[(address - width) * 4]) - (newImage[(address + width) * 4]);
-                    var gradT = (oldImage[address * 4]) - (newImage[address * 4]);
+                        var gradX = (newImage[(address - 1) * num_channels]) - (newImage[(address + 1) * num_channels]);
+                        var gradY = (newImage[(address - width) * num_channels]) - (newImage[(address + width) * num_channels]);
+                        var gradT = (oldImage[address * num_channels]) - (newImage[address * num_channels]);
 
-                    A2 += gradX * gradX;
-                    A1B2 += gradX * gradY;
-                    B1 += gradY * gradY;
-                    C2 += gradX * gradT;
-                    C1 += gradY * gradT;
+                        A2 += gradX * gradX;
+                        A1B2 += gradX * gradY;
+                        B1 += gradY * gradY;
+                        C2 += gradX * gradT;
+                        C1 += gradY * gradT;
+                    }
                 }
-            }
 
-            var delta = (A1B2 * A1B2 - A2 * B1);
+                var delta = (A1B2 * A1B2 - A2 * B1);
 
-            if (delta !== 0) {
-                /* system is not singular - solving by Kramer method */
-                var Idelta = step / delta;
-                var deltaX = -(C1 * A1B2 - C2 * B1);
-                var deltaY = -(A1B2 * C2 - A2 * C1);
+                if (delta !== 0) {
+                    /* system is not singular - solving by Kramer method */
+                    var Idelta = step / delta;
+                    var deltaX = -(C1 * A1B2 - C2 * B1);
+                    var deltaY = -(A1B2 * C2 - A2 * C1);
 
-                u = deltaX * Idelta;
-                v = deltaY * Idelta;
-            } else {
-                /* singular system - find optical flow in gradient direction */
-                var norm = (A1B2 + A2) * (A1B2 + A2) + (B1 + A1B2) * (B1 + A1B2);
-                if (norm !== 0) {
-                    var IGradNorm = step / norm;
-                    var temp = -(C1 + C2) * IGradNorm;
-
-                    u = (A1B2 + A2) * temp;
-                    v = (B1 + A1B2) * temp;
+                    u = deltaX * Idelta;
+                    v = deltaY * Idelta;
                 } else {
-                    u = v = 0;
-                }
-            }
+                    /* singular system - find optical flow in gradient direction */
+                    var norm = (A1B2 + A2) * (A1B2 + A2) + (B1 + A1B2) * (B1 + A1B2);
+                    if (norm !== 0) {
+                        var IGradNorm = step / norm;
+                        var temp = -(C1 + C2) * IGradNorm;
 
-            if (-winStep < u && u < winStep &&
-                -winStep < v && v < winStep) {
-                uu += u;
-                vv += v;
-                zones.push(new FlowZone(globalX, globalY, u, v));
+                        u = (A1B2 + A2) * temp;
+                        v = (B1 + A1B2) * temp;
+                    } else {
+                        u = v = 0;
+                    }
+                }
+
+                if (-winStep < u && u < winStep &&
+                    -winStep < v && v < winStep) {
+                    uu += u;
+                    vv += v;
+                    zones.push(new FlowZone(globalX, globalY, u, v));
+                }
             }
         }
     }
@@ -674,14 +678,17 @@ exports.WebCamFlow = WebCamFlow;
 
 
 self.calculator = new oflow.FlowCalculator(8);
+self.last       = null;
 
 self.addEventListener('message', function(e) {
+    var current = e.data.current;
+    // var last     = e.data.last;
+    var width   = e.data.width;
+    var height  = e.data.height;
+    if ( self.last != null ){
+       var zones = self.calculator.calculate(self.last, current, width, height, true);
+    }
+    self.last = current;
 
-	var current = e.data.current;
-	var last 	= e.data.last;
-	var width 	= e.data.width;
-	var height 	= e.data.height;
-	var zones = self.calculator.calculate(last, current, width, height);
-
-  	self.postMessage( {direction:zones, time: e.data.time});
+      	self.postMessage( {direction:zones, time: e.data.time});
 }, false);
