@@ -291,7 +291,7 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 		slits = new Slitter({
 			renderer: renderer,
 			camera: camera,
-			blendMap: blendMaps.randomGrid,//softNoise,//hardGradientDownTop,//
+			blendMap: blendMaps.softNoise,//hardGradientDownTop,//
 			currentTex: videoContrller.videos['01'].texture,
 		});
 
@@ -329,6 +329,9 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 		// .onChange(function(value) {
 		// 	slits.setBlendMap(value);
 		// });
+		
+		// move gui
+		$(".dg").css("z-index", 5000);
 	}
 
 	/**

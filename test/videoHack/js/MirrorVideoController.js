@@ -259,6 +259,10 @@ MirrorVideoController.prototype.loadVideo = function ( name, url, onLoadComplete
 		this.subtitleElement.setAttribute("srclang", "en");
 		this.subtitleElement.setAttribute("default", "");
 		this.subtitleElement.setAttribute("src", this.subtitles );
+
+		// this is a little weird, huh?
+		this.subTitleInvert = false;
+
 		this.subtitleElement.oncuechange = this.onSubtitleTrigger.bind(this);
 		this.subtitleElement.onerror = function(e){
 			console.log(e);
@@ -312,6 +316,10 @@ MirrorVideoController.prototype.onSubtitleTrigger = function(e){
 	for ( var i=0; i<this.subtitleElement.track.activeCues.length; i++){
 		var cue = this.subtitleElement.track.activeCues[i]; // assuming there is only one active cue
 		if ( cue ){ 
+			console.log(cue.text);
+			if ( cue.id == "159" || cue.id == "316" || cue.id == "362" || cue.id == "426" ){
+				this.subTitleInvert = !this.subTitleInvert;
+			}
 			var obj = cue.text;//JSON.parse(cue.text);
 			this.addFallingText(obj);
 		}
@@ -324,24 +332,34 @@ MirrorVideoController.prototype.addFallingText = function( string ){
 		this.divs = [];
 	}
 	if ( this.divs.length > 0 ){
-		this.divs[this.divs.length-1].style.top = window.innerHeight * 1.2 +"px";
-		this.divs[this.divs.length-1].style["-webkit-transform"] = "rotateZ(" + (Math.floor( -300 + Math.random() * 600 )) + "deg)";
+		// this.divs[this.divs.length-1].style.top = this.subTitleInvert ? window.innerHeight * -.25 +"px" : window.innerHeight * 1.2 +"px";
+		// this.divs[this.divs.length-1].style["-webkit-transform"] = "rotateZ(" + (Math.floor( -300 + Math.random() * 600 )) + "deg)";
 	}
 
 	var ind = this.divs.length;
 
 	this.divs[ind] = document.createElement("div");
 	this.divs[ind].style.fontFamily = "Helvetica";
-	this.divs[ind].style.color = "#fff";
 	this.divs[ind].style.position = "absolute";
 	this.divs[ind].style.zIndex = "1000";
 	this.divs[ind].style.padding = "5px";
 	this.divs[ind].style["background-color"] = "#000";
-	this.divs[ind].style.left = Math.floor(Math.random() * (window.innerWidth * 9)) +"px";
-	this.divs[ind].style.top = "0px";
+	this.divs[ind].style.color = "#fff";
+	if ( this.subTitleInvert ){
+		this.divs[ind].style.top = window.innerHeight * 1.2 + "px";
+	} else {
+		this.divs[ind].style.top = "0px";
+	}
 	this.divs[ind].style["-webkit-transition"] = "top ease-out 5s, -webkit-transform 10s";
+	this.divs[ind].style.left = Math.floor(window.innerWidth * .1 + Math.random() * (window.innerWidth * .8)) +"px";
+	console.log( string +":"+ this.divs[ind].style.left );
 	this.divs[ind].innerHTML = string;
 	document.body.appendChild(this.divs[ind]);
+
+	setTimeout( function(d){
+		d.style.top = this.subTitleInvert ? window.innerHeight * -.25 +"px" : window.innerHeight * 1.2 +"px";
+		d.style["-webkit-transform"] = "rotateZ(" + (Math.floor( -300 + Math.random() * 600 )) + "deg)";
+	}, 100, this.divs[ind]);
 
 	setTimeout( function(d){
 		document.body.removeChild(d);
