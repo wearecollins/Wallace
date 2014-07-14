@@ -66,19 +66,7 @@ MirrorVideoController = function(params)
 		right: 	{t: "03", uOffset: .5},
 
 		tiltLeft: 	{t: "04", uOffset: 0},
-		tiltRight: {t: "04", uOffset: .5},
-
-		// straight: 	{t: "01", channel: new THREE.Vector2( 0, 0, 0 )},
-		// up: 		{t: "01", channel: new THREE.Vector2( 0, 1, 0 )},
-		// down: 		{t: "01", channel: new THREE.Vector2( 0, 0, 1 )},
-
-		// left: 		{t: "02", channel: new THREE.Vector2( 1, 0, 0 )},
-		// right: 		{t: "02", channel: new THREE.Vector2( 0, 1, 0 )},
-		// tiltLeft: 	{t: "02", channel: new THREE.Vector2( 0, 0, 1 )},
-
-		// tiltRight: 	{t: "03", channel: new THREE.Vector2( 1, 0, 0 )},
-		// weird1: 	{t: "03", channel: new THREE.Vector2( 0, 1, 0 )},
-		// weird2: 	{t: "03", channel: new THREE.Vector2( 0, 0, 1 )}
+		tiltRight: {t: "04", uOffset: .5}
 	}
 
 	this.inverseVideoMap = {

@@ -48,7 +48,7 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 
 	// ABOUT
 	var hasWebGL 		= true;
-	var hasUserMedia 	= true;
+	var hasUserMedia 	= false;
 
 	var backgroundMesh;
 
@@ -157,13 +157,6 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 	        });
 
 			// Starts capturing the flow from webcamera:
-			var oflowFolder = gui.addFolder("oflow");
-			oflowFolder.add(flowValues, "decay", .5, 1.).step(.001).onChange(function(value){
-				flowSmoothing = value;
-			});	
-			oflowFolder.add(flowValues, "motionThreshold", 100, 6000).step(1);
-			oflowFolder.add(flowValues, "vScale", 0, 1).step(.01);
-			oflowFolder.add(flowValues, "nodMix", 0, 1).step(.01);
 
 
 
@@ -292,18 +285,6 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 
 		// VIDEO CONTROLLER
 		videoContrller.playVideos();
-		
-		//BACKGROUND MESH
-		// backgroundMesh = new THREE.Mesh(new THREE.PlaneGeometry( 1, 1, 12, 7 ), new THREE.MeshBasicMaterial( {
-		// 	side: 2,
-		// 	transparent: false,
-		// 	depthTest: true,
-		// 	color: 0xFFFFFF,
-		// 	map: videoContrller.videos['BackgroundVideo'].texture
-		// }));
-		// backgroundMesh.position.z = -1;
-
-		//scene.add(backgroundMesh);
 
 
 		//SLIT SCANNING
@@ -326,6 +307,28 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 		
 		//resize the screen planes
 		scaleVidMesh();
+
+
+		//GUI
+		
+		$(gui.domElement)[0].onmouseover = function(e){	console.log( "bMouseOverGui" );}
+		$(gui.domElement)[0].onmouseout = function(e){	console.log( "bMouseOverGui" );}
+
+		gui.add({"click": function(){console.log( "click" );}}, "click");
+		
+		// var oflowFolder = gui.addFolder("oflow");
+		// oflowFolder.add(flowValues, "decay", .5, 1.).step(.001).onChange(function(value){
+		// 	flowSmoothing = value;
+		// });	
+		// oflowFolder.add(flowValues, "motionThreshold", 100, 6000).step(1);
+		// oflowFolder.add(flowValues, "vScale", 0, 1).step(.01);
+		// oflowFolder.add(flowValues, "nodMix", 0, 1).step(.01);
+		
+		// var bmFolder = gui.addFolder("BlendMaps");
+		// bmFolder.add(slits, 'blendMap', Object.keys(blendMaps) )
+		// .onChange(function(value) {
+		// 	slits.setBlendMap(value);
+		// });
 	}
 
 	/**
@@ -383,16 +386,16 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 		} 
 
 
-		// if ( hasUserMedia ){
-		// 	if ( frame % rate == 0 ){
-		// 		webcam.updatePixels();
-		// 		// console.log("update");
-		// 	}
-		// // no user media (or they denied it), so check mouse
-		// } else {
-		// 	flowDir.x = flowDir.x * .9 + THREE.Math.mapLinear(mouse.x, 0.0, window.innerWidth, 0.0, 1.0) * .1;
-		// 	flowDir.y = flowDir.y * .9 + THREE.Math.mapLinear(mouse.y, 0.0, window.innerHeight, 1.0, 0.0) * .1;
-		// }
+		if ( hasUserMedia ){
+			if ( frame % rate == 0 ){
+				webcam.updatePixels();
+				// console.log("update");
+			}
+		// no user media (or they denied it), so check mouse
+		} else {
+			flowDir.x = flowDir.x * .9 + THREE.Math.mapLinear(mouse.x, 0.0, window.innerWidth, 0.0, 1.0) * .1;
+			flowDir.y = flowDir.y * .9 + THREE.Math.mapLinear(mouse.y, 0.0, window.innerHeight, 1.0, 0.0) * .1;
+		}
 
 		// if ( hasWebGL )
 		// {
