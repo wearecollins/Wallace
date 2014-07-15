@@ -11,10 +11,10 @@ handlers:
   auth_fail_action: redirect
 
 - url: /js
-  static_dir: headControl/js
+  static_dir: videoHack/js
 
 - url: /css
-  static_dir: headControl/css
+  static_dir: videoHack/css
 
 - url: /dist
   static_dir: oflow/dist
@@ -77,17 +77,17 @@ handlers:
   mime_type: video/mp4
 
 - url: /(.*\.(gif|png|jpg|mp4))$
-  static_files: headControl/\1
-  upload: headControl/.*\.(gif|png|jpg|mp4)$
+  static_files: videoHack/\1
+  upload: videoHack/.*\.(gif|png|jpg|mp4)$
 
 - url: /(.*\.(html))$
-  static_files: headControl/\1
-  upload: headControl/.*\.(html)$
+  static_files: videoHack/\1
+  upload: videoHack/.*\.(html)$
   login: required
   auth_fail_action: redirect
 
 - url: /.*
-  static_files: headControl/index\.html
-  upload: headControl/index\.html
+  static_files: videoHack/index\.html
+  upload: videoHack/index\.html
   login: required
   auth_fail_action: redirect
