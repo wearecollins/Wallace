@@ -677,7 +677,7 @@ exports.WebCamFlow = WebCamFlow;
 // START WORKER
 
 
-self.calculator = new oflow.FlowCalculator(8);
+self.calculator = new oflow.FlowCalculator(16);
 self.last       = null;
 
 self.addEventListener('message', function(e) {
@@ -687,7 +687,7 @@ self.addEventListener('message', function(e) {
     var height  = e.data.height;
     var zones;
     if ( self.last != null ){
-       zones = self.calculator.calculate(self.last, current, width, height, false);
+       zones = self.calculator.calculate(self.last, current, width, height, true);
     }
     self.last = current;
 

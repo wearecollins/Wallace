@@ -25,7 +25,7 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 	document.body.appendChild( container );
 
 	var debug = _debug || false;
-	var useStats = _useStats || true;
+	var useStats = debug;//_useStats || true;
 	var frame = 0;
 
 	var vidAspect = 1280 / 720;
@@ -41,10 +41,6 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 
 
 	var elapsedTime = 0;
-
-	//gui
-	var gui = new dat.GUI();
-
 
 	// ABOUT
 	var hasWebGL 		= true;
@@ -66,7 +62,7 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 
 	var blendMaps = {
 		randomGrid: THREE.ImageUtils.loadTexture( '../blendMaps/random_grid.png' ),
-		softNoise: THREE.ImageUtils.loadTexture( '../blendMaps/soft_noise.png' ),
+		softNoise: THREE.ImageUtils.loadTexture( '../blendMaps/soft_noise_sides.png'),//'../blendMaps/soft_noise.png' ),
 		hardGradientDownTop: THREE.ImageUtils.loadTexture('../blendMaps/hardGradientDownTop.png'),
 		hardGradientLeftRight: THREE.ImageUtils.loadTexture('../blendMaps/hardGradientLeftRight.png'),
 		hardGradientRightLeft: THREE.ImageUtils.loadTexture('../blendMaps/hardGradientRightLeft.png'),
@@ -104,7 +100,7 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 
 		worker = new Worker("js/flowWorker.js");
 
-		webcam = new oflow.WebCam();
+		webcam = new WebCam();
         webcam.onUpdated( function(){
             // console.log("yes")
            // if ( webcam.getLastPixels() ){
@@ -293,6 +289,7 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 			camera: camera,
 			blendMap: blendMaps.softNoise,//hardGradientDownTop,//
 			currentTex: videoContrller.videos['01'].texture,
+			alphaRendered: !videoContrller.backgroundRendered
 		});
 
 		scene.add(slits.mesh);
@@ -302,36 +299,35 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 		//MISC
 		//
 		//threshold lines
-		scene.add(motionThresholds.group);
-		scene.add(debugSphere);
-		
+		if ( debug ){
+			scene.add(motionThresholds.group);
+			scene.add(debugSphere);
+		}	
 		//resize the screen planes
 		scaleVidMesh();
 
 
 		//GUI
-		
-		$(gui.domElement)[0].onmouseover = function(e){	console.log( "bMouseOverGui" );}
-		$(gui.domElement)[0].onmouseout = function(e){	console.log( "bMouseOverGui" );}
+		if ( debug ){
+			//gui
+			gui = new dat.GUI();
+			var oflowFolder = gui.addFolder("oflow");
+			oflowFolder.add(flowValues, "decay", .5, 1.).step(.001).onChange(function(value){
+				flowSmoothing = value;
+			});	
+			oflowFolder.add(flowValues, "motionThreshold", 100, 6000).step(1);
+			oflowFolder.add(flowValues, "vScale", 0, 1).step(.01);
+			oflowFolder.add(flowValues, "nodMix", 0, 1).step(.01);
 
-		gui.add({"click": function(){console.log( "click" );}}, "click");
+			var bmFolder = gui.addFolder("BlendMaps");
+			bmFolder.add(slits, 'blendMap', Object.keys(blendMaps) )
+			.onChange(function(value) {
+				slits.setBlendMap(value);
+			});
+			// move gui
+			$(".dg").css("z-index", 5000);
+		}
 		
-		// var oflowFolder = gui.addFolder("oflow");
-		// oflowFolder.add(flowValues, "decay", .5, 1.).step(.001).onChange(function(value){
-		// 	flowSmoothing = value;
-		// });	
-		// oflowFolder.add(flowValues, "motionThreshold", 100, 6000).step(1);
-		// oflowFolder.add(flowValues, "vScale", 0, 1).step(.01);
-		// oflowFolder.add(flowValues, "nodMix", 0, 1).step(.01);
-		
-		// var bmFolder = gui.addFolder("BlendMaps");
-		// bmFolder.add(slits, 'blendMap', Object.keys(blendMaps) )
-		// .onChange(function(value) {
-		// 	slits.setBlendMap(value);
-		// });
-		
-		// move gui
-		$(".dg").css("z-index", 5000);
 	}
 
 	/**
@@ -351,7 +347,7 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 
 		if ( hasUserMedia ){
 			if ( frame % rate == 0 ){
-				webcam.updatePixels();
+				setTimeout(webcam.updatePixels,0);
 				// console.log("update");
 			}
 		// no user media (or they denied it), so check mouse
@@ -610,9 +606,8 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 
 	function rendererSetup()
 	{
-
-		renderer = new THREE.WebGLRenderer( { antialias: true, devicePixelRatio: 1, alpha: true } );
-		renderer.setClearColor( 0x000000, 0. );
+		renderer = new THREE.WebGLRenderer( { antialias: false, devicePixelRatio: 1, alpha: true } );
+		renderer.setClearColor( 0x000000, 1. );
 		renderer.sortObjects = false;
 		renderer.setSize( window.innerWidth, window.innerHeight );
 		renderer.autoClear = true;

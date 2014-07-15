@@ -7,6 +7,7 @@ var Slitter = function(params)
 	this.renderer = params.renderer;
 	this.camera = params.camera;
 	this.blendMap = params.blendMap;
+	this.alphaRendered = params.alphaRendered;
 
 	this.width = params.width || 1280;
 	this.height = params.height || 720;
@@ -32,7 +33,8 @@ var Slitter = function(params)
 	this.blendMaterial = new ChanneledBlendShader({
 		currentTex: params.currentTex,
 		previousTex: params.previousTex,
-		blendMap: this.blendMap
+		blendMap: this.blendMap,
+		alphaRendered: this.alphaRendered
 	});
 
 	this.blendPlane = new THREE.PlaneGeometry( 2,2,	12, 7 );
