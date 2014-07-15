@@ -433,6 +433,7 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 
 	function startTransition2( to, midVid, transitionTime, delay, ease)
 	{
+		console.log( "startTransition2" );
 		//...
 		videoContrller.setVideoActive(previousVideo, false);
 		previousVideo = currentVideo;
@@ -462,7 +463,7 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 
 		//SLIT tweens for min and max sliting values
 		slits.setSlitMin(0);
-		slits.setSlitMax(0);
+		// slits.setSlitMax(0);
 
 		// /slit - increase the slitMax from 0 -> 1
 		new TWEEN.Tween({value: slits.getSlitMax()})
@@ -487,7 +488,7 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 			videoContrller.setVideoActive(currentVideo, false);
 			currentVideo = getCurrentMotionPositionsCorrespondingVideoName();
 			c = videoContrller.getVideo(currentVideo);
-			
+
 			videoContrller.setVideoActive(currentVideo, true);
 
 			//blend
@@ -515,6 +516,9 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 				slits.setSlitMin(value);
 			})
 			.start();
+
+
+			bTransitioning = false;
 		})
         .easing( ease )
 		.to({value: 1}, hlfTT)
@@ -527,9 +531,8 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 
 	}
 
-	function startTransition( to, transitionTime, onComplete, delay, ease)
+	function startTransition( to, transitionTime, delay, ease)
 	{
-		onComplete = onComplete || function(){};
 		//...
 		videoContrller.setVideoActive(previousVideo, false);
 		previousVideo = currentVideo;
@@ -577,7 +580,6 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 		})
         .easing( ease )
 		.onComplete(function(){
-			bTransitioning = false;
 
 			new TWEEN.Tween({value: slits.getSlitMin()})
 			.to({value: 1}, hlfTT)
@@ -587,6 +589,10 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 			{
 				slits.setSlitMin(value);
 			})
+			.onComplete(function()
+			{
+				bTransitioning = false;
+			})
 			.start();
 		})
 		.to({value: 1}, transitionTime)
@@ -594,8 +600,6 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 		.onUpdate( function( value )
 		{
 			slits.setMixValue(value);
-			// controls.mixVal = value;
-			// texBlendMat.uniforms.mixVal.value = value;
 		})
 		.start();
 	}
