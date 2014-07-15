@@ -87,6 +87,12 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 	var debugSphere = new THREE.Mesh( new THREE.SphereGeometry(5), new THREE.MeshBasicMaterial( {color: 0xFF2201, side: 2} ) );
 	debugSphere.scale.z = 2;
 	
+	// transitions
+	var time = {
+		in: 500,
+		out: 1000
+	}
+
 	function setup() 
 	{
 		// THREE Setup
@@ -198,6 +204,12 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 			.onChange(function(value) {
 				slits.setBlendMap(value);
 			});
+
+			var slitFolder = gui.addFolder("Slitscanning");
+			slitFolder.add( slits, "slitStep", 1, 5 ).step(1);
+			slitFolder.add( time, "in", 10, 2000 ).step(1);
+			slitFolder.add( time, "out", 10, 2000 ).step(1);
+
 			// move gui
 			$(".dg").css("z-index", 5000);
 		}
@@ -441,7 +453,7 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 		slits.setMixValue(0);
 
 		//transition tween vvalues
-		transitionTime = transitionTime || 1200;
+		transitionTime = transitionTime || time.out;
 		delay = delay || 0;
 		ease = ease || TWEEN.Easing.Linear.None,//TWEEN.Easing.Sinusoidal.InOut;
 		slits.setMixValue(0);
@@ -530,7 +542,7 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 		slits.setMixValue(0);
 
 		//transition tween vvalues
-		transitionTime = transitionTime || 600;
+		transitionTime = transitionTime || time.in;
 		delay = delay || 0;
 		ease = ease || TWEEN.Easing.Sinusoidal.Out;
 		slits.setMixValue(0);
