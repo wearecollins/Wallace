@@ -113,171 +113,45 @@ function APP( _useStats, _debug, _muteVideo, _auto)
                 });
             //}
         });
-        	        /* Setup WebWorker messaging */
-	        var lastTime = new Date();
-	        worker.onmessage = function(event){
 
-	        	// console.log( event.data.time - lastTime );
-	        	if ( event.data.time - lastTime > 0 ){
-	        		lastTime = event.data.time;
-	        		var direction = event.data.direction;
+        /* Setup WebWorker messaging */
+        var lastTime = new Date();
+        worker.onmessage = function(event){
 
-					if(direction.averageMotionPos.numVals > flowValues.motionThreshold)
-					{
+        	// console.log( event.data.time - lastTime );
+        	if ( event.data.time - lastTime > 0 ){
+        		lastTime = event.data.time;
+        		var direction = event.data.direction;
+
+				if(direction.averageMotionPos.numVals > flowValues.motionThreshold)
+				{
 		            targetDir.x = 1. - event.data.direction.averageMotionPos.x;
 		            // targetDir.y = 1. - event.data.direction.averageMotionPos.y;
 
 					b1 = b1 * (1 - flowValues.nodMix) + event.data.direction.v * flowValues.nodMix;
 					targetDir.y = -b1 * flowValues.vScale + .5; 
-					}
+				}
 
 
-					flowDir.x = flowDir.x * flowSmoothing + (targetDir.x) * (1 - flowSmoothing);
-					flowDir.y = flowDir.y * flowSmoothing + (targetDir.y) * (1 - flowSmoothing);
-	        	}
-	            
-	        };
+				flowDir.x = flowDir.x * flowSmoothing + (targetDir.x) * (1 - flowSmoothing);
+				flowDir.y = flowDir.y * flowSmoothing + (targetDir.y) * (1 - flowSmoothing);
+        	}
+            
+        };
 
 
-	        // set up w/o starting animation
-	        // error callback determines next stuff
-	        webcam.startCapture(false, function (e){
-				hasUserMedia = false;
+        // set up w/o starting animation
+        // error callback determines next stuff
+        webcam.startCapture(false, function (e){
+			hasUserMedia = false;
 
-	        	if(e.code === 1){
-	                console.error('You have denied access to your camera. I cannot do anything.');
-	                // here we could do an "are you sure?" pop up that would refresh the page?
-	            } else { 
-	            	// we just don't have it!
-	            }
-	        });
-
-			// Starts capturing the flow from webcamera:
-
-
-
-		// if ( hasWebGL ){
-		// 	// optical flow debug canvas
-			
-		// 	// optical flow debug canvas
-		// 	if ( debugCanvas ){
-		// 		ofCanvas = document.createElement("canvas");
-		// 		document.body.appendChild(ofCanvas);
-		// 		ofCanvas.setAttribute("width", 640);
-		// 		ofCanvas.setAttribute("height", 480);
-		// 		ofCanvas.style.position = "absolute";
-		// 		ofCanvas.style.top = "0px";
-		// 		ofCanvas.style.left = "0px";
-		// 		ofCanvas.style.zIndex = "1000";
-		// 		ofCtx = ofCanvas.getContext("2d");
-		// 	}
-		// 	// setup web cam and optical flow worker
-			
-		// 	worker = new Worker("js/flowWorker.js");
-
-		// 	webcam = new oflow.WebCam();
-	 //        webcam.onUpdated( function(){
-	 //            // console.log("yes")
-	 //            if ( webcam.getLastPixels() ){
-	 //                worker.postMessage({
-	 //                    last: webcam.getLastPixels(),
-	 //                    current: webcam.getCurrentPixels(),
-	 //                    width: webcam.getWidth(),
-	 //                    height: webcam.getHeight(),
-	 //                    time: new Date()
-	 //                });
-	 //            }
-	 //        });
-
-	 //        /* Setup WebWorker messaging */
-	 //        var lastTime = new Date();
-	 //        worker.onmessage = function(event){
-
-	 //        	// console.log( event.data.time - lastTime );
-	 //        	if ( event.data.time - lastTime > 0 ){
-	 //        		lastTime = event.data.time;
-	 //        		var direction = event.data.direction;
-
-		//         	// draw
-		//         	if ( debugCanvas ){
-		//         		ofCtx.clearRect(0, 0, 640, 480);
-		// 	            for(var i = 0; i < direction.zones.length; ++i) {
-		// 	                var zone = direction.zones[i];
-		// 	                ofCtx.strokeStyle = getDirectionalColor(zone.u, zone.v);
-		// 	                ofCtx.beginPath();
-		// 	                ofCtx.moveTo(zone.x,zone.y);
-		// 	                ofCtx.lineTo((zone.x - zone.u), zone.y + zone.v);
-		// 	                ofCtx.stroke();
-		// 	            }
-		//         	}
-
-
-		// 			if(direction.averageMotionPos.numVals > flowValues.motionThreshold)
-		// 			{
-		//             targetDir.x = 1. - event.data.direction.averageMotionPos.x;
-		//             // targetDir.y = 1. - event.data.direction.averageMotionPos.y;
-
-		// 			b1 = b1 * (1 - flowValues.nodMix) + event.data.direction.v * flowValues.nodMix;
-		// 			targetDir.y = -b1 * flowValues.vScale + .5; 
-		// 			}
-
-
-		// 			flowDir.x = flowDir.x * flowSmoothing + (targetDir.x) * (1 - flowSmoothing);
-		// 			flowDir.y = flowDir.y * flowSmoothing + (targetDir.y) * (1 - flowSmoothing);
-	 //        	}
-	            
-	 //        };
-
-	 //        // set up w/o starting animation
-	 //        // error callback determines next stuff
-	 //        webcam.startCapture(false, function (e){
-		// 		hasUserMedia = false;
-
-	 //        	if(e.code === 1){
-	 //                console.error('You have denied access to your camera. I cannot do anything.');
-	 //                // here we could do an "are you sure?" pop up that would refresh the page?
-	 //            } else { 
-	 //            	// we just don't have it!
-	 //            }
-	 //        });
-
-		// 	// Starts capturing the flow from webcamera:
-		// 	var oflowFolder = gui.addFolder("oflow");
-		// 	oflowFolder.add(flowValues, "decay", .5, 1.).step(.001).onChange(function(value){
-		// 		flowSmoothing = value;
-		// 	});	
-		// 	oflowFolder.add(flowValues, "motionThreshold", 100, 6000).step(1);
-		// 	oflowFolder.add(flowValues, "vScale", 0, 1).step(.01);
-		// 	oflowFolder.add(flowValues, "nodMix", 0, 1).step(.01);
-
-		// 	//THREE SETUP
-		// 	resetCamera();
-
-		// 	projector = new THREE.Projector();
-
-		// 	light = new THREE.PointLight();
-		// 	light.position = camera.position;
-
-		// 	scene = new THREE.Scene();
-		// 	scene.add( camera );
-		// 	scene.add( light );
-		// 	scene.add( group );	
-
-		// 	//blend textures
-		// 	blendMaps ["hardNoise"] = THREE.ImageUtils.loadTexture( '../blendMaps/hard_noise.png' );
-		// 	blendMaps ["randomGrid"] = THREE.ImageUtils.loadTexture( '../blendMaps/random_grid.png' );
-		// 	blendMaps ["softNoise"] = THREE.ImageUtils.loadTexture( '../blendMaps/soft_noise.png' );
-		// 	blendMaps ["Checker"] = THREE.ImageUtils.loadTexture( '../blendMaps/Checker.png' );
-		// 	blendMaps["horizontal_stripes"] = THREE.ImageUtils.loadTexture( '../blendMaps/horizontal_stripes.png');
-		// 	blendMaps["hardGradientDownTop"] = THREE.ImageUtils.loadTexture('../blendMaps/hardGradientDownTop.png');
-		// 	blendMaps["hardGradientLeftRight"] = THREE.ImageUtils.loadTexture('../blendMaps/hardGradientLeftRight.png');
-		// 	blendMaps["hardGradientRightLeft"] = THREE.ImageUtils.loadTexture('../blendMaps/hardGradientRightLeft.png');
-		// 	blendMaps["hardGradientTopDown"] = THREE.ImageUtils.loadTexture('../blendMaps/hardGradientTopDown.png');
-
-		// 	blendMaps["verticalHardGradient"] = THREE.ImageUtils.loadTexture( '../blendMaps/verticalHardGradient.png');
-		// 	blendMaps["zigzag"] = THREE.ImageUtils.loadTexture( '../blendMaps/zigzag.png');
-		// }
-		
+        	if(e.code === 1){
+                console.error('You have denied access to your camera. I cannot do anything.');
+                // here we could do an "are you sure?" pop up that would refresh the page?
+            } else { 
+            	// we just don't have it!
+            }
+        });
 
 		// VIDEO CONTROLLER
 		videoContrller.playVideos();
