@@ -287,7 +287,7 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 		slits = new Slitter({
 			renderer: renderer,
 			camera: camera,
-			blendMap: blendMaps.randomGrid,// blendMaps.softNoise,//hardGradientDownTop,//
+			blendMap: blendMaps.softNoise,// blendMaps.softNoise,//hardGradientDownTop,//
 			currentTex: videoContrller.videos['01'].texture,
 			alphaRendered: !videoContrller.backgroundRendered
 		});
