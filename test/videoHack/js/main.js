@@ -484,8 +484,11 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 		})
 		.onComplete(function()
 		{
+			videoContrller.setVideoActive(currentVideo, false);
 			currentVideo = getCurrentMotionPositionsCorrespondingVideoName();
 			c = videoContrller.getVideo(currentVideo);
+			
+			videoContrller.setVideoActive(currentVideo, true);
 
 			//blend
 			new TWEEN.Tween({value: 0})
