@@ -59,6 +59,12 @@ Slitter.prototype.setMixValue = function(mixVal)
 	// this.slitMaterial.uniforms.mixVal.value = mixVal;
 }
 
+
+Slitter.prototype.getMixValue = function(mixVal)
+{
+	return this.blendMaterial.uniforms.mixVal.value;
+}
+
 Slitter.prototype.setSlitMax = function(value)
 {
 	this.slitMaterial.uniforms.bMax.value = value;
@@ -79,12 +85,12 @@ Slitter.prototype.getSlitMin = function()
 	return this.slitMaterial.uniforms.bMin.value;
 }
 
-Slitter.prototype.setCurrentTesture = function(currentTexture, textureCoordOffset)
+Slitter.prototype.setCurrentTexture = function(currentTexture, textureCoordOffset)
 {
 	this.blendMaterial.setCurrentTexture( currentTexture, textureCoordOffset );
 }
 
-Slitter.prototype.setPreviousTesture = function(previousTexture, textureCoordOffset)
+Slitter.prototype.setPreviousTexture = function(previousTexture, textureCoordOffset)
 {
 	this.blendMaterial.setPreviousTexture( previousTexture, textureCoordOffset );
 }

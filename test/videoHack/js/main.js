@@ -44,7 +44,7 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 
 	// ABOUT
 	var hasWebGL 		= true;
-	var hasUserMedia 	= true;
+	var hasUserMedia 	= false;
 
 	var backgroundMesh;
 
@@ -81,7 +81,7 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 		decay: .95,
 		motionThreshold: 1500,
 		nodMix: .3,
-		vScale: .2
+		vScale: .25
 	}
 
 	var debugSphere = new THREE.Mesh( new THREE.SphereGeometry(5), new THREE.MeshBasicMaterial( {color: 0xFF2201, side: 2} ) );
@@ -287,7 +287,7 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 		slits = new Slitter({
 			renderer: renderer,
 			camera: camera,
-			blendMap: blendMaps.softNoise,//hardGradientDownTop,//
+			blendMap: blendMaps.randomGrid,// blendMaps.softNoise,//hardGradientDownTop,//
 			currentTex: videoContrller.videos['01'].texture,
 			alphaRendered: !videoContrller.backgroundRendered
 		});
@@ -369,22 +369,31 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 
 			if( v != currentVideo)
 			{
-				videoContrller.setVideoActive(previousVideo, false);
-				previousVideo = currentVideo;
-				currentVideo = v;
+				var bMulti = false;
+				//multi transitioning
+				//
+				// left straight right
+				// weird
+				// left up right
+				// left down right
+				//  left
+				// right
+				// tiltLeft
+				// tiltRight
+				// 
+				// 
+				
+				if(currentVideo == "straight")
+				{
+					console.log( v, currentVideo );
+				}
+				
 
-				videoContrller.setVideoActive(previousVideo, true);
-				videoContrller.setVideoActive(currentVideo, true);
-
-				var c = videoContrller.getVideo(currentVideo);
-				var p = videoContrller.getVideo(previousVideo);
-
-				slits.setPreviousTesture(p.t, p.uOffset);
-				slits.setCurrentTesture(c.t, c.uOffset)
-
-				setBlendVal(0);
-
-				startTransition();
+				if(bMulti == false)
+				{
+					// startTransition(v);
+					startMultiTransition(currentVideo, v);
+				}
 			}
 		} 
 
@@ -396,8 +405,9 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 			}
 		// no user media (or they denied it), so check mouse
 		} else {
-			flowDir.x = flowDir.x * .9 + THREE.Math.mapLinear(mouse.x, 0.0, window.innerWidth, 0.0, 1.0) * .1;
-			flowDir.y = flowDir.y * .9 + THREE.Math.mapLinear(mouse.y, 0.0, window.innerHeight, 1.0, 0.0) * .1;
+			var fmix = .8, mfmix = 1. - fmix;
+			flowDir.x = flowDir.x * fmix + THREE.Math.mapLinear(mouse.x, 0.0, window.innerWidth, 0.0, 1.0) * mfmix;
+			flowDir.y = flowDir.y * fmix + THREE.Math.mapLinear(mouse.y, 0.0, window.innerHeight, 1.0, 0.0) * mfmix;
 		}
 
 		// if ( hasWebGL )
@@ -410,6 +420,115 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 				debugSphere.position.y = THREE.Math.mapLinear( flowDir.y, 0, 1, -motionThresholds.group.scale.y*.5, motionThresholds.group.scale.y*.5);
 			}
 		// }
+	}
+
+	function startMultiTransition(from, to)
+	{
+		var strFromTo = from + '_' + to;
+
+		switch(strFromTo)
+		{
+			// case "straight_down":
+			// 	break;
+			// case "down_tiltLeft":
+			// 	break;
+			// case "tiltLeft_straight":
+			// 	break;
+			// case "straight":
+			// 	break;
+			// 	
+			// 	//TO LEFT
+			case "straight_left":
+				startTransition2( "left", "tiltLeft");
+				break;
+			case "tiltRight_left":
+				startTransition2( "left", "straight");
+				break;
+			case "right_left":
+				startTransition2( "left", "weird");
+				break;
+			case "up_left":
+				startTransition2( "left", "tiltLeft");
+				break;
+			// case "down_left":
+			// 	startTransition2( "left", "weird");
+			// 	break;
+
+
+				//TO RIGHt
+			case "straight_right":
+				startTransition2( "right", "tiltRight");
+				break;
+			case "up_right":
+				startTransition2( "right", "tiltRight");
+				break;
+			// case "down_right":
+			// 	startTransition2( "right", "weird");
+			// 	break;
+			case "left_right":
+				startTransition2("right", "straight");
+				break;
+			case "tiltLeft_right":
+				startTransition2("right", "straight");
+				break;
+
+				//TO UP
+			case "left_up":
+				startTransition2("up", "tiltLeft");
+				break;
+			case "right_up":
+				startTransition2("up", "tiltRight");
+				break;
+			case "down_up":
+				startTransition2("up", "straight");
+				break;
+
+
+				//TO DOWN
+			case "left_down":
+				startTransition2("down", "weird");
+				break;
+			case "right_down":
+				startTransition2("down", "weird");
+				break;
+			case "up_down":
+				startTransition2("down", "straight");
+				break;
+			case "tiltLeft_down":
+				startTransition2("down", "weird");
+				break;
+			case "tiltRight_down":
+				startTransition2("down", "weird");
+				break;
+
+				//to TILT RIGHT
+			case "tiltLeft_tiltRight":
+				startTransition2("tiltRight", "straight");
+				break;
+			case "left_tiltRight":
+				startTransition2("tiltRight", "straight");
+				break;
+			case "down_tiltRight":
+				startTransition2("tiltRight", "weird");
+				break;
+
+
+				//to TILT LEFT
+			case "tiltRight_tiltLeft":
+				startTransition2("tiltLeft", "straight");
+				break;
+			case "right_tiltLeft":
+				startTransition2("tiltLeft", "straight");
+				break;
+			case "down_tiltLeft":
+				startTransition2("tiltLeft", "weird");
+				break;
+
+
+			default:
+				startTransition(to);
+				break; 
+		}
 	}
 
 	/**
@@ -426,12 +545,138 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 		renderer.render( scene, camera, null, true );
 	}
 
-	function startTransition(transitionTime, delay, ease)
+	function startTransition2( to, midVid, transitionTime, delay, ease)
 	{
-		transitionTime = transitionTime || 1000;
+		//...
+		videoContrller.setVideoActive(previousVideo, false);
+		previousVideo = currentVideo;
+		currentVideo = to;
+
+		videoContrller.setVideoActive(previousVideo, true);
+		videoContrller.setVideoActive(midVid, true);
+		videoContrller.setVideoActive(currentVideo, true);
+
+		var c = videoContrller.getVideo(currentVideo);
+		var m = videoContrller.getVideo(midVid);
+		var p = videoContrller.getVideo(previousVideo);
+
+		// slits.setPreviousTexture(p.t, p.uOffset);
+		// slits.setCurrentTexture(c.t, c.uOffset)
+
+		// setBlendVal(0);
+		slits.setMixValue(0);
+
+		//transition tween vvalues
+		transitionTime = transitionTime || 1200;
+		delay = delay || 0;
+		ease = ease || TWEEN.Easing.Linear.None,//TWEEN.Easing.Sinusoidal.InOut;
+		slits.setMixValue(0);
+		var hlfTT = transitionTime * .5;
+
+
+		//SLIT tweens for min and max sliting values
+		slits.setSlitMin(0);
+		slits.setSlitMax(0);
+
+		// /slit - increase the slitMax from 0 -> 1
+		new TWEEN.Tween({value: slits.getSlitMax()})
+		.to({value: 1}, hlfTT)
+		.delay(delay)
+		.easing( ease )
+		.onUpdate(function(value)
+		{
+			slits.setSlitMax(value);
+		})
+		.start();
+
+		//BLEND tweens for blending the current, mid and previous videos
+		new TWEEN.Tween({value: 0})
+		.onStart(function(){
+			bTransitioning = true;
+			slits.setPreviousTexture(p.t, p.uOffset);
+			slits.setCurrentTexture(m.t, m.uOffset)
+		})
+		.onComplete(function()
+		{
+			//blend
+			new TWEEN.Tween({value: 0})
+			.onStart(function(){
+				slits.setMixValue(0);
+				slits.setPreviousTexture(m.t, m.uOffset);
+				slits.setCurrentTexture(c.t, c.uOffset)
+			})
+			.onComplete(function(){
+				bTransitioning = false;
+			})
+			.to({value: 1}, hlfTT)
+			.onUpdate( function( value )
+			{
+				slits.setMixValue(value);
+			})
+			.start();
+
+			//slit- bring the slitmin up to meet the slitmax
+			new TWEEN.Tween({value: slits.getSlitMin()})
+			.to({value: 1}, hlfTT)
+			.onUpdate(function(value)
+			{
+				slits.setSlitMin(value);
+			})
+			.start();
+		})
+        .easing( ease )
+		.to({value: 1}, hlfTT)
+		.delay( delay)
+		.onUpdate( function( value )
+		{
+			slits.setMixValue(value);
+		})
+		.start();
+
+	}
+
+	function startTransition( to, transitionTime, onComplete, delay, ease)
+	{
+		onComplete = onComplete || function(){};
+		//...
+		videoContrller.setVideoActive(previousVideo, false);
+		previousVideo = currentVideo;
+		currentVideo = to;
+
+		videoContrller.setVideoActive(previousVideo, true);
+		videoContrller.setVideoActive(currentVideo, true);
+
+		var c = videoContrller.getVideo(currentVideo);
+		var p = videoContrller.getVideo(previousVideo);
+
+		slits.setPreviousTexture(p.t, p.uOffset);
+		slits.setCurrentTexture(c.t, c.uOffset)
+
+		// setBlendVal(0);
+		slits.setMixValue(0);
+
+		//transition tween vvalues
+		transitionTime = transitionTime || 600;
 		delay = delay || 0;
 		ease = ease || TWEEN.Easing.Sinusoidal.Out;
 		slits.setMixValue(0);
+		var hlfTT = transitionTime * .5;
+
+		//SLIT tweens for min and max sliting values
+		slits.setSlitMin(0);
+		slits.setSlitMax(0);
+
+		// /slit
+		new TWEEN.Tween({value: slits.getSlitMax()})
+		.to({value: 1}, hlfTT)
+		.delay(delay)
+		.easing( ease )
+		.onUpdate(function(value)
+		{
+			slits.setSlitMax(value);
+		})
+		.start();
+
 
 		//tween for blending the current and previous videos
 		new TWEEN.Tween({value: 0})
@@ -441,6 +686,16 @@ function APP( _useStats, _debug, _muteVideo, _auto)
         .easing( ease )
 		.onComplete(function(){
 			bTransitioning = false;
+
+			new TWEEN.Tween({value: slits.getSlitMin()})
+			.to({value: 1}, hlfTT)
+			.delay(delay)
+			.easing( ease )
+			.onUpdate(function(value)
+			{
+				slits.setSlitMin(value);
+			})
+			.start();
 		})
 		.to({value: 1}, transitionTime)
 		.delay( delay)
@@ -451,43 +706,6 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 			// texBlendMat.uniforms.mixVal.value = value;
 		})
 		.start();
-
-		//tweens for min and max sliting values
-		slits.setSlitMin(0);
-		slits.setSlitMax(1);
-		var hlfTT = transitionTime;// * .5;
-
-
-
-		new TWEEN.Tween({value: slits.getSlitMin()})
-		.to({value: 1}, transitionTime)
-		.delay(delay)
-		.easing( ease )
-		.onUpdate(function(value)
-		{
-			slits.setSlitMin(value);
-		})
-		.start();
-
-		// new TWEEN.Tween({value: slits.getSlitMax()})
-		// .to({value: 1}, hlfTT * .5)
-		// .delay(delay)
-  //       .easing( ease )
-		// .onUpdate(function(value)
-		// {
-		// 	slits.setSlitMax(value);
-		// })
-		// .start();
-
-		// new TWEEN.Tween({value: slits.getSlitMin()})
-		// .to({value: 1}, hlfTT * .5)
-		// .delay(delay + hlfTT * .5)
-		// .easing( ease )
-		// .onUpdate(function(value)
-		// {
-		// 	slits.setSlitMin(value);
-		// })
-		// .start();
 	}
 
 	function getCurrentMotionPositionsCorrespondingVideoName()
