@@ -44,7 +44,7 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 
 	// ABOUT
 	var hasWebGL 		= true;
-	var hasUserMedia 	= true;
+	var hasUserMedia 	= false;//true;
 
 	var backgroundMesh;
 
@@ -484,6 +484,9 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 		})
 		.onComplete(function()
 		{
+			currentVideo = getCurrentMotionPositionsCorrespondingVideoName();
+			c = videoContrller.getVideo(currentVideo);
+
 			//blend
 			new TWEEN.Tween({value: 0})
 			.onStart(function(){
