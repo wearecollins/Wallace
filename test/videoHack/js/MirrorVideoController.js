@@ -330,7 +330,7 @@ MirrorVideoController.prototype.onSubtitleTrigger = function(e){
 				this.subTitleInvert = !this.subTitleInvert;
 			}
 			var obj = cue.text;//JSON.parse(cue.text);
-			this.addFallingText(obj);
+			setTimeout( this.addFallingText.bind(this), 0, obj);
 		}
 	}
 }
@@ -382,7 +382,7 @@ MirrorVideoController.prototype.addFallingText = function( string ){
 		d.style["-webkit-transition"] = "top ease-out 5s, -webkit-transform 10s";
 		d.style.top = invert ? window.innerHeight * -.25 +"px" : window.innerHeight * 1.2 +"px";
 		d.style["-webkit-transform"] = "rotateZ(" + (Math.floor( -300 + Math.random() * 600 )) + "deg)";
-	}, 100, this.divs[ind], this.subTitleInvert);
+	}, 10, this.divs[ind], this.subTitleInvert);
 
 	// setTimeout( function(d){
 	// 	document.body.removeChild(d);
