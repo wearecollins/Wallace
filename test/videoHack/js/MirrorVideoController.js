@@ -31,8 +31,6 @@ var AzealiaVideoObject = function(params, useWebGL)
 
 
 	this.vidPosition = {position: 0.0001};
-
-	this.debugVal = 0;
 }
 
 MirrorVideoController = function(params)
@@ -177,18 +175,22 @@ MirrorVideoController.prototype.update = function()
 // }
 
 	//update videos 
+	// var vk = Object.keys(this.videos);
+	// console.log( vk );
 	for(var i in this.videos)
 	{
-		if(this.debugVal < 100)
-		{
-			console.log( this.videos[i] );
-			this.debugVal++;
-		}
 		if (this.videos[i].bIsActive && this.videos[i].video.readyState === this.videos[i].video.HAVE_ENOUGH_DATA )
 		{
 			if ( this.videos[i].texture ) this.videos[i].texture.needsUpdate = true;
 			this.vidPosition.position = this.videos[i].video.currentTime / this.videoDuration;
+
+
+			if( i != "01" && this.videos["01"].video.readyState)
+			{
+				this.videos[i].video.currentTime = this.videos["01"].video.currentTime;
+			}
 		}
+
 	}
 }
 
