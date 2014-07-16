@@ -24,7 +24,7 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 	container.style.top = '0px';
 	document.body.appendChild( container );
 
-	var debug = _debug || false;
+	var debug = (_debug == true)? true : false;
 	var useStats = debug;//_useStats || true;
 	var frame = 0;
 
@@ -249,7 +249,7 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 		//test for motion position and start transition to new video if needed 
 		
 
-		if(!bTransitioning)
+		if(bTransitioning == false)
 		{
 			var v = getCurrentMotionPositionsCorrespondingVideoName();
 
@@ -310,19 +310,19 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 
 	function startMultiTransition(from, to)
 	{
+
+
+		if(bTransitioning == true){
+			console.log( "wtf" );
+			return;
+		}
+
 		var strFromTo = from + '_' + to;
+
+		var wrd = "straight";
 
 		switch(strFromTo)
 		{
-			// case "straight_down":
-			// 	break;
-			// case "down_tiltLeft":
-			// 	break;
-			// case "tiltLeft_straight":
-			// 	break;
-			// case "straight":
-			// 	break;
-			// 	
 			// 	//TO LEFT
 			case "straight_left":
 				startTransition2( "left", "tiltLeft");
@@ -331,7 +331,7 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 				startTransition2( "left", "straight");
 				break;
 			case "right_left":
-				startTransition2( "left", "weird");
+				startTransition2( "left", wrd);
 				break;
 			case "up_left":
 				startTransition2( "left", "tiltLeft");
@@ -372,20 +372,20 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 
 				//TO DOWN
 			case "left_down":
-				startTransition2("down", "weird");
+				startTransition2("down", wrd);
 				break;
 			case "right_down":
-				startTransition2("down", "weird");
+				startTransition2("down", wrd);
 				break;
 			case "up_down":
 				startTransition2("down", "straight");
 				break;
-			case "tiltLeft_down":
-				startTransition2("down", "weird");
-				break;
-			case "tiltRight_down":
-				startTransition2("down", "weird");
-				break;
+			// case "tiltLeft_down":
+			// 	startTransition2("down", wrd);
+			// 	break;
+			// case "tiltRight_down":
+			// 	startTransition2("down", wrd);
+			// 	break;
 
 				//to TILT RIGHT
 			case "tiltLeft_tiltRight":
@@ -394,9 +394,9 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 			case "left_tiltRight":
 				startTransition2("tiltRight", "straight");
 				break;
-			case "down_tiltRight":
-				startTransition2("tiltRight", "weird");
-				break;
+			// case "down_tiltRight":
+			// 	startTransition2("tiltRight", wrd);
+			// 	break;
 
 
 				//to TILT LEFT
@@ -406,11 +406,12 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 			case "right_tiltLeft":
 				startTransition2("tiltLeft", "straight");
 				break;
-			case "down_tiltLeft":
-				startTransition2("tiltLeft", "weird");
-				break;
+			// case "down_tiltLeft":
+			// 	startTransition2("tiltLeft", wrd);
+			// 	break;
 
 
+			//OTHER
 			default:
 				startTransition(to);
 				break; 
@@ -433,7 +434,8 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 
 	function startTransition2( to, midVid, transitionTime, delay, ease)
 	{
-		console.log( "startTransition2" );
+		bTransitioning = true;
+		
 		//...
 		videoContrller.setVideoActive(previousVideo, false);
 		previousVideo = currentVideo;
@@ -446,9 +448,6 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 		var c = videoContrller.getVideo(currentVideo);
 		var m = videoContrller.getVideo(midVid);
 		var p = videoContrller.getVideo(previousVideo);
-
-		// slits.setPreviousTexture(p.t, p.uOffset);
-		// slits.setCurrentTexture(c.t, c.uOffset)
 
 		// setBlendVal(0);
 		slits.setMixValue(0);
@@ -479,17 +478,25 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 		//BLEND tweens for blending the current, mid and previous videos
 		new TWEEN.Tween({value: 0})
 		.onStart(function(){
-			bTransitioning = true;
 			slits.setPreviousTexture(p.t, p.uOffset);
 			slits.setCurrentTexture(m.t, m.uOffset)
 		})
 		.onComplete(function()
 		{
+			// var cv = getCurrentMotionPositionsCorrespondingVideoName();
+			// if(cv != currentVideo && cv != previousVideo)
+			// {
+			// 	videoContrller.setVideoActive(currentVideo, false);
+			// 	currentVideo = cv;//getCurrentMotionPositionsCorrespondingVideoName();
+			// 	c = videoContrller.getVideo(currentVideo);
+			// 	videoContrller.setVideoActive(currentVideo, true);	
+			// }
+			
 			videoContrller.setVideoActive(currentVideo, false);
 			currentVideo = getCurrentMotionPositionsCorrespondingVideoName();
 			c = videoContrller.getVideo(currentVideo);
 
-			videoContrller.setVideoActive(currentVideo, true);
+			videoContrller.setVideoActive(currentVideo, true);	
 
 			//blend
 			new TWEEN.Tween({value: 0})
@@ -499,7 +506,9 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 				slits.setCurrentTexture(c.t, c.uOffset)
 			})
 			.onComplete(function(){
-				bTransitioning = false;
+				setTimeout(function(){
+					bTransitioning = false;
+				}, 100);
 			})
 			.to({value: 1}, hlfTT)
 			.onUpdate( function( value )
@@ -516,9 +525,6 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 				slits.setSlitMin(value);
 			})
 			.start();
-
-
-			bTransitioning = false;
 		})
         .easing( ease )
 		.to({value: 1}, hlfTT)
@@ -533,6 +539,8 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 
 	function startTransition( to, transitionTime, delay, ease)
 	{
+		bTransitioning = true;
+
 		//...
 		videoContrller.setVideoActive(previousVideo, false);
 		previousVideo = currentVideo;
@@ -575,9 +583,6 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 
 		//tween for blending the current and previous videos
 		new TWEEN.Tween({value: 0})
-		.onStart(function(){
-			bTransitioning = true;
-		})
         .easing( ease )
 		.onComplete(function(){
 
@@ -591,7 +596,9 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 			})
 			.onComplete(function()
 			{
-				bTransitioning = false;
+				setTimeout(function(){
+					bTransitioning = false;
+				}, 100);
 			})
 			.start();
 		})
@@ -744,8 +751,8 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 
 	function animate() {
 		requestAnimationFrame( animate );
-		TWEEN.update();
 		update();
+		TWEEN.update();
 		if ( hasWebGL ) draw();
 
 		if(useStats)
