@@ -319,7 +319,7 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 
 		var strFromTo = from + '_' + to;
 
-		var wrd = "straight";
+		var wrd = "weird";
 
 		switch(strFromTo)
 		{
@@ -336,9 +336,9 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 			case "up_left":
 				startTransition2( "left", "tiltLeft");
 				break;
-			// case "down_left":
-			// 	startTransition2( "left", "weird");
-			// 	break;
+			case "down_left":
+				startTransition2( "left", "weird");
+				break;
 
 
 				//TO RIGHt
@@ -348,9 +348,9 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 			case "up_right":
 				startTransition2( "right", "tiltRight");
 				break;
-			// case "down_right":
-			// 	startTransition2( "right", "weird");
-			// 	break;
+			case "down_right":
+				startTransition2( "right", "weird");
+				break;
 			case "left_right":
 				startTransition2("right", "straight");
 				break;
@@ -380,12 +380,12 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 			case "up_down":
 				startTransition2("down", "straight");
 				break;
-			// case "tiltLeft_down":
-			// 	startTransition2("down", wrd);
-			// 	break;
-			// case "tiltRight_down":
-			// 	startTransition2("down", wrd);
-			// 	break;
+			case "tiltLeft_down":
+				startTransition2("down", wrd);
+				break;
+			case "tiltRight_down":
+				startTransition2("down", wrd);
+				break;
 
 				//to TILT RIGHT
 			case "tiltLeft_tiltRight":
@@ -394,9 +394,9 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 			case "left_tiltRight":
 				startTransition2("tiltRight", "straight");
 				break;
-			// case "down_tiltRight":
-			// 	startTransition2("tiltRight", wrd);
-			// 	break;
+			case "down_tiltRight":
+				startTransition2("tiltRight", wrd);
+				break;
 
 
 				//to TILT LEFT
@@ -406,9 +406,9 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 			case "right_tiltLeft":
 				startTransition2("tiltLeft", "straight");
 				break;
-			// case "down_tiltLeft":
-			// 	startTransition2("tiltLeft", wrd);
-			// 	break;
+			case "down_tiltLeft":
+				startTransition2("tiltLeft", wrd);
+				break;
 
 
 			//OTHER
