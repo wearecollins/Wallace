@@ -677,7 +677,7 @@ exports.WebCamFlow = WebCamFlow;
 // START WORKER
 
 
-self.calculator = new oflow.FlowCalculator(16);
+self.calculator = new oflow.FlowCalculator(8);
 self.last       = null;
 
 self.addEventListener('message', function(e) {

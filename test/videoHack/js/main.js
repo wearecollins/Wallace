@@ -24,7 +24,7 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 	container.style.top = '0px';
 	document.body.appendChild( container );
 
-	var debug = (_debug == true)? true : false;
+	var debug = (_debug == true)? false : false;
 	var useStats = debug;//_useStats || true;
 	var frame = 0;
 
@@ -39,6 +39,8 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 	var scene = new THREE.Scene();
 	var group = new THREE.Object3D();
 
+	// use alpha or background
+	var useBackground = false;
 
 	var elapsedTime = 0;
 
@@ -55,14 +57,15 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 	var motionThresholds = new MotionThresholds();
 
 	var videoContrller = new MirrorVideoController({
-		muteVideo: muteVideo
+		muteVideo: muteVideo,
+		useBackground: useBackground
 	});
 
 	this.videoCon = videoContrller;
 
 	var blendMaps = {
 		randomGrid: THREE.ImageUtils.loadTexture( '../blendMaps/random_grid.png' ),
-		softNoise: THREE.ImageUtils.loadTexture( '../blendMaps/soft_noise_sides.png'),//'../blendMaps/soft_noise.png' ),
+		softNoise: THREE.ImageUtils.loadTexture( useBackground ? '../blendMaps/soft_noise_sides.png' : '../blendMaps/soft_noise.png' ),
 		hardGradientDownTop: THREE.ImageUtils.loadTexture('../blendMaps/hardGradientDownTop.png'),
 		hardGradientLeftRight: THREE.ImageUtils.loadTexture('../blendMaps/hardGradientLeftRight.png'),
 		hardGradientRightLeft: THREE.ImageUtils.loadTexture('../blendMaps/hardGradientRightLeft.png'),
@@ -78,8 +81,8 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 	var flow, flowScene, fstPlane;
 	var flowDir = new THREE.Vector2( .5, .5 ), targetDir = new THREE.Vector2( .5, .5 ), flowSmoothing = .5, b1 = 0;
 	var flowValues = {
-		decay: .95,
-		motionThreshold: 1500,
+		decay: 0.9,//.95,
+		motionThreshold: 1300,
 		nodMix: .3,
 		vScale: .25
 	}
@@ -90,7 +93,7 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 	// transitions
 	var time = {
 		in: 500,
-		out: 1000
+		out: 500
 	}
 
 	function setup() 
@@ -728,7 +731,11 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 	function rendererSetup()
 	{
 		renderer = new THREE.WebGLRenderer( { antialias: false, devicePixelRatio: 1, alpha: true } );
-		renderer.setClearColor( 0x000000, 1. );
+		if ( useBackground ){
+			renderer.setClearColor( 0x000000, 1. );
+		} else {
+			renderer.setClearColor( 0x000000, 0. );
+		}
 		renderer.sortObjects = false;
 		renderer.setSize( window.innerWidth, window.innerHeight );
 		renderer.autoClear = true;

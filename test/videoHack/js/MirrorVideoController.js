@@ -36,7 +36,7 @@ var AzealiaVideoObject = function(params, useWebGL)
 MirrorVideoController = function(params)
 {
 	params = params || {};
-	this.backgroundRendered = params.useBackground || true;
+	this.backgroundRendered = params.useBackground || false;
 
 	if ( this.backgroundRendered ){
 		this.videoFiles = params.videoFiles || {
@@ -287,7 +287,7 @@ MirrorVideoController.prototype.loadVideo = function ( name, url, onLoadComplete
 	source.src = url;
 	videoElement.load();
 	videoElement.appendChild(source);
-	if ( name != "fart"){//BackgroundVideo" ){
+	if ( name != "BackgroundVideo"|| this.backgroundRendered ){
 		videoElement.style.visibility = "hidden";
 		videoElement.style.display = "none";
 	} else {
@@ -332,7 +332,8 @@ MirrorVideoController.prototype.onSubtitleTrigger = function(e){
 				this.subTitleInvert = !this.subTitleInvert;
 			}
 			var obj = cue.text;//JSON.parse(cue.text);
-			setTimeout( this.addFallingText.bind(this), 0, obj);
+			this.addFallingText(obj);
+			// setTimeout( this.addFallingText.bind(this), 0, obj);
 		}
 	}
 }
@@ -380,11 +381,14 @@ MirrorVideoController.prototype.addFallingText = function( string ){
 		document.body.appendChild(this.divs[ind]);
 	}
 
-	setTimeout( function(d, invert){
+	var d = this.divs[ind];
+	var invert = this.subTitleInvert
+
+	setTimeout( function(){
 		d.style["-webkit-transition"] = "top ease-out 5s, -webkit-transform 10s";
 		d.style.top = invert ? window.innerHeight * -.25 +"px" : window.innerHeight * 1.2 +"px";
 		d.style["-webkit-transform"] = "rotateZ(" + (Math.floor( -300 + Math.random() * 600 )) + "deg)";
-	}, 10, this.divs[ind], this.subTitleInvert);
+	}, 10);
 
 	// setTimeout( function(d){
 	// 	document.body.removeChild(d);

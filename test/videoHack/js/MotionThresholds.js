@@ -9,7 +9,7 @@ var MotionThresholds = function(params)
 		left: .44,
 		right: .56,
 		farRight: .65,
-		up: .57,
+		up: .6,
 		down: .43,
 	}
 

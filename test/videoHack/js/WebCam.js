@@ -23,7 +23,7 @@ function WebCam(defaultVideoTag) {
         lastPixels,
         loopId,
         updatedCallbacks = [],
-        scale = .2,
+        scale = .25,
 
         requestAnimFrame = window.requestAnimationFrame       ||
                            window.webkitRequestAnimationFrame ||
@@ -69,7 +69,7 @@ function WebCam(defaultVideoTag) {
             width = videoTag.videoWidth;
             height = videoTag.videoHeight;
             widthRounded = Math.round( width * scale);
-            heightRounded = Math.round( width * scale);
+            heightRounded = Math.round( height * scale);
 
             if (!canvas) { canvas = window.document.createElement('canvas'); }
             ctx = canvas.getContext('2d');
@@ -103,7 +103,7 @@ function WebCam(defaultVideoTag) {
             height = videoTag.videoHeight;
             if ( widthRounded == 0 ){
                 widthRounded = Math.round( width * scale);
-                heightRounded = Math.round( width * scale);
+                heightRounded = Math.round( height * scale);
                 canvas.width  = widthRounded;
                 canvas.height = heightRounded;
             } else {
