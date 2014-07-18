@@ -71,12 +71,12 @@ handlers:
   static_files: blendMaps/\1
   upload: blendMaps/.*\.(gif|png|jpg|mp4)$
 
-- url: /WALLACE_TESTS/(.*\.(gif|png|jpg|mp4))$
+- url: /WALLACE_TESTS/(.*\.(gif|png|jpg|mp4|vtt))$
   static_files: WALLACE_TESTS/\1
-  upload: WALLACE_TESTS/.*\.(gif|png|jpg|mp4)$
+  upload: WALLACE_TESTS/.*\.(gif|png|jpg|mp4|vtt)$
   mime_type: video/mp4
 
-- url: /(.*\.(gif|png|jpg|mp4))$
+- url: /(.*\.(gif|png|jpg|mp4|vtt))$
   static_files: videoHack/\1
   upload: videoHack/.*\.(gif|png|jpg|mp4)$
 
