@@ -23,7 +23,8 @@ function WebCam(defaultVideoTag) {
         lastPixels,
         loopId,
         updatedCallbacks = [],
-        scale = .25,
+        drawWidth = 160,
+        drawHeight = 120,
 
         requestAnimFrame = window.requestAnimationFrame       ||
                            window.webkitRequestAnimationFrame ||
@@ -68,10 +69,11 @@ function WebCam(defaultVideoTag) {
             // height = videoTag.height;
             width = videoTag.videoWidth;
             height = videoTag.videoHeight;
-            widthRounded = Math.round( width * scale);
-            heightRounded = Math.round( height * scale);
+            widthRounded = Math.round( drawWidth);
+            heightRounded = Math.round( drawHeight );
 
             if (!canvas) { canvas = window.document.createElement('canvas'); }
+            document.body.appendChild(canvas);
             ctx = canvas.getContext('2d');
         },
 
@@ -102,8 +104,8 @@ function WebCam(defaultVideoTag) {
             width = videoTag.videoWidth;
             height = videoTag.videoHeight;
             if ( widthRounded == 0 ){
-                widthRounded = Math.round( width * scale);
-                heightRounded = Math.round( height * scale);
+                widthRounded = Math.round( drawWidth );
+                heightRounded = Math.round( drawHeight );
                 canvas.width  = widthRounded;
                 canvas.height = heightRounded;
             } else {
@@ -111,52 +113,28 @@ function WebCam(defaultVideoTag) {
                 canvas.width = canvas.width;
             }
 
-            var useWeirdOptimization = false;
-
             if (width && height) {
                 lastPixels = currentPixels;
 
-                ctx.drawImage(videoTag, 0, 0, width * scale, height * scale);
+                ctx.drawImage(videoTag, 0, 0, drawWidth, drawHeight );
                 var data = [];
                 var pix;
 
-                if ( useWeirdOptimization ){
-                    pix = new Uint8ClampedArray( width * height * scale );
-                    var offset = 0
-                    for (var y = 0; y < height * scale; y++) {
-                        var d = ctx.getImageData(0, y, width * scale, 1).data;
-                        pix.set(d, offset);
-                        offset += d.length;
-                    }
+                var imgd = ctx.getImageData(0, 0, drawWidth, drawHeight );
+                pix = imgd.data;
+                var len = pix.length;
 
-                    var ind = 0;
-                    var brightness = 0.34 * pix[0] + 0.5 * pix[0 + 1] + 0.16 * pix[0 + 2];
-
-                    for(var i = 0; i < pix.length; i += 4) {
-                        var brightness = 0.34 * pix[i] + 0.5 * pix[i + 1] + 0.16 * pix[i + 2];
-                        // red
-                        data[ind] = brightness;
-                        ind++;
-                    }
-                    //delete pix;
-
-                } else {
-                    var imgd = ctx.getImageData(0, 0, widthRounded, heightRounded );
-                    pix = imgd.data;
-                    var len = pix.length;
-
-                    for(var i = 0; i < len; i += 4) {
-                      var brightness = 0.34 * pix[i] + 0.5 * pix[i + 1] + 0.16 * pix[i + 2];
-                      var ind = i/4;
-                      // red
-                      data[ind] = brightness;
-                    }
-                    // delete pix;
+                for(var i = 0; i < len; i += 4) {
+                  var brightness = 0.34 * pix[i] + 0.5 * pix[i + 1] + 0.16 * pix[i + 2];
+                  var ind = i/4;
+                  // red
+                  data[ind] = brightness;
                 }
+                // delete pix;
 
                 // debuggin ONLY
                 if ( window.drawDebug ){
-                    var id = ctx.createImageData( width * scale, height * scale );
+                    var id = ctx.createImageData( drawWidth, drawHeight );
                     id.data = pix;
                     ctx.putImageData( id, 0, 0 );
                 }

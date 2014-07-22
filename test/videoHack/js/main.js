@@ -24,7 +24,7 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 	container.style.top = '0px';
 	document.body.appendChild( container );
 
-	var debug = (_debug == true)? false : false;
+	var debug = true;//(_debug == true)? false : false;
 	var useStats = debug;//_useStats || true;
 	var frame = 0;
 
@@ -46,7 +46,7 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 
 	// ABOUT
 	var hasWebGL 		= true;
-	var hasUserMedia 	= debug ? false : true;
+	var hasUserMedia 	= true;
 
 	var backgroundMesh;
 
@@ -75,9 +75,11 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 	var slits, bTransitioning = false;
 
 	var currentVideo = undefined, previousVideo = undefined;
-
-	//optical flow
+	
+	// camera
 	var webcam;
+	
+	//optical flow
 	var flow, flowScene, fstPlane;
 	var flowDir = new THREE.Vector2( .5, .5 ), targetDir = new THREE.Vector2( .5, .5 ), flowSmoothing = .5, b1 = 0;
 	var flowValues = {
@@ -86,14 +88,17 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 		nodMix: .3,
 		vScale: .25
 	}
+	// simple detect
+	var simpleDetector;
+	var useOpticalFlow = true;
 
 	var debugSphere = new THREE.Mesh( new THREE.SphereGeometry(5), new THREE.MeshBasicMaterial( {color: 0xFF2201, side: 2} ) );
 	debugSphere.scale.z = 2;
 	
 	// transitions
 	var time = {
-		in: 500,
-		out: 500
+		in: 250,
+		out: 250
 	}
 
 	function setup() 
@@ -106,9 +111,11 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 		scene.add( light );
 		scene.add( group );	
 
-
-		worker = new Worker("js/flowWorker.js");
-
+		if ( useOpticalFlow ){
+			worker = new Worker("js/flowWorker.js");
+		} else {
+			simpleDetector = new SimpleMotionDetector();
+		}
 		webcam = new WebCam();
         webcam.onUpdated( function(){
             // console.log("yes")
@@ -172,7 +179,8 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 			camera: camera,
 			blendMap: blendMaps.softNoise,// blendMaps.softNoise,//hardGradientDownTop,//
 			currentTex: videoContrller.videos['01'].texture,
-			alphaRendered: !videoContrller.backgroundRendered
+			alphaRendered: !videoContrller.backgroundRendered,
+			doubleVideo: videoContrller.doubleWide
 		});
 
 		scene.add(slits.mesh);
@@ -228,6 +236,7 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 
 	function update()
 	{
+		if ( videoContrller.videoToLoadCount != 0 ) return;
 		frame++;
 		// if ( parseInt(document.getElementById("fpsText").innerHTML.substr(0,2)) < 30 ){
 		// 	rate++;
@@ -334,7 +343,7 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 				startTransition2( "left", "straight");
 				break;
 			case "right_left":
-				startTransition2( "left", wrd);
+				ifstartTransition2( "left", wrd);
 				break;
 			case "up_left":
 				startTransition2( "left", "tiltLeft");
@@ -451,6 +460,8 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 		var c = videoContrller.getVideo(currentVideo);
 		var m = videoContrller.getVideo(midVid);
 		var p = videoContrller.getVideo(previousVideo);
+
+		if ( c == null || m == null || p == null ) return;
 
 		// setBlendVal(0);
 		slits.setMixValue(0);
@@ -617,7 +628,7 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 	function getCurrentMotionPositionsCorrespondingVideoName()
 	{
 		//TODO: replace with motion tracking
-		return motionThresholds.getVideoName(flowDir.x, flowDir.y);// mouse.x / window.innerWidth, mouse.y / window.innerHeight);
+		return motionThresholds.getVideoName(flowDir.x, flowDir.y);
 	}
 
 	function setBlendVal(blendVal)

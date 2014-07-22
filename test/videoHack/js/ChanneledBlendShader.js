@@ -102,6 +102,47 @@ var ChanneledBlendShader = function(params)
 		'}'
 		].join('\n');
 
+	var fragSingle = [
+		'uniform sampler2D blendMap;',
+		'uniform sampler2D previousTex;',
+		'uniform sampler2D currentTex;',
+		'uniform float currentUOffset;',
+		'uniform float previousUOffset;',
+		'uniform float mixVal;',	
+		// 'uniform float useBlendMap;',
+
+		'varying vec2 vUv;',
+
+		'float mapLinear( in float x, in float a1, in float a2, in float b1, in float b2 ) {',
+		'	return b1 + ( x - a1 ) * ( b2 - b1 ) / ( a2 - a1 );',
+		'}',
+
+		'float getGray(vec3 rgb)',
+		'{',
+		'	return rgb.x * .3 + rgb.x * .59 + rgb.x * .11;',
+		'}',
+
+		'void main()',
+		'{',	
+		'	float b = clamp( texture2D(blendMap, vUv).x + (mixVal * 2. - 1.), 0., 1.);',
+
+		'	vec2 alphaUv = vUv * vec2(1., .5);',
+		'	vec2 colorUv = vUv * vec2(1., .5) + vec2(0., .5);',
+
+		'	float a0 = texture2D(currentTex, alphaUv).x;',
+		'	float a1 = texture2D(previousTex, alphaUv).x;',
+
+		'	vec4 c = texture2D(currentTex, colorUv + vec2(currentUOffset, 0.));',
+		'	vec4 p = texture2D(previousTex, colorUv + vec2(previousUOffset, 0.));',
+
+		'	c *= a0;',
+		'	p *= a1;',
+		'	vec4 col = mix(p, c, b);',
+
+		'	gl_FragColor = col;',
+		'}'
+		].join('\n');
+
 	var matParams = {
 		transparent: true,
 		blending: params.blending || 1,
@@ -124,8 +165,8 @@ var ChanneledBlendShader = function(params)
 			useBlendMap: {type: 'f', value: params.useBlendMap || 1},
 		},
 
-		vertexShader: params.alphaRendered ? vertAlpha : vertNoAlpha,
-		fragmentShader: params.alphaRendered ? fragAlpha : fragNoAlpha
+		vertexShader: !params.doubleVideo ? vertNoAlpha : params.alphaRendered ? vertAlpha : vertNoAlpha,
+		fragmentShader: !params.doubleVideo ? fragSingle :params.alphaRendered ? fragAlpha : fragNoAlpha
 	}
 
 	THREE.ShaderMaterial.call( this, matParams );

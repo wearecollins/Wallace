@@ -8,6 +8,7 @@ var Slitter = function(params)
 	this.camera = params.camera;
 	this.blendMap = params.blendMap;
 	this.alphaRendered = params.alphaRendered;
+	this.doubleVideo   = params.doubleVideo;
 
 	this.width = params.width || 1280;
 	this.height = params.height || 720;
@@ -34,7 +35,8 @@ var Slitter = function(params)
 		currentTex: params.currentTex,
 		previousTex: params.previousTex,
 		blendMap: this.blendMap,
-		alphaRendered: this.alphaRendered
+		alphaRendered: this.alphaRendered,
+		doubleVideo: this.doubleVideo
 	});
 
 	this.blendPlane = new THREE.PlaneGeometry( 2,2,	12, 7 );
