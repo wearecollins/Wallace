@@ -73,7 +73,7 @@ function WebCam(defaultVideoTag) {
             heightRounded = Math.round( drawHeight );
 
             if (!canvas) { canvas = window.document.createElement('canvas'); }
-            document.body.appendChild(canvas);
+            // document.body.appendChild(canvas);
             ctx = canvas.getContext('2d');
         },
 

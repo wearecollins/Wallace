@@ -191,7 +191,7 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 		//
 		//threshold lines
 		if ( debug ){
-			scene.add(motionThresholds.group);
+			//scene.add(motionThresholds.group);
 			scene.add(debugSphere);
 		}	
 		//resize the screen planes
