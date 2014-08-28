@@ -31,8 +31,8 @@ var MotionThresholds = function(params)
 	this.lines["down"].position.y = this.thresholds["down"] - .5;// * 2 - 1;
 	this.lines["left"].position.x = this.thresholds["left"] - .5;// * 2 - 1;
 	this.lines["right"].position.x = this.thresholds["right"] - .5;// * 2 - 1;
-	this.lines["farLeft"].position.x = this.thresholds["farLeft"] - .5;// * 2 - 1;
-	this.lines["farRight"].position.x = this.thresholds["farRight"] - .5;// * 2 - 1;
+	this.lines["farLeft"].position.x = 0;//this.thresholds["farLeft"] - .5;// * 2 - 1;
+	this.lines["farRight"].position.x = 1.0;//this.thresholds["farRight"] - .5;// * 2 - 1;
 
 	this.group = new THREE.Object3D();
 	for(var i in this.lines)
@@ -49,7 +49,7 @@ MotionThresholds.prototype.getVideoName = function(x, y)
 	}
 	else if(x < this.thresholds["left"])
 	{
-		return "tiltLeft";
+		return "left";
 	}
 
 	else if(x < this.thresholds["right"])
@@ -69,7 +69,7 @@ MotionThresholds.prototype.getVideoName = function(x, y)
 	}
 	else if(x < this.thresholds["farRight"])
 	{
-		return "tiltRight";
+		return "right";
 	}
 	else
 	{

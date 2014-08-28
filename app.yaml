@@ -30,18 +30,18 @@ handlers:
   static_dir: includes
 
 - url: /blendMaps
-  static_dir: blendMaps
+  static_dir: html/blendMaps
 
 - url: /normalMaps
-  static_dir: normalMaps
+  static_dir: html/normalMaps
 
 - url: /normalMaps/(.*\.(gif|png|jpg|mp4))$
-  static_files: normalMaps/\1
-  upload: normalMaps/.*\.(gif|png|jpg|mp4)$
+  static_files: html/normalMaps/\1
+  upload: html/normalMaps/.*\.(gif|png|jpg|mp4)$
 
 - url: /blendMaps/(.*\.(gif|png|jpg|mp4))$
-  static_files: blendMaps/\1
-  upload: blendMaps/.*\.(gif|png|jpg|mp4)$
+  static_files: html/blendMaps/\1
+  upload: html/blendMaps/.*\.(gif|png|jpg|mp4)$
 
 - url: /WALLACE_TESTS/(.*\.(gif|png|jpg|mp4|vtt))$
   static_files: WALLACE_TESTS/\1
