@@ -85,7 +85,9 @@ MirrorVideoController = function(params)
 			right: 	{t: "03", uOffset: this.backgroundRendered ? -.5 : .5},
 
 			tiltLeft: 	{t: "04", uOffset: 0},
-			tiltRight: {t: "04", uOffset: this.backgroundRendered ? -.5 : .5}
+			tiltRight: {t: "04", uOffset: this.backgroundRendered ? -.5 : .5},
+
+			background: {t:"BackgroundVideo", uOffset:0}
 		}
 
 		this.inverseVideoMap = {
@@ -110,7 +112,9 @@ MirrorVideoController = function(params)
 			right: 	{t: "05", uOffset: 0},
 
 			tiltLeft: 	{t: "04", uOffset: 0},
-			tiltRight: {t: "05", uOffset: 0}
+			tiltRight: {t: "05", uOffset: 0},
+
+			background: {t:"BackgroundVideo", uOffset:0}
 		}
 			
 		this.inverseVideoMap = {
@@ -262,10 +266,12 @@ MirrorVideoController.prototype.loadVideos = function ()
 	for(var id in this.videoFiles)
 	{
 		if ( !this.videoFiles[id].wait ){
-			// console.log( 'info' );
+			// console.log( 'info' );this.videos["BackgroundVideo"]
+			var active = id == "BackgroundVideo";
 			this.videos[id] = new AzealiaVideoObject({
 				video: document.getElementById( id ),
-				name: id
+				name: id,
+				bIsActive: active
 			}, true);
 		}
 	}
@@ -281,7 +287,7 @@ MirrorVideoController.prototype.getVideoLocation = function ( videoName )
 
 MirrorVideoController.prototype.getVideo = function ( videoName )
 {	
-	var loc = this.	getVideoLocation(videoName);
+	var loc = this.getVideoLocation(videoName);
 	if ( this.videos[loc.t] ){
 		return {t: this.videos[loc.t].texture, uOffset: loc.uOffset}
 	} else {
@@ -336,7 +342,7 @@ MirrorVideoController.prototype.loadVideo = function ( name, url, onLoadComplete
 					for ( var i=0; i<cues.length; i++){
 						var cue = cues[i];
 						if ( cue.id == "159" || cue.id == "316" || cue.id == "362" || cue.id == "426" ){
-							invert = !invert;
+							//invert = !invert;
 						}
 
 						var t = cues[i].text;
@@ -347,7 +353,7 @@ MirrorVideoController.prototype.loadVideo = function ( name, url, onLoadComplete
 							'd.style["-webkit-transform"] = "rotateZ(" + (Math.floor( -300 + Math.random() * 600 )) + "deg)";',
 						'}; fun();'].join('\n');
 						console.log( str );
-						setTimeout( function(){ console.log("weeee"); eval(str)}, cues[i].startTime * 1000 );
+						setTimeout( function(){ eval(str)}, cues[i].startTime * 1000 );
 						this.createFallDiv( cues[i].text, invert );
 					}
 					window.whichSub = 0;
@@ -394,19 +400,10 @@ MirrorVideoController.prototype.loadVideo = function ( name, url, onLoadComplete
 	source.src = url;
 	videoElement.load();
 	videoElement.appendChild(source);
-	if ( name != "BackgroundVideo"|| this.backgroundRendered ){
-		videoElement.style.visibility = "hidden";
-		videoElement.style.display = "none";
-	} else {
-		// videoElement.style.position = "absolute";
-		videoElement.style.width = "100%";
-		videoElement.style.margin = "auto";
-		videoElement.style.position = "absolute";
-		videoElement.style.top= "0px";
-		videoElement.style.bottom = "0px";
-		videoElement.style.left = "0px";
-		videoElement.style.right = "0px";
-	}
+	videoElement.style.visibility = "hidden";
+	videoElement.style.display = "none";
+	
+	// if ( name != "BackgroundVideo"|| this.backgroundRendered ){
 	document.body.appendChild(videoElement);
 
 	//debugging LISTENERS
@@ -436,7 +433,7 @@ MirrorVideoController.prototype.onSubtitleTrigger = function(e){
 		var cue = this.subtitleElement.track.activeCues[i]; // assuming there is only one active cue
 		if ( cue ){ 
 			if ( cue.id == "159" || cue.id == "316" || cue.id == "362" || cue.id == "426" ){
-				this.subTitleInvert = !this.subTitleInvert;
+				//this.subTitleInvert = !this.subTitleInvert;
 			}
 			var obj = cue.text;//JSON.parse(cue.text);
 			this.triggerDiv(obj);
@@ -534,7 +531,7 @@ MirrorVideoController.prototype.addFallingText = function( string ){
 
 	setTimeout( function(){
 		d.style["-webkit-transition"] = "top ease-out 5s, -webkit-transform 10s";
-		d.style.top = invert ? window.innerHeight * -.25 +"px" : window.innerHeight * 1.2 +"px";
+		d.style.top = window.innerHeight * -.25 +"px";//invert ? window.innerHeight * -.25 +"px" : window.innerHeight * 1.2 +"px";
 		d.style["-webkit-transform"] = "rotateZ(" + (Math.floor( -300 + Math.random() * 600 )) + "deg)";
 	}, 10);
 

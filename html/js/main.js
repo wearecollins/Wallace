@@ -92,7 +92,7 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 	var simpleDetector;
 	var useOpticalFlow = true;
 
-	var debugSphere = new THREE.Mesh( new THREE.SphereGeometry(5), new THREE.MeshBasicMaterial( {color: 0xFF2201, side: 2} ) );
+	var debugSphere = new THREE.Mesh( new THREE.SphereGeometry(5), new THREE.MeshBasicMaterial( {color: 0xffffff, side: 2} ) );
 	debugSphere.scale.z = 2;
 	
 	// transitions
@@ -172,6 +172,10 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 		// VIDEO CONTROLLER
 		videoContrller.playVideos();
 
+		// background mesh
+		backgroundPlane = new THREE.PlaneGeometry(1,1, 12, 7 );
+		backgroundMesh = new THREE.Mesh(backgroundPlane, new THREE.MeshBasicMaterial( { color: 0xffffff, map: videoContrller.getVideo("background").t } ));
+		scene.add(backgroundMesh);
 
 		//SLIT SCANNING
 		slits = new Slitter({
@@ -242,6 +246,7 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 		// 	rate++;
 		// 	console.log(rate);
 		// }
+		backgroundMesh.material.map = videoContrller.getVideo("background").t;
 
 		if ( hasUserMedia ){
 			if ( frame % rate == 0 ){
@@ -644,6 +649,7 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 
 		slits.mesh.scale.set( window.innerWidth, h, 1);
 		motionThresholds.group.scale.set( window.innerWidth, h, 1);
+		backgroundMesh.scale.set( window.innerWidth, h, 1);
 	}
 
 	function resetCamera()
@@ -742,11 +748,7 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 	function rendererSetup()
 	{
 		renderer = new THREE.WebGLRenderer( { antialias: false, devicePixelRatio: 1, alpha: true } );
-		if ( useBackground ){
-			renderer.setClearColor( 0x000000, 1. );
-		} else {
-			renderer.setClearColor( 0x000000, 0. );
-		}
+		renderer.setClearColor( 0x000000, 0. );
 		renderer.sortObjects = false;
 		renderer.setSize( window.innerWidth, window.innerHeight );
 		renderer.autoClear = true;
@@ -803,7 +805,7 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 	setup();
 	events();
 	animate();
-
+	this.bgm = backgroundMesh;
 }
 
 function getQuerystring(key, default_)
