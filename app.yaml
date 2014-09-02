@@ -13,6 +13,13 @@ handlers:
 - url: /js
   static_dir: html/js
 
+- url: /fonts
+  static_dir: html/fonts
+
+- url: /fonts/.*\.(otf)$
+  static_files: html/fonts/\1
+  upload: html/fonts/.*\.(otf)$
+
 - url: /css
   static_dir: html/css
 
@@ -47,6 +54,7 @@ handlers:
   static_files: WALLACE_TESTS/\1
   upload: WALLACE_TESTS/.*\.(gif|png|jpg|mp4|vtt)$
   mime_type: video/mp4
+  expiration: "7d"
 
 - url: /(.*\.(gif|png|jpg|mp4|vtt))$
   static_files: html/\1

@@ -1,6 +1,8 @@
-
-
 var app;
+
+var LYRICS_ON 	= false;
+var PLAYING		= false;
+var HAS_PLAYED 	= false;
 
 $(window).bind("load", function() {
 	var debug = getQuerystring('debug') == "true";
@@ -13,7 +15,7 @@ $(window).bind("load", function() {
 
 function APP( _useStats, _debug, _muteVideo, _auto)
 {
-	var muteVideo = _muteVideo || false;
+	var muteVideo = _muteVideo || !PLAYING;
 	var auto = _auto || false;
 
 	//main container
@@ -24,7 +26,7 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 	container.style.top = '0px';
 	document.body.appendChild( container );
 
-	var debug = true;//(_debug == true)? false : false;
+	var debug = false;//(_debug == true)? false : false;
 	var useStats = debug;//_useStats || true;
 	var frame = 0;
 
@@ -54,22 +56,34 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 		slitStep: 2
 	}
 
+	function addSubtitles( subs ){
+		console.log(scene);
+		for ( var i =0; i<subs.length; i++ ){
+			var sub = subs[i];
+			sub.mesh.position.x = Math.random() * window.innerWidth - window.innerWidth/2.0;
+			sub.mesh.position.y = -window.innerHeight * .6;
+			sub.mesh.position.z = 1;
+			if ( LYRICS_ON ) scene.add( subs[i].mesh );
+		}
+	}
+
 	var motionThresholds = new MotionThresholds();
 
 	var videoContrller = new MirrorVideoController({
 		muteVideo: muteVideo,
-		useBackground: useBackground
+		useBackground: useBackground,
+		subtitleHander: addSubtitles
 	});
 
 	this.videoCon = videoContrller;
 
 	var blendMaps = {
-		randomGrid: THREE.ImageUtils.loadTexture( '../blendMaps/random_grid.png' ),
+		// randomGrid: THREE.ImageUtils.loadTexture( '../blendMaps/random_grid.png' ),
 		softNoise: THREE.ImageUtils.loadTexture( useBackground ? '../blendMaps/soft_noise_sides.png' : '../blendMaps/soft_noise.png' ),
-		hardGradientDownTop: THREE.ImageUtils.loadTexture('../blendMaps/hardGradientDownTop.png'),
-		hardGradientLeftRight: THREE.ImageUtils.loadTexture('../blendMaps/hardGradientLeftRight.png'),
-		hardGradientRightLeft: THREE.ImageUtils.loadTexture('../blendMaps/hardGradientRightLeft.png'),
-		hardGradientTopDown: THREE.ImageUtils.loadTexture('../blendMaps/hardGradientTopDown.png')
+		// hardGradientDownTop: THREE.ImageUtils.loadTexture('../blendMaps/hardGradientDownTop.png'),
+		// hardGradientLeftRight: THREE.ImageUtils.loadTexture('../blendMaps/hardGradientLeftRight.png'),
+		// hardGradientRightLeft: THREE.ImageUtils.loadTexture('../blendMaps/hardGradientRightLeft.png'),
+		// hardGradientTopDown: THREE.ImageUtils.loadTexture('../blendMaps/hardGradientTopDown.png')
 	};
 	
 	var slits, bTransitioning = false;
@@ -97,7 +111,7 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 	
 	// transitions
 	var time = {
-		in: 250,
+		in: 500,
 		out: 250
 	}
 
@@ -188,6 +202,7 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 		});
 
 		scene.add(slits.mesh);
+		slits.mesh.position.z = 2;
 		slits.setMixValue(1);
 
 
@@ -229,6 +244,40 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 			$(".dg").css("z-index", 5000);
 		}
 		
+		$("#play").click(function(){
+			var wasPlaying = PLAYING;
+			PLAYING = !PLAYING;
+			if (!HAS_PLAYED ){
+				HAS_PLAYED = true;
+				videoContrller.setVideoPosition(0);
+				videoContrller.setVolume(1.0);
+			}
+
+			if ( !wasPlaying ){
+				$("#play").html("PAUSE");
+				videoContrller.playVideos();
+			} else {
+				$("#play").html("PLAY");
+				videoContrller.pauseVideos();
+			}
+		})
+
+		$("#lyrics").click(function(){
+			var wasOn = LYRICS_ON;
+			LYRICS_ON = !LYRICS_ON;
+			for ( var i =0; i<window.textMeshes.length; i++ ){
+				if ( LYRICS_ON ){
+					scene.add( window.textMeshes[i].mesh );
+				} else {
+					scene.remove( window.textMeshes[i].mesh );
+				}
+			}
+			if ( !wasOn ){
+				$("#lyrics").html("NO LYRICS");
+			} else {
+				$("#lyrics").html("LYRICS");
+			}
+		})
 	}
 
 	/**

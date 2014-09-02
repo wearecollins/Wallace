@@ -38,6 +38,7 @@ MirrorVideoController = function(params)
 	params = params || {};
 	this.backgroundRendered = params.useBackground || false;
 	this.doubleWide = params.doubleWide || false;
+	this.onSubtitlesMade = params.subtitleHander || undefined;
 
 	if ( this.backgroundRendered ){
 		this.videoFiles = params.videoFiles || {
@@ -145,7 +146,7 @@ MirrorVideoController = function(params)
 
 	this.vidPosition = {position: 0.0001};
 
-	this.muteVideo = (params.muteVideo !== undefined)? params.muteVideo : false;
+	this.muteVideo = (params.muteVideo !== undefined)? params.muteVideo : !PLAYING;
 	console.log("this.muteVideo " + this.muteVideo)
 
 	this.loadVideos();
@@ -155,7 +156,10 @@ MirrorVideoController = function(params)
 	if(!this.muteVideo)
 	{
 		this.setVolume(params.volume || .25);	
+	} else {
+		this.setVolume(0);
 	}
+	this.restarted = false;
 }
 
 
@@ -210,6 +214,29 @@ MirrorVideoController.prototype.setVolume = function(value)
 
 MirrorVideoController.prototype.update = function()
 {
+	if ( !PLAYING ){
+		if ( this.vidPosition.position > .02 ){
+			this.setVideoTime(0.0);
+			this.videos['01'].video.currentTime = 0;
+			window.debugVideo = this.videos['01'];
+		}
+	// check on lyrics
+	} else {
+		for ( var i=0; i<window.textMeshes.length; i++){
+			if ( this.videos['01'].video.currentTime >= window.textMeshes[i].time && window.textMeshes[i].started == false){
+				window.textMeshes[i].started = true;
+				new TWEEN.Tween(window.textMeshes[i].mesh.position)
+					.to({y: window.innerHeight * .75}, 5000)
+					.easing( TWEEN.Easing.Sinusoidal.Out )
+					.start();
+
+				new TWEEN.Tween(window.textMeshes[i].mesh.rotation)
+					.to({z: Math.random() * Math.PI - Math.PI / 2.0}, 5000)
+					.easing( TWEEN.Easing.Sinusoidal.Out )
+					.start();
+			}
+		}
+	}
 // if(this.videos["BackgroundVideo"].video.readyState === this.videos["BackgroundVideo"].video.HAVE_ENOUGH_DATA )
 // {
 // if ( this.videos[i].texture ) this.videos[i].texture.needsUpdate = true;
@@ -219,20 +246,30 @@ MirrorVideoController.prototype.update = function()
 	//update videos 
 	// var vk = Object.keys(this.videos);
 	// console.log( vk );
+	var count = Object.keys(this.videos).length;
+	var loaded = 0;
+	var m = 0;
 	for(var i in this.videos)
 	{
+		// var pc = parseInt(((this.videos[i].video.buffered.end(0) / this.videos[i].video.duration) * 100));
 		if (this.videos[i].bIsActive && this.videos[i].video.readyState === this.videos[i].video.HAVE_ENOUGH_DATA )
 		{
+			// loaded++;
+			// if ( loaded == count ){
+			// 	this.playVideos();
+			// }
+
 			if ( this.videos[i].texture ) this.videos[i].texture.needsUpdate = true;
-			this.vidPosition.position = this.videos[i].video.currentTime / this.videoDuration;
 
 
 			if( i != "01" && this.videos["01"].video.readyState)
 			{
-				this.videos[i].video.currentTime = this.videos["01"].video.currentTime;
+				// if ( this.videos[i].video.currentTime != this.videos["01"].video.currentTime)
+				// 	this.videos[i].video.currentTime = this.videos["01"].video.currentTime;
+			} else {
+				this.vidPosition.position = this.videos[i].video.currentTime / this.videoDuration;
 			}
 		}
-
 	}
 }
 
@@ -252,6 +289,10 @@ MirrorVideoController.prototype.loadVideos = function ()
 
 	this.videoLoadCount = 0;
 	this.videoToLoadCount = 0;
+	// var videoLoader = html5Preloader();
+	// videoLoader.on('finish', function(){ console.log('All assets loaded.'); });
+
+	// var files = [];
 	for( var id in this.videoFiles )
 	{
 		if ( !this.videoFiles[id].wait ){
@@ -261,7 +302,9 @@ MirrorVideoController.prototype.loadVideos = function ()
 		this.videoToLoadCount++;
 
 		// console.log( document.getElementById( id ))
+		// files.push(this.videoFiles[id].path);
 	}
+	// videoLoader.addFiles(files);
 
 	for(var id in this.videoFiles)
 	{
@@ -309,11 +352,13 @@ MirrorVideoController.prototype.loadVideo = function ( name, url, onLoadComplete
 	var videoElement = document.createElement( 'video' );
 	videoElement.setAttribute("loop", "");
 	videoElement.setAttribute("type", "video/mp4");
+	videoElement.setAttribute("preload", "auto");
 	
 	if(this.muteVideo == true || name != "01")
 	{
 		videoElement.setAttribute("muted", "");
 	}
+	
 
 	// create subtitles
 	if ( !this.subtitlesAttached ){
@@ -330,31 +375,31 @@ MirrorVideoController.prototype.loadVideo = function ( name, url, onLoadComplete
 		console.log( this.subtitleElement.track )
 		this.subtitleElement.setAttribute("src", this.subtitles );
 
-		var cues = this.subtitleElement.track.cues;
+		var cues = this.subtitleElement.track ? this.subtitleElement.track.cues : null;
 		if ( cues == null || cues.length == 0 ){
 			window.tryInterval = setInterval(function(){
-				console.log("try");
 			    // here goes nothing
 				var cues = this.subtitleElement.track.cues;
 				if ( cues != null && cues.length != 0){
 					window.clearInterval( window.tryInterval );
-					var invert = false;
 					for ( var i=0; i<cues.length; i++){
 						var cue = cues[i];
 						if ( cue.id == "159" || cue.id == "316" || cue.id == "362" || cue.id == "426" ){
 							//invert = !invert;
 						}
 
-						var t = cues[i].text;
-						var str = ['function fun(){',
-							'var d = window.textDivs[window.whichSub]; window.whichSub++;',
-							'd.style["-webkit-transition"] = "top ease-out 5s, -webkit-transform 10s";',
-							'd.style.top = d.invert ? window.innerHeight * -.25 +"px" : window.innerHeight * 1.2 +"px";',
-							'd.style["-webkit-transform"] = "rotateZ(" + (Math.floor( -300 + Math.random() * 600 )) + "deg)";',
-						'}; fun();'].join('\n');
-						console.log( str );
-						setTimeout( function(){ eval(str)}, cues[i].startTime * 1000 );
-						this.createFallDiv( cues[i].text, invert );
+						// var t = cues[i].text;
+						// var str = ['function fun(){',
+						// 	'var d = window.textDivs[window.whichSub]; window.whichSub++;',
+						// 	'd.style["-webkit-transition"] = "top ease-out 5s, -webkit-transform 10s";',
+						// 	'd.style.top = d.invert ? window.innerHeight * -.25 +"px" : window.innerHeight * 1.2 +"px";',
+						// 	'd.style["-webkit-transform"] = "rotateZ(" + (Math.floor( -300 + Math.random() * 600 )) + "deg)";',
+						// '}; fun();'].join('\n');
+						// setTimeout( function(){ eval(str)}, cues[i].startTime * 1000 );
+						// this.createFallDiv( cues[i].text, invert );
+
+						this.createFallMesh( cues[i].text, cues[i].startTime );
+
 					}
 					window.whichSub = 0;
 
@@ -362,6 +407,9 @@ MirrorVideoController.prototype.loadVideo = function ( name, url, onLoadComplete
 					videoElement.removeChild(this.subtitleElement);
 
 					this.subtitleElement = null;
+
+					// alert parent we're donezo
+					if ( this.onSubtitlesMade ) this.onSubtitlesMade( window.textMeshes );
 
 					for( var id in this.videoFiles )
 					{
@@ -404,14 +452,15 @@ MirrorVideoController.prototype.loadVideo = function ( name, url, onLoadComplete
 	videoElement.style.display = "none";
 	
 	// if ( name != "BackgroundVideo"|| this.backgroundRendered ){
-	document.body.appendChild(videoElement);
 
-	//debugging LISTENERS
 	videoElement.addEventListener('loadeddata', function() {
 	   this.videoLoadCount++;
 	   // console.log( "\n" + name + " is loaded. videoLoadCount = " + this.videoLoadCount+ "\n" );
 	   onLoadComplete();
 	}.bind(this), false);
+	
+
+	document.body.appendChild(videoElement);
 
 	if(this.verbose)
 	{
@@ -442,6 +491,14 @@ MirrorVideoController.prototype.onSubtitleTrigger = function(e){
 		}
 	}
 }
+
+MirrorVideoController.prototype.createFallMesh = function(string, time) {
+	if ( !window.textMeshes ){
+		window.textMeshes = [];
+	}
+
+	window.textMeshes.push( {started: false, mesh:new THREE.TextTexture(string, 16, "#fff", "Helvetica", "#000"), time:time});
+};
 
 MirrorVideoController.prototype.createFallDiv = function( string, invert ){
 	if ( !window.textDivs ){
@@ -481,61 +538,4 @@ MirrorVideoController.prototype.triggerDiv = function( name ){
 		d.style.top = d.invert ? window.innerHeight * -.25 +"px" : window.innerHeight * 1.2 +"px";
 		d.style["-webkit-transform"] = "rotateZ(" + (Math.floor( -300 + Math.random() * 600 )) + "deg)";
 	}
-}
-
-// this should probably be elsewhere?
-MirrorVideoController.prototype.addFallingText = function( string ){
-	if ( !window.textDivs ){
-		window.textDivs = [];
-		this.subMax   = 20;
-		this.subIndex = 0;
-	}
-
-	var ind = window.textDivs.length;
-
-	if ( window.textDivs.length < this.subMax ){
-		this.subIndex 	= window.textDivs.length;
-		window.textDivs[ind] 	= document.createElement("div");
-		window.textDivs[ind].style.fontFamily = "Helvetica";
-		window.textDivs[ind].style.position = "absolute";
-		window.textDivs[ind].style.zIndex = "2000";
-		window.textDivs[ind].style.padding = "5px";
-		window.textDivs[ind].style["background-color"] = "#000";
-		window.textDivs[ind].style.color = "#fff";
-	} else {
-		ind = this.subIndex;
-		window.textDivs[ind].style["-webkit-transition"] = "";
-	}
-
-	this.subIndex++;
-	if ( this.subIndex >= this.subMax ){
-		this.subIndex = 0;
-	}
-
-	if ( this.subTitleInvert ){
-		window.textDivs[ind].style.top = window.innerHeight * 1.2 + "px";
-	} else {
-		window.textDivs[ind].style.top = "0px";
-	}
-	window.textDivs[ind].style["-webkit-transform"] = "";
-	window.textDivs[ind].style.left 	 = (Math.random() > .5 ? Math.floor(window.innerWidth * .1 + Math.random() * (window.innerWidth * .3)) : Math.floor(window.innerWidth * .6 + Math.random() * (window.innerWidth * .3))) +"px";
-
-	window.textDivs[ind].innerHTML = string;
-
-	if ( window.textDivs.length < this.subMax ){
-		document.body.appendChild(window.textDivs[ind]);
-	}
-
-	var d = window.textDivs[ind];
-	var invert = this.subTitleInvert
-
-	setTimeout( function(){
-		d.style["-webkit-transition"] = "top ease-out 5s, -webkit-transform 10s";
-		d.style.top = window.innerHeight * -.25 +"px";//invert ? window.innerHeight * -.25 +"px" : window.innerHeight * 1.2 +"px";
-		d.style["-webkit-transform"] = "rotateZ(" + (Math.floor( -300 + Math.random() * 600 )) + "deg)";
-	}, 10);
-
-	// setTimeout( function(d){
-	// 	document.body.removeChild(d);
-	// }, 5100, window.textDivs[ind]);
 }
