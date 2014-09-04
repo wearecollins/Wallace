@@ -12,6 +12,7 @@ $(window).bind("load", function() {
 	app = new APP(useStats, debug, muteVideo, auto );
 });
 
+	var barMeshes = [];
 
 function APP( _useStats, _debug, _muteVideo, _auto)
 {
@@ -57,12 +58,9 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 	}
 
 	function addSubtitles( subs ){
-		console.log(scene);
-		for ( var i =0; i<subs.length; i++ ){
-			var sub = subs[i];
-			sub.mesh.position.x = Math.random() * window.innerWidth - window.innerWidth/2.0;
-			sub.mesh.position.y = -window.innerHeight * .6;
-			sub.mesh.position.z = 1;
+		positionSubtitles();
+		for ( var i =0; i<window.textMeshes.length; i++ ){
+			var sub = window.textMeshes[i];
 			if ( LYRICS_ON ) scene.add( subs[i].mesh );
 		}
 	}
@@ -190,6 +188,15 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 		backgroundPlane = new THREE.PlaneGeometry(1,1, 12, 7 );
 		backgroundMesh = new THREE.Mesh(backgroundPlane, new THREE.MeshBasicMaterial( { color: 0xffffff, map: videoContrller.getVideo("background").t } ));
 		scene.add(backgroundMesh);
+
+		// black bars
+		var barMesh = new THREE.PlaneGeometry(1,1, 12, 7 );
+		barMeshes[0] = new THREE.Mesh(barMesh, new THREE.MeshBasicMaterial( { color: 0x000000 } ));
+		barMeshes[1] = new THREE.Mesh(barMesh, new THREE.MeshBasicMaterial( { color: 0x000000 } ));
+		barMeshes[0].position.z = 3;
+		barMeshes[1].position.z = 3;
+		scene.add( barMeshes[0] );
+		scene.add( barMeshes[1] );
 
 		//SLIT SCANNING
 		slits = new Slitter({
@@ -397,7 +404,7 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 				startTransition2( "left", "straight");
 				break;
 			case "right_left":
-				ifstartTransition2( "left", wrd);
+				startTransition2( "left", wrd);
 				break;
 			case "up_left":
 				startTransition2( "left", "tiltLeft");
@@ -699,6 +706,12 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 		slits.mesh.scale.set( window.innerWidth, h, 1);
 		motionThresholds.group.scale.set( window.innerWidth, h, 1);
 		backgroundMesh.scale.set( window.innerWidth, h, 1);
+
+		var bar_h = window.innerHeight - (-h);
+		barMeshes[0].scale.set( window.innerWidth, -bar_h, 1);
+		barMeshes[0].position.y = -window.innerHeight/2.0;
+		barMeshes[1].scale.set( window.innerWidth, -bar_h, 1);
+		barMeshes[1].position.y = window.innerHeight/2.0;
 	}
 
 	function resetCamera()
@@ -721,21 +734,29 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 		}
 	}
 
+	function positionSubtitles(){
+		// move subtitles
+		for ( var i =0; i<window.textMeshes.length; i++ ){
+			var sub = window.textMeshes[i];
+			if ( !sub.started ){
+				var ran = Math.random();
+				if ( ran > .5 ){
+					sub.mesh.position.x =  -window.innerWidth * .1 - Math.random() * (window.innerWidth * .4);
+				} else {
+					sub.mesh.position.x =  window.innerWidth * .1 + Math.random() * window.innerWidth * .4;
+				}
+				sub.mesh.position.y = -window.innerHeight * .6;
+				sub.mesh.position.z = 1;
+			}
+		}
+	}
+
 	//-----------------------------------------------------------
 	function onWindowResize() {
-
-		// camera.right = window.innerWidth;
-		// camera.bottom = window.innerHeight;
-
-		// camera.aspect = window.innerWidth / window.innerHeight;
-		// camera.updateProjectionMatrix();
 		resetCamera();
 		scaleVidMesh();
 
-		// if(fstPlane !== undefined)
-		// {
-		// 	fstPlane.material.uniforms.screendim.value.set(window.innerWidth, window.innerHeight );
-		// }
+		positionSubtitles();
 
 		renderer.setSize( window.innerWidth, window.innerHeight );
 	}
@@ -772,25 +793,8 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 
 	function onKeyDown( event )
 	{
-		console.log( event.keyCode );
 		switch( event.keyCode )
 		{
-
-			case 32:
-				// pauseVideos();
-				videoContrller.setVideoTime(80);
-
-				break;
-
-			case 67:
-				break;
-
-			// case 77:
-			// 	break;
-
-			default:
-				// console.log( event.keyCode );
-				break;
 		}
 	}
 

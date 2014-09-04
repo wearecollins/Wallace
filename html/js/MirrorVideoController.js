@@ -1,5 +1,21 @@
 // MirrorVideoController.js
-// 
+
+function supports_video() {
+  return !!document.createElement('video').canPlayType;
+}
+
+function supports_h264_baseline_video() {
+  if (!supports_video()) { return false; }
+  var v = document.createElement("video");
+  return v.canPlayType('video/mp4; codecs="avc1.42E01E, mp4a.40.2"');
+}
+
+// convert hh:mm::ss to int (seconds)
+function timeCodeToInt(tcStr){
+	var t = tcStr.split(":");
+	return (t[0] * 3600 + t[1] * 60 + t[2] * 1);
+}
+
 // 
 // 1 - straight / up / down (has audio)
 // 2 - left / right / upper left (no audio)
@@ -40,35 +56,33 @@ MirrorVideoController = function(params)
 	this.doubleWide = params.doubleWide || false;
 	this.onSubtitlesMade = params.subtitleHander || undefined;
 
+	var fmt = supports_h264_baseline_video() !== "" ? "mp4" : "webm";
+
 	if ( this.backgroundRendered ){
 		this.videoFiles = params.videoFiles || {
-			"01": 	{path: 	"../WALLACE_TESTS/01_STRAIGHT_WEIRD_BLEND.mp4"},
-			"02": {path: 	"../WALLACE_TESTS/02_UP_DOWN_BLEND.mp4"},
-			"03": {path: 	"../WALLACE_TESTS/03_LEFT_RIGHT_BLEND.mp4"},
-			"04": {path: 	"../WALLACE_TESTS/04_UL_UR_BLEND.mp4"},
+			"01": 	{path: 	"../WALLACE_TESTS/01_STRAIGHT_WEIRD_BLEND." + fmt},
+			"02": {path: 	"../WALLACE_TESTS/02_UP_DOWN_BLEND." + fmt},
+			"03": {path: 	"../WALLACE_TESTS/03_LEFT_RIGHT_BLEND." + fmt},
+			"04": {path: 	"../WALLACE_TESTS/04_UL_UR_BLEND." + fmt},
 		};
 	} else if ( !this.doubleWide ){
 		this.videoFiles = params.videoFiles || {
-			"BackgroundVideo": {path: "../WALLACE_TESTS/BG_PREVIEW_07_1.mp4"},
-			"01": {path: 	"../WALLACE_TESTS/02_ALPHA_STRAIGHT_03.mp4"},
-			"02": {path: 	"../WALLACE_TESTS/03_ALPHA_UP.mp4"},
-			"03": {path: 	"../WALLACE_TESTS/04_ALPHA_DOWN.mp4"},
-			"04": {path: 	"../WALLACE_TESTS/05_ALPHA_LEFT.mp4"},
-			"05": {path: 	"../WALLACE_TESTS/06_ALPHA_RIGHT.mp4", wait: true},
+			"BackgroundVideo": {path: "../WALLACE_TESTS/BG_PREVIEW_07_1." + fmt},
+			"01": {path: 	"../WALLACE_TESTS/02_ALPHA_STRAIGHT_03." + fmt},
+			"02": {path: 	"../WALLACE_TESTS/03_ALPHA_UP." + fmt},
+			"03": {path: 	"../WALLACE_TESTS/04_ALPHA_DOWN." + fmt},
+			"04": {path: 	"../WALLACE_TESTS/05_ALPHA_LEFT." + fmt},
+			"05": {path: 	"../WALLACE_TESTS/06_ALPHA_RIGHT." + fmt},
 		};
 	} else {
 		this.videoFiles = params.videoFiles || {
-			"BackgroundVideo": {path: "../WALLACE_TESTS/BG_PREVIEW_07_1.mp4"},
-			"01": 	{path: 	"../WALLACE_TESTS/01_STRAIGHT_WEIRD.mp4"},
-			"02": {path: 	"../WALLACE_TESTS/02_UP_DOWN.mp4"},
-			"03": {path: 	"../WALLACE_TESTS/03_LEFT_RIGHT.mp4"},
-			"04": {path: 	"../WALLACE_TESTS/04_UL_UR.mp4"},
+			"BackgroundVideo": {path: "../WALLACE_TESTS/BG_PREVIEW_07_1." + fmt},
+			"01": 	{path: 	"../WALLACE_TESTS/01_STRAIGHT_WEIRD." + fmt},
+			"02": {path: 	"../WALLACE_TESTS/02_UP_DOWN." + fmt},
+			"03": {path: 	"../WALLACE_TESTS/03_LEFT_RIGHT." + fmt},
+			"04": {path: 	"../WALLACE_TESTS/04_UL_UR." + fmt},
 		};
 	}
-
-	this.subtitles = params.subtitles || "../WALLACE_TESTS/subtitles.js";
-	this.subtitlesAttached = false; // only attach to one video element.
-
 
 	// 1 - straight / up / down (has audio)
 	// 2 - left / right / upperLeft (no audio)
@@ -149,9 +163,24 @@ MirrorVideoController = function(params)
 	this.muteVideo = (params.muteVideo !== undefined)? params.muteVideo : !PLAYING;
 	console.log("this.muteVideo " + this.muteVideo)
 
-	this.loadVideos();
+	this.loadVideos(fmt);
 
 	//this.playVideos();
+	
+	// create subtitles
+	$.getJSON(params.subtitles || "../WALLACE_TESTS/subtitles.json", 
+		function(data) {
+			var cues = data.entries;
+
+			for ( var i=0; i<cues.length; i++){
+				var cue = cues[i];
+				this.createFallMesh( cues[i].text, timeCodeToInt(cues[i].start) );
+			}
+
+			// alert parent we're donezo
+			if ( this.onSubtitlesMade ) this.onSubtitlesMade( window.textMeshes );
+		}.bind(this)
+	);
 
 	if(!this.muteVideo)
 	{
@@ -190,7 +219,11 @@ MirrorVideoController.prototype.pauseVideos = function ()
 
 MirrorVideoController.prototype.setVideoPosition = function (percent)
 {
-	for(var v in this.videos)	this.videos[v].video.currentTime = percent * this.videoDuration; 
+	try {
+		for(var v in this.videos)	this.videos[v].video.currentTime = percent * this.videoDuration; 
+	} catch(e){
+
+	}
 }
 MirrorVideoController.prototype.setVideoTime = function (videotime)
 {
@@ -201,15 +234,22 @@ MirrorVideoController.prototype.stopVideos = function ()
 {
 	this.setVideoPosition(0);
 
-	for(var v in videos)	this.videos[v].video.pause();
+	for(var v in this.videos)	this.videos[v].video.pause();
 
 	this.bPaused = true;
 }
 
 MirrorVideoController.prototype.setVolume = function(value)
 {
-	this.videos['01'].video.muted = false;
-	this.videos['01'].video.volume = value;
+	if ( value == 0 ){
+		for(var v in this.videos){
+			this.videos[v].video.muted = false;
+			this.videos[v].video.volume = value;
+		}
+	} else {
+			this.videos['01'].video.muted = false;
+			this.videos['01'].video.volume = value;
+	}
 };
 
 MirrorVideoController.prototype.update = function()
@@ -225,10 +265,16 @@ MirrorVideoController.prototype.update = function()
 		for ( var i=0; i<window.textMeshes.length; i++){
 			if ( this.videos['01'].video.currentTime >= window.textMeshes[i].time && window.textMeshes[i].started == false){
 				window.textMeshes[i].started = true;
+				window.textMeshes[i].mesh.rotation.z = 0;
+				window.textMeshes[i].mesh.position.y = -window.innerHeight * .6;
+				window.textMeshes[i].mesh.position.parent = window.textMeshes[i].mesh;
 				new TWEEN.Tween(window.textMeshes[i].mesh.position)
 					.to({y: window.innerHeight * .75}, 5000)
 					.easing( TWEEN.Easing.Sinusoidal.Out )
-					.start();
+					.start()
+					.onComplete(function(){
+						this.parent.visible = false;
+					});
 
 				new TWEEN.Tween(window.textMeshes[i].mesh.rotation)
 					.to({z: Math.random() * Math.PI - Math.PI / 2.0}, 5000)
@@ -284,7 +330,7 @@ MirrorVideoController.prototype.setVideoActive = function( name, bIsActive)
 	}
 }
 
-MirrorVideoController.prototype.loadVideos = function ()
+MirrorVideoController.prototype.loadVideos = function (fmt)
 {
 
 	this.videoLoadCount = 0;
@@ -295,29 +341,22 @@ MirrorVideoController.prototype.loadVideos = function ()
 	// var files = [];
 	for( var id in this.videoFiles )
 	{
-		if ( !this.videoFiles[id].wait ){
-			// console.log( 'this.videoFiles[id].path ' + this.videoFiles[id].path );
-			this.loadVideo( id, this.videoFiles[id].path);
-		}
-		this.videoToLoadCount++;
-
-		// console.log( document.getElementById( id ))
-		// files.push(this.videoFiles[id].path);
+		this.loadVideo( id, this.videoFiles[id].path, fmt == "mp4" ? "video/mp4" : "video/webm");
+		//this.videoToLoadCount++;
 	}
 	// videoLoader.addFiles(files);
 
 	for(var id in this.videoFiles)
 	{
-		if ( !this.videoFiles[id].wait ){
-			// console.log( 'info' );this.videos["BackgroundVideo"]
-			var active = id == "BackgroundVideo";
-			this.videos[id] = new AzealiaVideoObject({
-				video: document.getElementById( id ),
-				name: id,
-				bIsActive: active
-			}, true);
-		}
+		// console.log( 'info' );this.videos["BackgroundVideo"]
+		var active = id == "BackgroundVideo";
+		this.videos[id] = new AzealiaVideoObject({
+			video: document.getElementById( id ),
+			name: id,
+			bIsActive: true
+		}, true);
 	}
+	this.playVideos();
 }
 
 MirrorVideoController.prototype.getVideoLocation = function ( videoName )
@@ -342,7 +381,7 @@ MirrorVideoController.prototype.getVideo = function ( videoName )
 }
 
 
-MirrorVideoController.prototype.loadVideo = function ( name, url, onLoadComplete )
+MirrorVideoController.prototype.loadVideo = function ( name, url, type, onLoadComplete )
 {
 
 	// console.log( "\nload name: " + name);
@@ -351,98 +390,14 @@ MirrorVideoController.prototype.loadVideo = function ( name, url, onLoadComplete
 
 	var videoElement = document.createElement( 'video' );
 	videoElement.setAttribute("loop", "");
-	videoElement.setAttribute("type", "video/mp4");
-	videoElement.setAttribute("preload", "auto");
+	videoElement.setAttribute("type", type);
+	videoElement.setAttribute("preload", "none");
 	
 	if(this.muteVideo == true || name != "01")
 	{
 		videoElement.setAttribute("muted", "");
 	}
-	
 
-	// create subtitles
-	if ( !this.subtitlesAttached ){
-		this.subtitlesAttached = true;
-		this.subtitleElement = document.createElement('track');
-		this.subtitleElement.setAttribute("kind", "subtitles");
-		this.subtitleElement.setAttribute("label", "English subtitles");
-		this.subtitleElement.setAttribute("srclang", "en");
-		this.subtitleElement.setAttribute("default", "");
-
-		// this is a little weird, huh?
-		this.subTitleInvert = false;
-
-		console.log( this.subtitleElement.track )
-		this.subtitleElement.setAttribute("src", this.subtitles );
-
-		var cues = this.subtitleElement.track ? this.subtitleElement.track.cues : null;
-		if ( cues == null || cues.length == 0 ){
-			window.tryInterval = setInterval(function(){
-			    // here goes nothing
-				var cues = this.subtitleElement.track.cues;
-				if ( cues != null && cues.length != 0){
-					window.clearInterval( window.tryInterval );
-					for ( var i=0; i<cues.length; i++){
-						var cue = cues[i];
-						if ( cue.id == "159" || cue.id == "316" || cue.id == "362" || cue.id == "426" ){
-							//invert = !invert;
-						}
-
-						// var t = cues[i].text;
-						// var str = ['function fun(){',
-						// 	'var d = window.textDivs[window.whichSub]; window.whichSub++;',
-						// 	'd.style["-webkit-transition"] = "top ease-out 5s, -webkit-transform 10s";',
-						// 	'd.style.top = d.invert ? window.innerHeight * -.25 +"px" : window.innerHeight * 1.2 +"px";',
-						// 	'd.style["-webkit-transform"] = "rotateZ(" + (Math.floor( -300 + Math.random() * 600 )) + "deg)";',
-						// '}; fun();'].join('\n');
-						// setTimeout( function(){ eval(str)}, cues[i].startTime * 1000 );
-						// this.createFallDiv( cues[i].text, invert );
-
-						this.createFallMesh( cues[i].text, cues[i].startTime );
-
-					}
-					window.whichSub = 0;
-
-					this.subtitleElement.setAttribute("src", "");
-					videoElement.removeChild(this.subtitleElement);
-
-					this.subtitleElement = null;
-
-					// alert parent we're donezo
-					if ( this.onSubtitlesMade ) this.onSubtitlesMade( window.textMeshes );
-
-					for( var id in this.videoFiles )
-					{
-						if ( this.videoFiles[id].wait ){
-							// console.log( 'this.videoFiles[id].path ' + this.videoFiles[id].path );
-							this.loadVideo( id, this.videoFiles[id].path, function(){ this.videoToLoadCount = 0 }.bind(this) );
-						}
-						// console.log( document.getElementById( id ))
-					}
-
-					for(var id in this.videoFiles)
-					{
-						if ( this.videoFiles[id].wait ){
-							// console.log( 'info' );
-							this.videos[id] = new AzealiaVideoObject({
-								video: document.getElementById( id ),
-								name: id
-							}, true);
-						}
-					}
-
-					this.playVideos();
-				}
-			}.bind(this), 10);
-		} 
-		videoElement.appendChild(this.subtitleElement);
-
-		//this.subtitleElement.oncuechange = this.onSubtitleTrigger.bind(this);
-		this.subtitleElement.onerror = function(e){
-			console.log(e);
-		}
-	}
-	
 	videoElement.setAttribute("id", name);
 	var source = document.createElement('source');
 	source.src = url;
@@ -475,67 +430,11 @@ MirrorVideoController.prototype.loadVideo = function ( name, url, onLoadComplete
 	}
 }
 
-MirrorVideoController.prototype.onSubtitleTrigger = function(e){
-	//console.log(e);
-	// override?
-	for ( var i=0; i<this.subtitleElement.track.activeCues.length; i++){
-		var cue = this.subtitleElement.track.activeCues[i]; // assuming there is only one active cue
-		if ( cue ){ 
-			if ( cue.id == "159" || cue.id == "316" || cue.id == "362" || cue.id == "426" ){
-				//this.subTitleInvert = !this.subTitleInvert;
-			}
-			var obj = cue.text;//JSON.parse(cue.text);
-			this.triggerDiv(obj);
-			//this.addFallingText(obj);
-			// setTimeout( this.addFallingText.bind(this), 0, obj);
-		}
-	}
-}
-
 MirrorVideoController.prototype.createFallMesh = function(string, time) {
 	if ( !window.textMeshes ){
 		window.textMeshes = [];
+		console.log(time)
 	}
 
 	window.textMeshes.push( {started: false, mesh:new THREE.TextTexture(string, 16, "#fff", "Helvetica", "#000"), time:time});
 };
-
-MirrorVideoController.prototype.createFallDiv = function( string, invert ){
-	if ( !window.textDivs ){
-		window.textDivs = {};
-		window.whichSub = 0;
-	}
-
-	window.textDivs[window.whichSub] 	= document.createElement("div");
-	window.textDivs[window.whichSub].style.fontFamily = "Helvetica";
-	window.textDivs[window.whichSub].style.position = "absolute";
-	window.textDivs[window.whichSub].style.zIndex = "2000";
-	window.textDivs[window.whichSub].style.padding = "5px";
-	window.textDivs[window.whichSub].style["background-color"] = "#000";
-	window.textDivs[window.whichSub].style.color = "#fff";
-
-	if ( invert ){
-		window.textDivs[window.whichSub].style.top = window.innerHeight * 1.2 + "px";
-		window.textDivs[window.whichSub].invert 	= true;
-	} else {
-		window.textDivs[window.whichSub].style.top = "-50px";
-		window.textDivs[window.whichSub].invert 	= false;
-	}
-	window.textDivs[window.whichSub].style["-webkit-transform"] = "";
-	window.textDivs[window.whichSub].style.left 	 = (Math.random() > .5 ? Math.floor(window.innerWidth * .1 + Math.random() * (window.innerWidth * .3)) : Math.floor(window.innerWidth * .6 + Math.random() * (window.innerWidth * .3))) +"px";
-
-	window.textDivs[window.whichSub].innerHTML = string;
-
-	document.body.appendChild(window.textDivs[window.whichSub]);
-	window.whichSub++;
-}
-
-MirrorVideoController.prototype.triggerDiv = function( name ){
-	if ( window.textDivs && window.textDivs[name]){
-		var d = window.textDivs[name];
-
-		d.style["-webkit-transition"] = "top ease-out 5s, -webkit-transform 10s";
-		d.style.top = d.invert ? window.innerHeight * -.25 +"px" : window.innerHeight * 1.2 +"px";
-		d.style["-webkit-transform"] = "rotateZ(" + (Math.floor( -300 + Math.random() * 600 )) + "deg)";
-	}
-}

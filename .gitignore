@@ -1,4 +1,5 @@
 *.pyc
 *.mp4
+*.webm
 *.zip
 .DS_Store
