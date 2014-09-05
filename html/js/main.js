@@ -54,7 +54,7 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 	var backgroundMesh;
 
 	var controls = {
-		slitStep: 2
+		slitStep: 5
 	}
 
 	function addSubtitles( subs ){
@@ -179,6 +179,7 @@ function APP( _useStats, _debug, _muteVideo, _auto)
             } else { 
             	// we just don't have it!
             }
+            $("#cta").html("Move your mouse.<br/>Your browser doesn't support camera interaction. Please try <a href='https://www.google.com/chrome/browser/'>Chrome</a> or <a href='https://www.mozilla.org/en-US/firefox/new/'>Firefox</a>.")
         });
 
 		// VIDEO CONTROLLER
@@ -350,8 +351,8 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 
 				if(bMulti == false)
 				{
-					// startTransition(v);
-					startMultiTransition(currentVideo, v);
+					startTransition(v);
+					//startMultiTransition(currentVideo, v);
 				}
 			}
 		} 

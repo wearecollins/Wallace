@@ -27,7 +27,7 @@ var Slitter = function(params)
 	// var slitMat, blendMat;
 	// var slitScene = new THREE.Scene();
 	
-	this.slitStep = params.slitStep || 3;
+	this.slitStep = params.slitStep || 2;
 	this.frame = 0;
 
 	//blended videos input

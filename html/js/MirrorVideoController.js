@@ -391,7 +391,7 @@ MirrorVideoController.prototype.loadVideo = function ( name, url, type, onLoadCo
 	var videoElement = document.createElement( 'video' );
 	videoElement.setAttribute("loop", "");
 	videoElement.setAttribute("type", type);
-	videoElement.setAttribute("preload", "none");
+	videoElement.setAttribute("preload", "auto");
 	
 	if(this.muteVideo == true || name != "01")
 	{
