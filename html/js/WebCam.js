@@ -183,6 +183,10 @@ function WebCam(defaultVideoTag) {
         return heightRounded;
     }
 
+    this.getVideoElement = function(){
+        return videoTag;
+    }
+
     this.getDOMElement = function(){
         return canvas;
     }

@@ -9,8 +9,8 @@ var MotionThresholds = function(params)
 		left: .44,
 		right: .56,
 		farRight: .65,
-		up: .6,
-		down: .43,
+		up: .53,
+		down: .47,
 	}
 
 	var horizontalLine = new THREE.Geometry();

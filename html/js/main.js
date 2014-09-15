@@ -21,6 +21,9 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 	var muteVideo = _muteVideo || !PLAYING;
 	var auto = _auto || false;
 
+	var useCLMTracker = true;
+	var faceTracker;
+
 	//main container
 	var container = document.createElement( 'div' );
 
@@ -30,7 +33,7 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 	document.body.appendChild( container );
 
 	var debug = false;//(_debug == true)? false : false;
-	var useStats = debug;//_useStats || true;
+	var useStats = false;//debug;//_useStats || true;
 	var frame = 0;
 
 	var vidAspect = 1280 / 720;
@@ -106,7 +109,8 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 	}
 	// simple detect
 	var simpleDetector;
-	var useOpticalFlow = true;
+	var useOpticalFlow = !useCLMTracker;//true;
+	var worker;
 
 	var debugSphere = new THREE.Mesh( new THREE.SphereGeometry(5), new THREE.MeshBasicMaterial( {color: 0xffffff, side: 2} ) );
 	debugSphere.scale.z = 2;
@@ -130,46 +134,50 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 		if ( useOpticalFlow ){
 			worker = new Worker("js/flowWorker.js");
 		} else {
-			simpleDetector = new SimpleMotionDetector();
+			// simpleDetector = new SimpleMotionDetector();
 		}
 		webcam = new WebCam();
         webcam.onUpdated( function(){
-            // console.log("yes")
-           // if ( webcam.getLastPixels() ){
-                worker.postMessage({
-                    // last: webcam.getLastPixels(),
-                    current: webcam.getCurrentPixels(),
-                    width: webcam.getWidth(),
-                    height: webcam.getHeight(),
-                    time: new Date()
-                });
-            //}
+        	if ( worker ){
+	            // console.log("yes")
+	           // if ( webcam.getLastPixels() ){
+	                worker.postMessage({
+	                    // last: webcam.getLastPixels(),
+	                    current: webcam.getCurrentPixels(),
+	                    width: webcam.getWidth(),
+	                    height: webcam.getHeight(),
+	                    time: new Date()
+	                });
+	            //}
+	       	}
         });
 
         /* Setup WebWorker messaging */
-        var lastTime = new Date();
-        worker.onmessage = function(event){
+        if ( worker ){
+        	var lastTime = new Date();
+	        worker.onmessage = function(event){
 
-        	// console.log( event.data.time - lastTime );
-        	if ( event.data.time - lastTime > 0 ){
-        		lastTime = event.data.time;
-        		var direction = event.data.direction;
+	        	// console.log( event.data.time - lastTime );
+	        	if ( event.data.time - lastTime > 0 ){
+	        		lastTime = event.data.time;
+	        		var direction = event.data.direction;
 
-				if(direction.averageMotionPos.numVals > flowValues.motionThreshold)
-				{
-		            targetDir.x = 1. - event.data.direction.averageMotionPos.x;
-		            // targetDir.y = 1. - event.data.direction.averageMotionPos.y;
+					if(direction.averageMotionPos.numVals > flowValues.motionThreshold)
+					{
+			            targetDir.x = 1. - event.data.direction.averageMotionPos.x;
+			            // targetDir.y = 1. - event.data.direction.averageMotionPos.y;
 
-					b1 = b1 * (1 - flowValues.nodMix) + event.data.direction.v * flowValues.nodMix;
-					targetDir.y = -b1 * flowValues.vScale + .5; 
-				}
+						b1 = b1 * (1 - flowValues.nodMix) + event.data.direction.v * flowValues.nodMix;
+						targetDir.y = -b1 * flowValues.vScale + .5; 
+					}
 
 
-				flowDir.x = flowDir.x * flowSmoothing + (targetDir.x) * (1 - flowSmoothing);
-				flowDir.y = flowDir.y * flowSmoothing + (targetDir.y) * (1 - flowSmoothing);
-        	}
-            
-        };
+					flowDir.x = flowDir.x * flowSmoothing + (targetDir.x) * (1 - flowSmoothing);
+					flowDir.y = flowDir.y * flowSmoothing + (targetDir.y) * (1 - flowSmoothing);
+	        	}
+	            
+	        };
+	    }
 
 
         // set up w/o starting animation
@@ -185,6 +193,11 @@ function APP( _useStats, _debug, _muteVideo, _auto)
             }
             $("#cta").html("Move your mouse.<br/>Your browser doesn't support camera interaction. Please try <a href='https://www.google.com/chrome/browser/'>Chrome</a> or <a href='https://www.mozilla.org/en-US/firefox/new/'>Firefox</a>.")
         });
+
+        if ( useCLMTracker ){
+        	faceTracker = new FaceTracker();
+        	faceTracker.setup( webcam );
+        }
 
         webCamTexture = new THREE.Texture(webcam.getDOMElement());
 		webCamTexture.minFilter = THREE.LinearFilter;
@@ -246,7 +259,7 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 
 
 		//GUI
-		if ( debug ){
+		if ( debug && useStats ){
 			//gui
 			gui = new dat.GUI();
 			var oflowFolder = gui.addFolder("oflow");
@@ -321,6 +334,9 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 	{
 		if ( videoContrller.videoToLoadCount != 0 ) return;
 
+        if ( useCLMTracker ){
+			faceTracker.update();
+		}
 		if ( videoContrller.videos['01'].video.currentTime > backgroundTime.start && videoContrller.videos['01'].video.currentTime < backgroundTime.end)
 		{
 			webcam.setGrayscale( true );
@@ -357,6 +373,10 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 		// }
 
 		if ( hasUserMedia ){
+			if ( useCLMTracker ){
+				flowDir.x = faceTracker.nose.x;
+				flowDir.y = faceTracker.nose.y;
+			}
 			// if ( frame % rate == 0 ){
 			// 	setTimeout(webcam.updatePixels,0);
 			// 	// console.log("update");
@@ -553,7 +573,10 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 		//draw the slits to thier render targets
 		slits.draw();
 		webcamslits.draw();
-		
+
+        if ( useCLMTracker ){
+			faceTracker.draw();
+		}	
 		//to the background & slitShader to screen
 		renderer.render( scene, camera, null, true );
 	}
@@ -916,6 +939,7 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 	events();
 	animate();
 	this.bgm = backgroundMesh;
+	this.ft = faceTracker; 
 }
 
 function getQuerystring(key, default_)
