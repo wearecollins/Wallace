@@ -12,13 +12,13 @@ THREE.TextTexture = function(text, size, color, font, backGroundColor, backgroun
 	var textWidth = context.measureText(text).width;
 
 	canvas.width = textWidth + backgroundMargin;
-	canvas.height = size + backgroundMargin;
+	canvas.height = size + backgroundMargin * 2;
 	context = canvas.getContext("2d");
 	context.font = size + "pt " + font;
 
 	if(backGroundColor !== undefined) {
 		context.fillStyle = backGroundColor;
-		context.fillRect(canvas.width / 2 - textWidth / 2 - backgroundMargin / 2, canvas.height / 2 - size / 2 - +backgroundMargin / 2, textWidth + backgroundMargin, size + backgroundMargin);
+		context.fillRect(canvas.width / 2 - textWidth / 2 - backgroundMargin / 2, canvas.height / 2 - size / 2 - +backgroundMargin / 2, textWidth + backgroundMargin, size + backgroundMargin * 2);
 	}
 
 	context.textAlign = "center";

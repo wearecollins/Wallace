@@ -12,7 +12,7 @@ var SlitShader = function(params)
 	var slitCount = params.slits.length;
 
 	var matParams = {
-		transparent: true,
+		transparent: params.transparent !== undefined ? params.transparent : true,
 		blending: params.blending || 1,
 		depthTest: params.depthTest || true,
 		side: params.side || 2,// 0 = backFaceCull, 1 = frontFaceCull, 2 = doubleSided
@@ -39,7 +39,7 @@ var SlitShader = function(params)
 		'}'].join('\n'),
 
 		fragmentShader: [
-		'uniform sampler2D slits[15];',
+		'uniform sampler2D slits[' + parseInt(slitCount) + '];',
 		'uniform sampler2D blendMap;',
 
 		'uniform float bMin;',	

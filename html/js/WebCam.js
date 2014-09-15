@@ -23,8 +23,9 @@ function WebCam(defaultVideoTag) {
         lastPixels,
         loopId,
         updatedCallbacks = [],
-        drawWidth = 160,
-        drawHeight = 120,
+        drawWidth = 320,
+        drawHeight = 240,
+        grayscale = false,
 
         requestAnimFrame = window.requestAnimationFrame       ||
                            window.webkitRequestAnimationFrame ||
@@ -129,14 +130,15 @@ function WebCam(defaultVideoTag) {
                   var ind = i/4;
                   // red
                   data[ind] = brightness;
+                  pix[i] = brightness;
+                  pix[i+1] = brightness;
+                  pix[i+2] = brightness;
                 }
                 // delete pix;
 
                 // debuggin ONLY
-                if ( window.drawDebug ){
-                    var id = ctx.createImageData( drawWidth, drawHeight );
-                    id.data = pix;
-                    ctx.putImageData( id, 0, 0 );
+                if ( grayscale ){
+                    ctx.putImageData( imgd, 0, 0 );
                 }
 
                 currentPixels = data;
@@ -148,6 +150,10 @@ function WebCam(defaultVideoTag) {
         } else {
             // width = height = 0?
         }
+    };
+
+    this.setGrayscale = function(t){
+        grayscale = t;
     }
 
     this.stopCapture = function() {
@@ -177,4 +183,7 @@ function WebCam(defaultVideoTag) {
         return heightRounded;
     }
 
+    this.getDOMElement = function(){
+        return canvas;
+    }
 }

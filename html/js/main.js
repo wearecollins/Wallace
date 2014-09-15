@@ -4,6 +4,8 @@ var LYRICS_ON 	= false;
 var PLAYING		= false;
 var HAS_PLAYED 	= false;
 
+var iOS = ( navigator.userAgent.match(/(iPad|iPhone|iPod)/g) ? true : false );
+
 $(window).bind("load", function() {
 	var debug = getQuerystring('debug') == "true";
 	var useStats = getQuerystring('useStats') == "true";
@@ -52,6 +54,8 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 	var hasUserMedia 	= true;
 
 	var backgroundMesh;
+	var backgroundFlipped = false;
+	var webCamTexture;
 
 	var controls = {
 		slitStep: 5
@@ -77,14 +81,14 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 
 	var blendMaps = {
 		// randomGrid: THREE.ImageUtils.loadTexture( '../blendMaps/random_grid.png' ),
-		softNoise: THREE.ImageUtils.loadTexture( useBackground ? '../blendMaps/soft_noise_sides.png' : '../blendMaps/soft_noise.png' ),
+		softNoise: THREE.ImageUtils.loadTexture( useBackground ? '../blendMaps/soft_noise_sides.png' : '../blendMaps/hr_noise.png' ),
 		// hardGradientDownTop: THREE.ImageUtils.loadTexture('../blendMaps/hardGradientDownTop.png'),
 		// hardGradientLeftRight: THREE.ImageUtils.loadTexture('../blendMaps/hardGradientLeftRight.png'),
 		// hardGradientRightLeft: THREE.ImageUtils.loadTexture('../blendMaps/hardGradientRightLeft.png'),
 		// hardGradientTopDown: THREE.ImageUtils.loadTexture('../blendMaps/hardGradientTopDown.png')
 	};
 	
-	var slits, bTransitioning = false;
+	var slits, webcamslits, bTransitioning = false;
 
 	var currentVideo = undefined, previousVideo = undefined;
 	
@@ -109,7 +113,7 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 	
 	// transitions
 	var time = {
-		in: 500,
+		in: 400,
 		out: 250
 	}
 
@@ -182,6 +186,13 @@ function APP( _useStats, _debug, _muteVideo, _auto)
             $("#cta").html("Move your mouse.<br/>Your browser doesn't support camera interaction. Please try <a href='https://www.google.com/chrome/browser/'>Chrome</a> or <a href='https://www.mozilla.org/en-US/firefox/new/'>Firefox</a>.")
         });
 
+        webCamTexture = new THREE.Texture(webcam.getDOMElement());
+		webCamTexture.minFilter = THREE.LinearFilter;
+		webCamTexture.magFilter = THREE.LinearFilter;
+		webCamTexture.format = THREE.RGBFormat;
+		webCamTexture.generateMipmaps = false;
+		webCamTexture.needsUpdate = false;
+
 		// VIDEO CONTROLLER
 		videoContrller.playVideos();
 
@@ -213,6 +224,15 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 		slits.mesh.position.z = 2;
 		slits.setMixValue(1);
 
+		webcamslits = new SlitterBasic({
+			renderer: renderer,
+			camera: camera,
+			blendMap: blendMaps.softNoise,// blendMaps.softNoise,//hardGradientDownTop,//
+			currentTex: webCamTexture
+		});
+		scene.add(webcamslits.mesh);
+		webcamslits.mesh.position.z = 0;
+		// webcamslits.setMixValue(1);
 
 		//MISC
 		//
@@ -294,22 +314,53 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 	 */
 
 	var rate = 2;
+	var backgroundTime = {start:162.386, end: 191.124};
+	var done = false;
 
 	function update()
 	{
 		if ( videoContrller.videoToLoadCount != 0 ) return;
+
+		if ( videoContrller.videos['01'].video.currentTime > backgroundTime.start && videoContrller.videos['01'].video.currentTime < backgroundTime.end)
+		{
+			webcam.setGrayscale( true );
+			if ( webcam.getDOMElement().readyState === webcam.getDOMElement().HAVE_ENOUGH_DATA ){
+				webCamTexture.needsUpdate = true;
+			}
+			// if ( !webcamslits.flipped ){
+			// 	webcamslits.flip();
+			// }
+			webcamslits.update();
+			//backgroundMesh.material.map = webCamTexture;
+			if ( !backgroundFlipped ){
+				backgroundFlipped = true;
+				backgroundMesh.visible = false;
+			}
+			// if ( frame % 5 == 0 ){
+			// 	webcamslits.mesh.visible = true;
+			// } else {
+			// 	webcamslits.mesh.visible = false;
+			// }
+		} else {
+			webcam.setGrayscale( false );
+			if ( backgroundFlipped ){
+				backgroundFlipped = false;
+				backgroundMesh.visible = true;
+				webcamslits.visible = false;
+			}
+			backgroundMesh.material.map = videoContrller.getVideo("background").t;
+		}
 		frame++;
 		// if ( parseInt(document.getElementById("fpsText").innerHTML.substr(0,2)) < 30 ){
 		// 	rate++;
 		// 	console.log(rate);
 		// }
-		backgroundMesh.material.map = videoContrller.getVideo("background").t;
 
 		if ( hasUserMedia ){
-			if ( frame % rate == 0 ){
-				setTimeout(webcam.updatePixels,0);
-				// console.log("update");
-			}
+			// if ( frame % rate == 0 ){
+			// 	setTimeout(webcam.updatePixels,0);
+			// 	// console.log("update");
+			// }
 		// no user media (or they denied it), so check mouse
 		} else {
 			flowDir.x = flowDir.x * .9 + THREE.Math.mapLinear(mouse.x, 0.0, window.innerWidth, 0.0, 1.0) * .1;
@@ -501,6 +552,7 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 	{
 		//draw the slits to thier render targets
 		slits.draw();
+		webcamslits.draw();
 		
 		//to the background & slitShader to screen
 		renderer.render( scene, camera, null, true );
@@ -705,6 +757,8 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 		var yPos = 0;
 
 		slits.mesh.scale.set( window.innerWidth, h, 1);
+		webcamslits.mesh.scale.set( window.innerWidth * -1, h, 1);
+		webcamslits.renderMesh.scale.set( window.innerWidth, h, 1);
 		motionThresholds.group.scale.set( window.innerWidth, h, 1);
 		backgroundMesh.scale.set( window.innerWidth, h, 1);
 
@@ -857,6 +911,8 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 	}	
 
 	setup();
+	this.ws = webcamslits;
+	this.s = scene;
 	events();
 	animate();
 	this.bgm = backgroundMesh;

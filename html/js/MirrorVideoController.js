@@ -56,31 +56,35 @@ MirrorVideoController = function(params)
 	this.doubleWide = params.doubleWide || false;
 	this.onSubtitlesMade = params.subtitleHander || undefined;
 
-	var fmt = supports_h264_baseline_video() !== "" ? "mp4" : "webm";
+	var fmt = supports_h264_baseline_video() !== "" ? ".mp4" : ".webm";
+
+	if ( iOS ){
+		fmt = "_mobile" + fmt;
+	}
 
 	if ( this.backgroundRendered ){
 		this.videoFiles = params.videoFiles || {
-			"01": 	{path: 	"../WALLACE_TESTS/01_STRAIGHT_WEIRD_BLEND." + fmt},
-			"02": {path: 	"../WALLACE_TESTS/02_UP_DOWN_BLEND." + fmt},
-			"03": {path: 	"../WALLACE_TESTS/03_LEFT_RIGHT_BLEND." + fmt},
-			"04": {path: 	"../WALLACE_TESTS/04_UL_UR_BLEND." + fmt},
+			"01": 	{path: 	"../WALLACE_TESTS/01_STRAIGHT_WEIRD_BLEND" + fmt},
+			"02": {path: 	"../WALLACE_TESTS/02_UP_DOWN_BLEND" + fmt},
+			"03": {path: 	"../WALLACE_TESTS/03_LEFT_RIGHT_BLEND" + fmt},
+			"04": {path: 	"../WALLACE_TESTS/04_UL_UR_BLEND" + fmt},
 		};
 	} else if ( !this.doubleWide ){
 		this.videoFiles = params.videoFiles || {
-			"BackgroundVideo": {path: "../WALLACE_TESTS/BG_PREVIEW_07_1." + fmt},
-			"01": {path: 	"../WALLACE_TESTS/02_ALPHA_STRAIGHT_03." + fmt},
-			"02": {path: 	"../WALLACE_TESTS/03_ALPHA_UP." + fmt},
-			"03": {path: 	"../WALLACE_TESTS/04_ALPHA_DOWN." + fmt},
-			"04": {path: 	"../WALLACE_TESTS/05_ALPHA_LEFT." + fmt},
-			"05": {path: 	"../WALLACE_TESTS/06_ALPHA_RIGHT." + fmt},
+			"BackgroundVideo": {path: "../WALLACE_TESTS/BG_PREVIEW_07_1" + fmt},
+			"01": {path: 	"../WALLACE_TESTS/02_ALPHA_STRAIGHT_03" + fmt},
+			"02": {path: 	"../WALLACE_TESTS/03_ALPHA_UP" + fmt},
+			"03": {path: 	"../WALLACE_TESTS/04_ALPHA_DOWN" + fmt},
+			"04": {path: 	"../WALLACE_TESTS/05_ALPHA_LEFT" + fmt},
+			"05": {path: 	"../WALLACE_TESTS/06_ALPHA_RIGHT" + fmt},
 		};
 	} else {
 		this.videoFiles = params.videoFiles || {
-			"BackgroundVideo": {path: "../WALLACE_TESTS/BG_PREVIEW_07_1." + fmt},
-			"01": 	{path: 	"../WALLACE_TESTS/01_STRAIGHT_WEIRD." + fmt},
-			"02": {path: 	"../WALLACE_TESTS/02_UP_DOWN." + fmt},
-			"03": {path: 	"../WALLACE_TESTS/03_LEFT_RIGHT." + fmt},
-			"04": {path: 	"../WALLACE_TESTS/04_UL_UR." + fmt},
+			"BackgroundVideo": {path: "../WALLACE_TESTS/BG_PREVIEW_07_1" + fmt},
+			"01": 	{path: 	"../WALLACE_TESTS/01_STRAIGHT_WEIRD" + fmt},
+			"02": {path: 	"../WALLACE_TESTS/02_UP_DOWN" + fmt},
+			"03": {path: 	"../WALLACE_TESTS/03_LEFT_RIGHT" + fmt},
+			"04": {path: 	"../WALLACE_TESTS/04_UL_UR" + fmt},
 		};
 	}
 
@@ -436,5 +440,5 @@ MirrorVideoController.prototype.createFallMesh = function(string, time) {
 		console.log(time)
 	}
 
-	window.textMeshes.push( {started: false, mesh:new THREE.TextTexture(string, 16, "#fff", "Helvetica", "#000"), time:time});
+	window.textMeshes.push( {started: false, mesh:new THREE.TextTexture(string, 24, "#fff", "Helvetica", "#000", 10), time:time});
 };
