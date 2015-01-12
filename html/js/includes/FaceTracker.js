@@ -9,6 +9,9 @@ FaceTracker.prototype.setup = function(webcam)
 	this._rawNose = new THREE.Vector2(.5, .5);
 	this._noseMap = new THREE.Vector2(0.0,1.0);
 
+	this.canvas = document.createElement('canvas');
+	this.context = this.canvas.getContext('2d');
+
 	function startVideo() 
 	{
 		console.log("hllow");
@@ -99,10 +102,11 @@ FaceTracker.prototype.update = function()
 
 FaceTracker.prototype.draw = function() {
 	// requestAnimFrame(this.draw.bind(this));
-	// this.context.clearRect(0, 0, this.videoElement.width, this.canvas.width);
+	this.context.clearRect(0, 0, this.videoElement.width, this.canvas.width);
 
 	if (this.tracker.getCurrentPosition()) 
 	{
+		this.tracker.draw(this.canvas);
 	}
 
 	//var cp = this.tracker.getCurrentParameters();

@@ -81,7 +81,7 @@ MirrorVideoController = function(params)
 	} else {
 		this.videoFiles = params.videoFiles || {
 			"BackgroundVideo": {path: "../WALLACE_TESTS/BG_PREVIEW_07_1" + fmt},
-			"01": 	{path: 	"../WALLACE_TESTS/01_STRAIGHT_WEIRD" + fmt},
+			"01": {path: 	"../WALLACE_TESTS/01_STRAIGHT_WEIRD" + fmt},
 			"02": {path: 	"../WALLACE_TESTS/02_UP_DOWN" + fmt},
 			"03": {path: 	"../WALLACE_TESTS/03_LEFT_RIGHT" + fmt},
 			"04": {path: 	"../WALLACE_TESTS/04_UL_UR" + fmt},
@@ -395,7 +395,7 @@ MirrorVideoController.prototype.loadVideo = function ( name, url, type, onLoadCo
 	var videoElement = document.createElement( 'video' );
 	videoElement.setAttribute("loop", "");
 	videoElement.setAttribute("type", type);
-	videoElement.setAttribute("preload", "auto");
+	// videoElement.setAttribute("preload", "true");
 	
 	if(this.muteVideo == true || name != "01")
 	{
@@ -418,7 +418,6 @@ MirrorVideoController.prototype.loadVideo = function ( name, url, type, onLoadCo
 	   onLoadComplete();
 	}.bind(this), false);
 	
-
 	document.body.appendChild(videoElement);
 
 	if(this.verbose)

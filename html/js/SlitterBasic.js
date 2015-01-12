@@ -40,7 +40,7 @@ var SlitterBasic = function (params) {
 	});
 
 
-	this.geometry = params.geometry || new THREE.PlaneGeometry( 1, 1, 12, 7 );
+	this.geometry = params.geometry || new THREE.PlaneBufferGeometry( 1, 1, 12, 7 );
 	this.renderMesh = new THREE.Mesh(this.geometry, new THREE.MeshBasicMaterial( { color: 0xffffff, map: params.currentTex } ));
 	this.scene.add(this.renderMesh);	
 

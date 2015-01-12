@@ -42,7 +42,7 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 	var lastMouse = new THREE.Vector2(), mouse = new THREE.Vector2();
 
 	//basic stuff
-	var camera, light, projector;
+	var camera, projector;
 	var clock = new THREE.Clock();
 	var scene = new THREE.Scene();
 	var group = new THREE.Object3D();
@@ -128,7 +128,6 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 		
 		scene = new THREE.Scene();
 		scene.add( camera );
-		scene.add( light );
 		scene.add( group );	
 
 		if ( useOpticalFlow ){
@@ -197,25 +196,33 @@ function APP( _useStats, _debug, _muteVideo, _auto)
         if ( useCLMTracker ){
         	faceTracker = new FaceTracker();
         	faceTracker.setup( webcam );
+        	if ( debug ){
+	        	document.body.appendChild(faceTracker.canvas);
+	        	faceTracker.canvas.style.zIndex = 3000;
+	        	faceTracker.canvas.style.position = "absolute";
+	        	faceTracker.canvas.style.top = "0px";
+	        	faceTracker.canvas.style.left = "0px";
+	        }
         }
-
-        webCamTexture = new THREE.Texture(webcam.getDOMElement());
-		webCamTexture.minFilter = THREE.LinearFilter;
-		webCamTexture.magFilter = THREE.LinearFilter;
-		webCamTexture.format = THREE.RGBFormat;
-		webCamTexture.generateMipmaps = false;
-		webCamTexture.needsUpdate = false;
+        if (hasUserMedia){
+	        webCamTexture = new THREE.Texture(webcam.getDOMElement());
+			webCamTexture.minFilter = THREE.LinearFilter;
+			webCamTexture.magFilter = THREE.LinearFilter;
+			webCamTexture.format = THREE.RGBFormat;
+			webCamTexture.generateMipmaps = false;
+			webCamTexture.needsUpdate = false;
+		}
 
 		// VIDEO CONTROLLER
 		videoContrller.playVideos();
 
 		// background mesh
-		backgroundPlane = new THREE.PlaneGeometry(1,1, 12, 7 );
+		backgroundPlane = new THREE.PlaneBufferGeometry(1,1, 12, 7 );
 		backgroundMesh = new THREE.Mesh(backgroundPlane, new THREE.MeshBasicMaterial( { color: 0xffffff, map: videoContrller.getVideo("background").t } ));
 		scene.add(backgroundMesh);
 
 		// black bars
-		var barMesh = new THREE.PlaneGeometry(1,1, 12, 7 );
+		var barMesh = new THREE.PlaneBufferGeometry(1,1, 12, 7 );
 		barMeshes[0] = new THREE.Mesh(barMesh, new THREE.MeshBasicMaterial( { color: 0x000000 } ));
 		barMeshes[1] = new THREE.Mesh(barMesh, new THREE.MeshBasicMaterial( { color: 0x000000 } ));
 		barMeshes[0].position.z = 3;
@@ -237,16 +244,17 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 		slits.mesh.position.z = 2;
 		slits.setMixValue(1);
 
-		webcamslits = new SlitterBasic({
-			renderer: renderer,
-			camera: camera,
-			blendMap: blendMaps.softNoise,// blendMaps.softNoise,//hardGradientDownTop,//
-			currentTex: webCamTexture
-		});
-		scene.add(webcamslits.mesh);
-		webcamslits.mesh.position.z = 0;
-		// webcamslits.setMixValue(1);
-
+		if ( hasUserMedia ){
+			webcamslits = new SlitterBasic({
+				renderer: renderer,
+				camera: camera,
+				blendMap: blendMaps.softNoise,// blendMaps.softNoise,//hardGradientDownTop,//
+				currentTex: webCamTexture
+			});
+			scene.add(webcamslits.mesh);
+			webcamslits.mesh.position.z = 0;
+			// webcamslits.setMixValue(1);
+		}
 		//MISC
 		//
 		//threshold lines
@@ -337,7 +345,7 @@ function APP( _useStats, _debug, _muteVideo, _auto)
         if ( useCLMTracker ){
 			faceTracker.update();
 		}
-		if ( videoContrller.videos['01'].video.currentTime > backgroundTime.start && videoContrller.videos['01'].video.currentTime < backgroundTime.end)
+		if ( hasUserMedia && videoContrller.videos['01'].video.currentTime > backgroundTime.start && videoContrller.videos['01'].video.currentTime < backgroundTime.end)
 		{
 			webcam.setGrayscale( true );
 			if ( webcam.getDOMElement().readyState === webcam.getDOMElement().HAVE_ENOUGH_DATA ){
@@ -358,11 +366,13 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 			// 	webcamslits.mesh.visible = false;
 			// }
 		} else {
-			webcam.setGrayscale( false );
-			if ( backgroundFlipped ){
-				backgroundFlipped = false;
-				backgroundMesh.visible = true;
-				webcamslits.visible = false;
+			if (hasUserMedia){ 
+				webcam.setGrayscale( false );
+				if ( backgroundFlipped ){
+					backgroundFlipped = false;
+					backgroundMesh.visible = true;
+					webcamslits.visible = false;
+				}
 			}
 			backgroundMesh.material.map = videoContrller.getVideo("background").t;
 		}
@@ -568,17 +578,18 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 	 * NOT called if no WebGL
 	 * @return {none} 
 	 */
+	var lc = true;
 	function draw()
 	{
 		//draw the slits to thier render targets
 		slits.draw();
-		webcamslits.draw();
+		if ( hasUserMedia ) webcamslits.draw();
 
-        if ( useCLMTracker ){
-			faceTracker.draw();
-		}	
 		//to the background & slitShader to screen
 		renderer.render( scene, camera, null, true );
+        if ( useCLMTracker && debug ){
+			faceTracker.draw();
+		} 
 	}
 
 	function startTransition2( to, midVid, transitionTime, delay, ease)
@@ -780,8 +791,10 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 		var yPos = 0;
 
 		slits.mesh.scale.set( window.innerWidth, h, 1);
-		webcamslits.mesh.scale.set( window.innerWidth * -1, h, 1);
-		webcamslits.renderMesh.scale.set( window.innerWidth, h, 1);
+		if ( hasUserMedia ){
+			webcamslits.mesh.scale.set( window.innerWidth * -1, h, 1);
+			webcamslits.renderMesh.scale.set( window.innerWidth, h, 1);
+		}
 		motionThresholds.group.scale.set( window.innerWidth, h, 1);
 		backgroundMesh.scale.set( window.innerWidth, h, 1);
 
@@ -839,6 +852,19 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 		renderer.setSize( window.innerWidth, window.innerHeight );
 	}
 
+	function onTouchMove( event , still )
+	{
+    	event.preventDefault(); 
+		mouse.set( event.touches[0].clientX, event.touches[0].clientY );
+
+		// if(mouseDown)
+		// {
+		// 	onMouseDragged( event );
+		// }
+
+		// lastMouse.set( mouse.x, mouse.y );
+	}
+
 	function onMouseMove( event , still )
 	{
 		mouse.set( event.x, event.y );
@@ -891,6 +917,7 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 	{
 		//events
 		window.addEventListener( 'resize', onWindowResize, false );
+		document.addEventListener( 'touchmove', onTouchMove, false );
 		document.addEventListener( 'mousemove', onMouseMove, false );
 		document.addEventListener( 'mouseup', onMouseUp, false );
 		document.addEventListener( 'mousedown', onMouseDown, false );
@@ -924,6 +951,7 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 
 
 	if ( hasWebGL) rendererSetup();
+
 	if(useStats)
 	{	
 		stats = new Stats();
@@ -940,6 +968,7 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 	animate();
 	this.bgm = backgroundMesh;
 	this.ft = faceTracker; 
+	this.lc = lc;
 }
 
 function getQuerystring(key, default_)

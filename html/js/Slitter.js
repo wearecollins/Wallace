@@ -2,6 +2,7 @@
 
 var Slitter = function(params)
 {
+
 	params = params || {};
 
 	this.renderer = params.renderer;
@@ -17,7 +18,8 @@ var Slitter = function(params)
 	this.scene = params.scene || new THREE.Scene();
 
 	this.slits = [];
-	for(var i=0; i<15; i++)
+	this.numSlits = iOS ? 5 : 15;
+	for(var i=0; i<this.numSlits; i++)
 	{
 		this.slits[i] = new THREE.WebGLRenderTarget( this.width, this.height, { minFilter: THREE.LinearFilter, magFilter: THREE.LinearFilter, format: THREE.RGBAFormat, wrapS: THREE.RepeatWrapping, wrapT: THREE.RepeatWrapping } );
 	}
@@ -39,7 +41,7 @@ var Slitter = function(params)
 		doubleVideo: this.doubleVideo
 	});
 
-	this.blendPlane = new THREE.PlaneGeometry( 2,2,	12, 7 );
+	this.blendPlane = new THREE.PlaneBufferGeometry( 2,2,	12, 7 );
 	this.blendMesh = new THREE.Mesh(this.blendPlane, this.blendMaterial);
 	this.scene.add(this.blendMesh);
 
@@ -50,7 +52,7 @@ var Slitter = function(params)
 		slits: this.slits
 	});
 
-	this.geometry = params.geometry || new THREE.PlaneGeometry( 1, 1, 12, 7 );
+	this.geometry = params.geometry || new THREE.PlaneBufferGeometry( 1, 1, 12, 7 );
 
 	this.mesh = new THREE.Mesh(this.geometry, this.slitMaterial);
 }

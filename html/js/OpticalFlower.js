@@ -34,7 +34,7 @@ var OpticalFlower = function(params)
 	this.diffRT = new THREE.WebGLRenderTarget( this.width, this.height, { minFilter: minFilter, magFilter: magFilter, format: THREE.RGBAFormat, wrapS: THREE.RepeatWrapping, wrapT: THREE.RepeatWrapping } );
 
 
-	this.inputPlane = new THREE.Mesh( new THREE.PlaneGeometry( 2, 2, 12, 7 ), new BlurMotionShader({
+	this.inputPlane = new THREE.Mesh( new THREE.PlaneBufferGeometry( 2, 2, 12, 7 ), new BlurMotionShader({
 		map: this.cameraTexture,
 		previousMap: this.ping,
 		decay: .875
@@ -43,7 +43,7 @@ var OpticalFlower = function(params)
 	this.inputScene.add(this.inputPlane);
 
 	//differncing
-	this.diffPlane = new THREE.Mesh( new THREE.PlaneGeometry( 2, 2, 12, 7 ), new DiffShader({
+	this.diffPlane = new THREE.Mesh( new THREE.PlaneBufferGeometry( 2, 2, 12, 7 ), new DiffShader({
 		map: this.cameraTexture,
 		camera: this.cameraTexture}));
 	this.diffScene = new THREE.Scene();
