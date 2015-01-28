@@ -162,7 +162,7 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 		// });
 	
 		//TRACKING DEBGUG
-		debugBox = new THREE.Mesh(new THREE.PlaneBufferGeometry( 100,100), new THREE.MeshBasicMaterial( {
+		debugBox = new THREE.Mesh(new THREE.PlaneBufferGeometry( 400,400), new THREE.MeshBasicMaterial( {
 			transparent: true,
 			opacity: .4,
 			map: THREE.ImageUtils.loadTexture("images/face.png"),
@@ -235,7 +235,7 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 		slit.update();
 		tracking.update(cameraTexture.getData(), cameraTexture.width, cameraTexture.height );
 
-		debugBox.setRotationFromAxisAngle({x:0,y:0,z:1}, tracking.delta.x  *.5 );
+		debugBox.setRotationFromAxisAngle({x:0,y:0,z:1}, tracking.delta.x  *.25 );
 		debugBox.position.x = tracking.delta.x * -100;	
 		debugBox.position.y = tracking.delta.y * -150;	
 
