@@ -84,7 +84,7 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 		useBackground: useBackground,
 		subtitleHander: addSubtitles
 	});
-	videoContrller.setVolume(0);
+	// videoContrller.setVolume(0);
 
 	var currentVideo = undefined, previousVideo = undefined;
 	
@@ -173,7 +173,7 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 			if (!HAS_PLAYED ){
 				HAS_PLAYED = true;
 				videoContrller.setVideoPosition(0);
-				videoContrller.setVolume(videoContrller.muteVideo? 0 : 1.0);
+				videoContrller.setVolume( videoContrller.muteVideo? 0 : 1.0);
 			}
 
 			if ( !wasPlaying ){
@@ -233,7 +233,7 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 
 		var samplePos = debugBox.position;
 
-		var leftRightThreshold = 110, upDownThreshold = 30;
+		var leftRightThreshold = 110, upThreshold = 30, downThreshold = 45;
 		if(samplePos.x < -leftRightThreshold)
 		{
 			debugBox.material.color.set(0xFF0000);
@@ -245,12 +245,12 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 			slit.setTexture(videoContrller.getVideo("right").t);
 			
 		}
-		else if(samplePos.y > upDownThreshold)
+		else if(samplePos.y > upThreshold)
 		{
 			debugBox.material.color.set(0x00FFFF);
 			slit.setTexture(videoContrller.getVideo("up").t);
 		}
-		else if(samplePos.y < -upDownThreshold)
+		else if(samplePos.y < -downThreshold)
 		{
 			debugBox.material.color.set(0xFFFF00);
 			slit.setTexture(videoContrller.getVideo("down").t);
