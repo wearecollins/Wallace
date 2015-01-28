@@ -9,6 +9,7 @@ var AzealiaTracking = function(params)
 	var smoothedDelta = new THREE.Vector3();
 
 	var smoothing = .85;
+	var attenuation = .005;
 
 	var dimX = width;
 	var dimY = height;
@@ -87,7 +88,6 @@ var AzealiaTracking = function(params)
 		//descern motion
 		var j = 0, j1=0;
 		var sampleCount=0;
-		var attenuation = .0025;
 		avgDelta.set(0,0,0);
 		for(var i=0; i<point_count; i++)
 		{

@@ -90,7 +90,7 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 	
 	// camera
 	var webcam;
-	var cameraTexture, slit, tracking, debugBox, azealiaMesh;
+	var cameraTexture, slit, tracking, debugBox, azealiaMesh, depthSampleScale = 0;
 
 	function setup() 
 	{
@@ -230,6 +230,14 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 		debugBox.setRotationFromAxisAngle({x:0,y:0,z:1}, tracking.delta.x  *.25 );
 		debugBox.position.x = tracking.delta.x * -100;	
 		debugBox.position.y = tracking.delta.y * -150;	
+
+		depthSampleScale = Math.max(Math.min(1, tracking.delta.length() * 2.), depthSampleScale * .99);
+		slit.setDepthSampleScale( depthSampleScale );
+
+		// if(frame % 10 == 0)
+		// {
+		// 	console.log("tracking.delta.length(): " + tracking.delta.length() );
+		// }
 
 		var samplePos = debugBox.position;
 

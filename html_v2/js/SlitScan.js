@@ -103,7 +103,7 @@ var SlitScan = function( params )
 
 	function sampleDepth(x, y)
 	{
-		return Math.floor(distortionData[(y * dimX + x) ] * (pixelStackSize - 1) * depthSampleScale );
+		return Math.max(0, Math.floor(distortionData[(y * dimX + x) ] * (pixelStackSize - 1) * depthSampleScale ) );
 	}
 
 
@@ -154,6 +154,11 @@ var SlitScan = function( params )
 		vidMesh.material.needsUpdate = true;
 	}
 
+	function setDepthSampleScale( val )
+	{
+		depthSampleScale = val;
+	}
+
 
 	return {
 		texture: dataTexture,
@@ -166,7 +171,8 @@ var SlitScan = function( params )
 		setTexture: setTexture,
 		camera: dimCamera,
 		scene: scene,
-		videoMesh: vidMesh
+		videoMesh: vidMesh,
+		setDepthSampleScale: setDepthSampleScale
 	}
 }
 
