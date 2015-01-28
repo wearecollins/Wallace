@@ -26,11 +26,12 @@ var SlitScan = function( params )
 	//SCENE AND MESH
 	var scene = new THREE.Scene();
 
-	var vidMesh = new THREE.Mesh(new THREE.PlaneBufferGeometry(dimX, dimY), new THREE.MeshBasicMaterial( {
+	var vidMesh = new THREE.Mesh(new THREE.PlaneBufferGeometry(dimX, dimY), new VideoMaterial( {
 		color: 0xFFFFFF,
 		side: 2,
 		map: THREE.ImageUtils.loadTexture("images/face.png")
 	} ) );
+	vidMesh.visible = true;
 	scene.add(vidMesh);	
 
 	//SLIT SCAN
@@ -149,13 +150,8 @@ var SlitScan = function( params )
 
 	function setTexture(map)
 	{
-		vidMesh.material.map = map;
+		vidMesh.material.uniforms.map.value = map;
 		vidMesh.material.needsUpdate = true;
-		// vidMesh.material = new THREE.MeshBasicMaterial( {
-		// 	color: 0xFFFFFF,
-		// 	side: 2,
-		// 	map: map
-		// } );
 	}
 
 
@@ -170,6 +166,7 @@ var SlitScan = function( params )
 		setTexture: setTexture,
 		camera: dimCamera,
 		scene: scene,
+		videoMesh: vidMesh
 	}
 }
 

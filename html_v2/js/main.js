@@ -90,7 +90,7 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 	
 	// camera
 	var webcam;
-	var cameraTexture, slit, tracking, debugBox;
+	var cameraTexture, slit, tracking, debugBox, azealiaMesh;
 
 	function setup() 
 	{
@@ -125,7 +125,6 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 		scene.add( barMeshes[0] );
 		scene.add( barMeshes[1] );
 
-
 		var slitWidth = 640;
 		slit = new SlitScan({
 			width: slitWidth,
@@ -149,6 +148,11 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 				backgroundMesh.material.map = slit.texture;
 			}
 		});
+
+		// mesh for showing double high videos
+		azealiaMesh = new THREE.Mesh(backgroundPlane, new VideoMaterial({map: THREE.ImageUtils.loadTexture("images/debugImg.png")}))
+		azealiaMesh.position.z = 10;
+		slit.scene.add(azealiaMesh);
 	
 		//TRACKING DEBGUG
 		debugBox = new THREE.Mesh(new THREE.PlaneBufferGeometry( 400,400), new THREE.MeshBasicMaterial( {
@@ -159,8 +163,6 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 		} ) );
 		debugBox.scale.set(-1, 1, 1);
 		scene.add(debugBox);
-
-
 
 		//RESIZE THE SCREEN PLANES
 		scaleVidMesh();
