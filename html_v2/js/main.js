@@ -107,8 +107,8 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 		screenPlane = new THREE.PlaneBufferGeometry(1,1, 12, 7 );
 
 		backgroundMesh = new THREE.Mesh(screenPlane, new THREE.MeshBasicMaterial( {
-			// map: THREE.ImageUtils.loadTexture("images/face.png"),
-			color: 0xff0000,
+			map: videoContrller.getVideo("background").t, //THREE.ImageUtils.loadTexture("images/face.png"),
+			color: 0xFFFFFF,
 			side: 2 
 		}) );
 		backgroundMesh.position.z = -10;
@@ -173,6 +173,7 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 			side: 2
 		} ) );
 		debugBox.scale.set(-1, 1, 1);
+		// debugBox.visible = false;
 		scene.add(debugBox);
 
 		//RESIZE THE SCREEN PLANES
@@ -184,7 +185,7 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 			if (!HAS_PLAYED ){
 				HAS_PLAYED = true;
 				videoContrller.setVideoPosition(0);
-				videoContrller.setVolume( videoContrller.muteVideo? 0 : 1.0);
+				videoContrller.setVolume(1);// videoContrller.muteVideo? 0 : 1.0);
 			}
 
 			if ( !wasPlaying ){
