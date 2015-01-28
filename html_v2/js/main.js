@@ -30,6 +30,14 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 	container.style.top = '0px';
 	document.body.appendChild( container );
 
+
+	//STATS
+	var stats = new Stats();
+	stats.domElement.style.position = 'absolute';
+	stats.domElement.style.top = '10px';
+	stats.domElement.style.left = '10px';
+	container.appendChild( stats.domElement );
+
 	var debug = false;//(_debug == true)? false : false;
 	var useStats = debug;//_useStats || true;
 	var frame = 0;
@@ -118,8 +126,13 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 		scene.add( barMeshes[1] );
 
 
-
-		slit = new SlitScan({renderer: renderer});
+		var slitWidth = 640;
+		slit = new SlitScan({
+			width: slitWidth,
+			height: Math.floor( slitWidth / vidAspect),
+			depth: 60,
+			renderer: renderer
+		});
 		tracking = new AzealiaTracking({
 			width: 160,
 			height: 120
@@ -136,30 +149,6 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 				backgroundMesh.material.map = slit.texture;
 			}
 		});
-
-
-		// //SLIT SCANNING
-		// slit = new SlitScan({renderer: renderer});
-
-		// //TRACKING
-		// tracking = new AzealiaTracking({
-		// 	width: 160,
-		// 	height: 120
-		// });
-
-		// //webcam input
-		// console.log( "tracking.width: " + tracking.width );
-		// console.log( "tracking.height: " + tracking.height );
-		// cameraTexture = new CameraTexture({
-		// 	width: tracking.width,
-		// 	height: tracking.height,
-		// 	onGetUserMedia: function(texture)
-		// 	{
-		// 		// console.log("got user media");			
-		// 		slit.setTexture(texture);
-		// 		// backgroundMesh.material.map = texture;
-		// 	}
-		// });
 	
 		//TRACKING DEBGUG
 		debugBox = new THREE.Mesh(new THREE.PlaneBufferGeometry( 400,400), new THREE.MeshBasicMaterial( {
@@ -224,6 +213,7 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 	function update()
 	{
 		frame++;
+		stats.update();
 
 		if ( videoContrller.videoToLoadCount != 0 ) return;
 		
