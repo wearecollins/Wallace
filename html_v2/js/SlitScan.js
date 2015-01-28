@@ -98,7 +98,7 @@ var SlitScan = function( params )
 		});
 	}
 
-	imageToSlitData("images/fractal_simplex.png", distortionData, canvasContext, dimX, dimY);
+	imageToSlitData("images/hr_noise.png", distortionData, canvasContext, dimX, dimY);
 
 
 	function sampleDepth(x, y)

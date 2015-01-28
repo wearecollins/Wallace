@@ -11,17 +11,17 @@ handlers:
   auth_fail_action: redirect
 
 - url: /js
-  static_dir: html/js
+  static_dir: html_v2/js
 
 - url: /fonts
-  static_dir: html/fonts
+  static_dir: html_v2/fonts
 
 - url: /fonts/.*\.(otf)$
-  static_files: html/fonts/\1
-  upload: html/fonts/.*\.(otf)$
+  static_files: html_v2/fonts/\1
+  upload: html_v2/fonts/.*\.(otf)$
 
 - url: /css
-  static_dir: html/css
+  static_dir: html_v2/css
 
 - url: /html
   static_dir: html
@@ -37,18 +37,18 @@ handlers:
   static_dir: includes
 
 - url: /blendMaps
-  static_dir: html/blendMaps
+  static_dir: html_v2/blendMaps
 
 - url: /normalMaps
-  static_dir: html/normalMaps
+  static_dir: html_v2/normalMaps
 
 - url: /normalMaps/(.*\.(gif|png|jpg|mp4))$
-  static_files: html/normalMaps/\1
-  upload: html/normalMaps/.*\.(gif|png|jpg|mp4)$
+  static_files: html_v2/normalMaps/\1
+  upload: html_v2/normalMaps/.*\.(gif|png|jpg|mp4)$
 
 - url: /blendMaps/(.*\.(gif|png|jpg|mp4))$
-  static_files: html/blendMaps/\1
-  upload: html/blendMaps/.*\.(gif|png|jpg|mp4)$
+  static_files: html_v2/blendMaps/\1
+  upload: html_v2/blendMaps/.*\.(gif|png|jpg|mp4)$
 
 - url: /WALLACE_TESTS/(.*\.(gif|png|jpg|mp4|vtt))$
   static_files: WALLACE_TESTS/\1
@@ -57,17 +57,17 @@ handlers:
   expiration: "7d"
 
 - url: /(.*\.(gif|png|jpg|mp4|vtt))$
-  static_files: html/\1
-  upload: html/.*\.(gif|png|jpg|mp4)$
+  static_files: html_v2/\1
+  upload: html_v2/.*\.(gif|png|jpg|mp4)$
 
 - url: /(.*\.(html))$
-  static_files: html/\1
-  upload: html/.*\.(html)$
+  static_files: html_v2/\1
+  upload: html_v2/.*\.(html)$
   login: required
   auth_fail_action: redirect
 
 - url: /.*
-  static_files: html/index\.html
-  upload: html/index\.html
+  static_files: html_v2/index\.html
+  upload: html_v2/index\.html
   login: required
   auth_fail_action: redirect
