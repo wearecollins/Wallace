@@ -62,7 +62,7 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 	var hasWebGL 		= true;
 	var hasUserMedia 	= true;
 
-	var backgroundMesh;
+	var slitMesh;
 	var backgroundFlipped = false;
 	var webCamTexture;
 
@@ -103,14 +103,25 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 		scene.add( group );	
 
 
-		// BACKGROUND MESH
-		backgroundPlane = new THREE.PlaneBufferGeometry(1,1, 12, 7 );
-		backgroundMesh = new THREE.Mesh(backgroundPlane, new THREE.MeshBasicMaterial( {
-			map: THREE.ImageUtils.loadTexture("images/face.png"),
-			color: 0xffffff,
+		// MESHES
+		screenPlane = new THREE.PlaneBufferGeometry(1,1, 12, 7 );
+
+		backgroundMesh = new THREE.Mesh(screenPlane, new THREE.MeshBasicMaterial( {
+			// map: THREE.ImageUtils.loadTexture("images/face.png"),
+			color: 0xff0000,
 			side: 2 
 		}) );
+		backgroundMesh.position.z = -10;
 		scene.add(backgroundMesh);
+
+		slitMesh = new THREE.Mesh(screenPlane, new THREE.MeshBasicMaterial( {
+			map: THREE.ImageUtils.loadTexture("images/face.png"),
+			color: 0xffffff,
+			side: 2,
+			transparent: true
+		}) );
+		scene.add(slitMesh);
+
 
 		// VIDEO CONTROLLER
 		videoContrller.playVideos();
@@ -145,12 +156,12 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 				console.log("got user media");	
 
 				slit.setTexture(texture);
-				backgroundMesh.material.map = slit.texture;
+				slitMesh.material.map = slit.texture;
 			}
 		});
 
 		// mesh for showing double high videos
-		azealiaMesh = new THREE.Mesh(backgroundPlane, new VideoMaterial({map: THREE.ImageUtils.loadTexture("images/debugImg.png")}))
+		azealiaMesh = new THREE.Mesh(screenPlane, new VideoMaterial({map: THREE.ImageUtils.loadTexture("images/debugImg.png")}))
 		azealiaMesh.position.z = 10;
 		slit.scene.add(azealiaMesh);
 	
@@ -293,6 +304,7 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 
 		var yPos = 0;
 
+		slitMesh.scale.set( window.innerWidth, h, 1);
 		backgroundMesh.scale.set( window.innerWidth, h, 1);
 
 		var bar_h = window.innerHeight - (-h);
@@ -447,7 +459,7 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 	this.s = scene;
 	events();
 	animate();
-	this.bgm = backgroundMesh;
+	this.bgm = slitMesh;
 }
 
 function getQuerystring(key, default_)

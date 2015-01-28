@@ -42,7 +42,7 @@ var SlitScan = function( params )
 			pixels.push(255 * j / dimX);
 			pixels.push(255 * i / dimY);
 			pixels.push(255);
-			pixels.push(255);
+			pixels.push(0);
 		};
 	}
 
@@ -136,6 +136,7 @@ var SlitScan = function( params )
 				data[index] = pixelStack[depthIndex][index + 0]; // 255 * depthIndex / pixelStackSize;//
 				data[index + 1] = pixelStack[depthIndex][index + 1];
 				data[index + 2] = pixelStack[depthIndex][index + 2];
+				data[index + 3] = pixelStack[depthIndex][index + 3];
 			}
 		}
 		dataTexture.needsUpdate = true;
