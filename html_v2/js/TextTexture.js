@@ -39,7 +39,7 @@ THREE.TextTexture = function(text, size, color, font, backGroundColor, backgroun
 		side: 2
 	});
 
-	var mesh = new THREE.Mesh(new THREE.PlaneGeometry(canvas.width, canvas.height, 12, 7), material);
+	var mesh = new THREE.Mesh(new THREE.PlaneBufferGeometry(canvas.width, canvas.height, 12, 7), material);
 	// mesh.overdraw = true;
 	mesh.doubleSided = true;
 	mesh.rotation.x = Math.PI;

@@ -234,24 +234,28 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 		var leftRightThreshold = 110, upDownThreshold = 30;
 		if(samplePos.x < -leftRightThreshold)
 		{
-			// slit.setTexture( videoContrller.getVideo("04") );
 			debugBox.material.color.set(0xFF0000);
+			slit.setTexture(videoContrller.getVideo("left").t);
 		}
 		else if(samplePos.x > leftRightThreshold)
 		{
-			// slit.setTexture( videoContrller.getVideo("04") );
 			debugBox.material.color.set(0x0000FF);
+			slit.setTexture(videoContrller.getVideo("right").t);
+			
 		}
 		else if(samplePos.y > upDownThreshold)
 		{
 			debugBox.material.color.set(0x00FFFF);
+			slit.setTexture(videoContrller.getVideo("up").t);
 		}
 		else if(samplePos.y < -upDownThreshold)
 		{
 			debugBox.material.color.set(0xFFFF00);
+			slit.setTexture(videoContrller.getVideo("down").t);
 		}
 		else{
 			debugBox.material.color.set(0xFFFFFF);
+			slit.setTexture(videoContrller.getVideo("straight").t);
 		}
 
 
@@ -279,7 +283,7 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 
 		var yPos = 0;
 
-		backgroundMesh.scale.set( -window.innerWidth, h, 1);
+		backgroundMesh.scale.set( window.innerWidth, h, 1);
 
 		var bar_h = window.innerHeight - (-h);
 		barMeshes[0].scale.set( window.innerWidth, -bar_h, 1);

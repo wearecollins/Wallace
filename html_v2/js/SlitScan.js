@@ -149,14 +149,13 @@ var SlitScan = function( params )
 
 	function setTexture(map)
 	{
-		console.log(vidMesh.material);
 		vidMesh.material.map = map;
 		vidMesh.material.needsUpdate = true;
-		vidMesh.material = new THREE.MeshBasicMaterial( {
-			color: 0xFFFFFF,
-			side: 2,
-			map: map
-		} );
+		// vidMesh.material = new THREE.MeshBasicMaterial( {
+		// 	color: 0xFFFFFF,
+		// 	side: 2,
+		// 	map: map
+		// } );
 	}
 
 
