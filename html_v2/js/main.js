@@ -229,6 +229,31 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 		debugBox.position.x = tracking.delta.x * -100;	
 		debugBox.position.y = tracking.delta.y * -150;	
 
+		var samplePos = debugBox.position;
+
+		var leftRightThreshold = 110, upDownThreshold = 30;
+		if(samplePos.x < -leftRightThreshold)
+		{
+			// slit.setTexture( videoContrller.getVideo("04") );
+			debugBox.material.color.set(0xFF0000);
+		}
+		else if(samplePos.x > leftRightThreshold)
+		{
+			// slit.setTexture( videoContrller.getVideo("04") );
+			debugBox.material.color.set(0x0000FF);
+		}
+		else if(samplePos.y > upDownThreshold)
+		{
+			debugBox.material.color.set(0x00FFFF);
+		}
+		else if(samplePos.y < -upDownThreshold)
+		{
+			debugBox.material.color.set(0xFFFF00);
+		}
+		else{
+			debugBox.material.color.set(0xFFFFFF);
+		}
+
 
 		videoContrller.update();
 	}
