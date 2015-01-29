@@ -46,6 +46,7 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 	var gui, stats, renderer;
 	var mouseDown = false, mouseDragged = false;
 	var lastMouse = new THREE.Vector2(), mouse = new THREE.Vector2();
+	var lastDelta = new THREE.Vector2();
 
 	//basic stuff
 	var camera, light, projector;
@@ -187,7 +188,7 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 			if (!HAS_PLAYED ){
 				HAS_PLAYED = true;
 				videoContrller.setVideoPosition(0);
-				videoContrller.setVolume( videoContrller.muteVideo? 0 : 1.0);
+				videoContrller.setVolume(1);// videoContrller.muteVideo? 0 : 1.0);
 			}
 
 			if ( !wasPlaying ){
@@ -245,8 +246,11 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 		debugBox.position.x = tracking.delta.x * -100;	
 		debugBox.position.y = tracking.delta.y * -150;	
 
-		depthSampleScale = Math.max(Math.min(1, tracking.delta.length() * 2.), depthSampleScale * .99);
+
+		depthSampleScale = Math.max(Math.min(1, lastDelta.distanceTo( tracking.delta ) * 50.), depthSampleScale * .985);
 		slit.setDepthSampleScale( depthSampleScale );
+
+		lastDelta.copy( tracking.delta );
 
 		// if(frame % 10 == 0)
 		// {
