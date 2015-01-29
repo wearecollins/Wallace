@@ -96,7 +96,7 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 
 	// videoContrller.setVolume(0);
 
-	var currentVideo = "striaght", previousVideo = "doYouLikeHorses?";
+	var currentVideo = "straight", previousVideo = "doYouLikeHorses?";
 	
 	// camera
 	var webcam;
