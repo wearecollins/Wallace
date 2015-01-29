@@ -54,7 +54,7 @@ var MouthMaterial = function(params)
 		'void main()',
 		'{',
 		'	float alpha =  opacity * (1. - pow(length( (mUv*2.-1.) ), 4.));',
-		'	gl_FragColor = texture2D(map, vUv) * vec4(1., 1., 1. , alpha); // vec4(texture2D(map, vUv).xyz, texture2D(map, vUvAlpha).x);',
+		'	gl_FragColor = texture2D(map, vUv) * vec4(1., 1., 1. , alpha);',
 		'}'
 		].join('\n'),
 

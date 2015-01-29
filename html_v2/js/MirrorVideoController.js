@@ -62,6 +62,14 @@ MirrorVideoController = function(params)
 		fmt = "_mobile" + fmt;
 	}
 
+	/**
+AB_1_Down_1_1.mp4
+AB_1_Left_1_1_1.mp4
+AB_1_Right_1.mp4
+AB_1_Straight_1.mp4
+AB_1_Up.mp4
+	 */
+
 	if ( this.backgroundRendered ){
 		this.videoFiles = params.videoFiles || {
 			"01": 	{path: 	"../WALLACE_TESTS/01_STRAIGHT_WEIRD_BLEND" + fmt},
@@ -72,11 +80,11 @@ MirrorVideoController = function(params)
 	} else if ( !this.doubleWide ){
 		this.videoFiles = params.videoFiles || {
 			"BackgroundVideo": {path: "../WALLACE_TESTS/BG_PREVIEW_07_1" + fmt},
-			"01": {path: 	"../WALLACE_TESTS/02_ALPHA_STRAIGHT_03" + fmt},
-			"02": {path: 	"../WALLACE_TESTS/03_ALPHA_UP" + fmt},
-			"03": {path: 	"../WALLACE_TESTS/04_ALPHA_DOWN" + fmt},
-			"04": {path: 	"../WALLACE_TESTS/05_ALPHA_LEFT" + fmt},
-			"05": {path: 	"../WALLACE_TESTS/06_ALPHA_RIGHT" + fmt},
+			"01": {path: 	"../720p/AB_1_Down_1_1" + fmt},
+			"02": {path: 	"../720p/AB_1_Left_1_1_1" + fmt},
+			"03": {path: 	"../720p/AB_1_Right_1" + fmt},
+			"04": {path: 	"../720p/AB_1_Straight_1" + fmt},
+			"05": {path: 	"../720p/AB_1_Up" + fmt},
 		};
 	} else {
 		this.videoFiles = params.videoFiles || {
