@@ -85,9 +85,18 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 		useBackground: useBackground,
 		subtitleHander: addSubtitles
 	});
+	var mouthRect ;
+	var mouthPositions = {
+		"straight": new THREE.Vector3( -.02, -.085, .05 ),
+		"left": new THREE.Vector3( -.05, -.07, .05 ),
+		"right": new THREE.Vector3( .05, -.07, .05 ),
+		"up": new THREE.Vector3( 0.01, .035, .05 ),
+		"down": new THREE.Vector3( 0, -.22, .05 )
+	}
+
 	// videoContrller.setVolume(0);
 
-	var currentVideo = undefined, previousVideo = undefined;
+	var currentVideo = "striaght", previousVideo = "doYouLikeHorses?";
 	
 	// camera
 	var webcam;
@@ -121,6 +130,18 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 			transparent: true
 		}) );
 		slitScene.add(slitMesh);
+
+		// mouthRect = new THREE.Mesh(
+		// 	new THREE.PlaneBufferGeometry(.15, .15), 
+			// new THREE.MeshBasicMaterial( {color: "red", side: 2} ));
+		mouthRect = new THREE.Mesh(
+			new THREE.PlaneBufferGeometry(.2, .2),
+			new MouthMaterial( {
+				map: videoContrller.getVideo("straight").t,
+				aspect: 720 / 1280
+			} ) );
+		mouthRect.position.copy( mouthPositions["straight"] );
+		slitMesh.add(mouthRect);
 
 
 		// VIDEO CONTROLLER
@@ -252,42 +273,70 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 
 		lastDelta.copy( tracking.delta );
 
-		// if(frame % 10 == 0)
-		// {
-		// 	console.log("tracking.delta.length(): " + tracking.delta.length() );
-		// }
+		getCurrentVideo();
 
+		videoContrller.update();
+	}
+
+	function getCurrentVideo()
+	{
 		var samplePos = debugBox.position;
 
 		var leftRightThreshold = 110, upThreshold = 30, downThreshold = 45;
 		if(samplePos.x < -leftRightThreshold)
 		{
 			debugBox.material.color.set(0xFF0000);
-			slit.setTexture(videoContrller.getVideo("left").t);
+			currentVideo = "left";
 		}
 		else if(samplePos.x > leftRightThreshold)
 		{
 			debugBox.material.color.set(0x0000FF);
-			slit.setTexture(videoContrller.getVideo("right").t);
-			
+			currentVideo = "right";
 		}
 		else if(samplePos.y > upThreshold)
 		{
 			debugBox.material.color.set(0x00FFFF);
-			slit.setTexture(videoContrller.getVideo("up").t);
+			currentVideo = "up";
 		}
 		else if(samplePos.y < -downThreshold)
 		{
 			debugBox.material.color.set(0xFFFF00);
-			slit.setTexture(videoContrller.getVideo("down").t);
+			currentVideo = "down";
 		}
 		else{
 			debugBox.material.color.set(0xFFFFFF);
-			slit.setTexture(videoContrller.getVideo("straight").t);
+			currentVideo = "straight";
 		}
 
+		if(previousVideo !== currentVideo )
+		{
+			setVideo(currentVideo);
+		}
 
-		videoContrller.update();
+		previousVideo = currentVideo;
+	}
+
+
+	function setVideo( videoName )
+	{
+
+		var t = videoContrller.getVideo( videoName ).t;
+		slit.setTexture( t );
+
+		mouthRect.material.uniforms.map.value = t;
+		mouthRect.position.copy( mouthPositions[ videoName ] );
+
+		fadeMouth();
+	}
+
+	function fadeMouth()
+	{
+		mouthRect.material.uniforms.opacity.value = 0.;
+
+	new TWEEN.Tween( mouthRect.material.uniforms.opacity )
+		.to( { value: 1 }, 500 )
+		.easing( TWEEN.Easing.Quintic.In )
+		.start();
 	}
 
 	/**
@@ -315,6 +364,8 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 
 		slitMesh.scale.set( window.innerWidth, h, 1);
 		backgroundMesh.scale.set( window.innerWidth, h, 1);
+
+		mouthRect.material.uniforms.screenAspect.value = window.innerHeight / window.innerWidth;
 
 		var bar_h = window.innerHeight - (-h);
 		barMeshes[0].scale.set( window.innerWidth, -bar_h, 1);
