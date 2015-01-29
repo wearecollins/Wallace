@@ -36,7 +36,8 @@ THREE.TextTexture = function(text, size, color, font, backGroundColor, backgroun
 	var material = new THREE.MeshBasicMaterial({
 		map : texture,
 		color: 0xffffff,
-		side: 2
+		side: 2,
+		depthTest: false
 	});
 
 	var mesh = new THREE.Mesh(new THREE.PlaneBufferGeometry(canvas.width, canvas.height, 12, 7), material);

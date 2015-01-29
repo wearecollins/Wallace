@@ -21,7 +21,7 @@ var SlitScan = function( params )
 	var gl = renderer.getContext();
 
 	//CAMERA
-	var dimCamera = new THREE.OrthographicCamera( -.5 * dimX, .5 * dimX, .5 * dimY, -.5 * dimY, -1000, 1000 );;//new THREE.PerspectiveCamera( 60, aspect, 1, 1000 );
+	var dimCamera = new THREE.OrthographicCamera( -.5 * dimX, .5 * dimX, -.5 * dimY, .5 * dimY, -1000, 1000 );;//new THREE.PerspectiveCamera( 60, aspect, 1, 1000 );
 
 	//SCENE AND MESH
 	var scene = new THREE.Scene();

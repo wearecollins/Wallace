@@ -50,7 +50,7 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 	//basic stuff
 	var camera, light, projector;
 	var clock = new THREE.Clock();
-	var scene = new THREE.Scene();
+	var scene = new THREE.Scene(), slitScene = new THREE.Scene();
 	var group = new THREE.Object3D();
 
 	// use alpha or background
@@ -97,7 +97,6 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 		// THREE Setup
 		resetCamera()
 		
-		scene = new THREE.Scene();
 		scene.add( camera );
 		scene.add( light );
 		scene.add( group );	
@@ -120,7 +119,7 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 			side: 2,
 			transparent: true
 		}) );
-		scene.add(slitMesh);
+		slitScene.add(slitMesh);
 
 
 		// VIDEO CONTROLLER
@@ -133,8 +132,8 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 		barMeshes[1] = new THREE.Mesh( barGeom, barMat );
 		barMeshes[0].position.z = 3;
 		barMeshes[1].position.z = 3;
-		scene.add( barMeshes[0] );
-		scene.add( barMeshes[1] );
+		slitScene.add( barMeshes[0] );
+		slitScene.add( barMeshes[1] );
 
 		var slitWidth = 640;
 		slit = new SlitScan({
@@ -166,6 +165,8 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 		slit.scene.add(azealiaMesh);
 	
 		//TRACKING DEBGUG
+		var debugFlipper = new THREE.Object3D();
+		debugFlipper.scale.y = -1;
 		debugBox = new THREE.Mesh(new THREE.PlaneBufferGeometry( 400,400), new THREE.MeshBasicMaterial( {
 			transparent: true,
 			opacity: .4,
@@ -174,7 +175,8 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 		} ) );
 		debugBox.scale.set(-1, 1, 1);
 		// debugBox.visible = false;
-		scene.add(debugBox);
+		debugFlipper.add(debugBox);
+		scene.add(debugFlipper);
 
 		//RESIZE THE SCREEN PLANES
 		scaleVidMesh();
@@ -185,7 +187,7 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 			if (!HAS_PLAYED ){
 				HAS_PLAYED = true;
 				videoContrller.setVideoPosition(0);
-				videoContrller.setVolume(1);// videoContrller.muteVideo? 0 : 1.0);
+				videoContrller.setVolume( videoContrller.muteVideo? 0 : 1.0);
 			}
 
 			if ( !wasPlaying ){
@@ -297,6 +299,8 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 		
 		//to the background & slitShader to screen
 		renderer.render( scene, camera, null, true );
+
+		renderer.render( slitScene, camera, null, false );
 	}
 
 	function scaleVidMesh()
@@ -324,14 +328,14 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 		{
 			camera.left = -halfWidth;
 			camera.right = halfWidth;
-			camera.top = halfHeight;
-			camera.bottom = -halfHeight;
+			camera.top = -halfHeight;
+			camera.bottom = halfHeight;
 
 			camera.updateProjectionMatrix();	
 		}
 		else
 		{
-			camera = new THREE.OrthographicCamera( -halfWidth, halfWidth, halfHeight, -halfHeight, -1000, 1000 );
+			camera = new THREE.OrthographicCamera( -halfWidth, halfWidth, -halfHeight, halfHeight, -1000, 1000 );
 		}
 	}
 
@@ -405,9 +409,9 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 		renderer.setClearColor( 0x000000, 0. );
 		renderer.sortObjects = false;
 		renderer.setSize( window.innerWidth, window.innerHeight );
-		renderer.autoClear = true;
+		renderer.autoClear = false;
 		container.appendChild( renderer.domElement );
-		container.style.zIndex = 1100;
+		container.style.zIndex = 100;
 	}
 
 	function events()
