@@ -14,8 +14,8 @@ var BackgroundWebcamMaterial = function(params)
 		uniforms: {
 			map: {type: 't', value: params.map },
 			color: {type: 'c', value: new THREE.Color( 0xFFFFFF )},
-			// screenAspect: {type: 'f', value: params.screenAspect || (window.innerHeight / window.innerWidth)},
-			opacity: {type: 'f', value: params.opacity !== undefined ? params.opacity : 1. }
+			opacity: {type: 'f', value: params.opacity !== undefined ? params.opacity : 1. },
+			brightnessExpo: {type: 'f', value: params.brightnessExpo || 1.5}
 		},
 
 		attributes: {
@@ -30,7 +30,7 @@ var BackgroundWebcamMaterial = function(params)
 		'}',
 
 		'void main() {',
-		'	vUv = uv * vec2(1., 0.749);',
+		'	vUv = vec2(1. - uv.x, 0.749 * uv.y);',
 		'	gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );',
 		'}'].join('\n'),
 
@@ -38,6 +38,7 @@ var BackgroundWebcamMaterial = function(params)
 		'uniform sampler2D map;',
 		'varying vec2 vUv;',
 		'uniform vec3 color;',
+		'uniform float brightnessExpo;',
 
 		'float toGrey(vec3 rgb){',
 		'	return dot(rgb, vec3(0.299, 0.587, 0.114));',
@@ -51,6 +52,7 @@ var BackgroundWebcamMaterial = function(params)
 		'{',
 		'	vec2 s = vec2(1. / 320., 1. / 240.);',
 
+		//	box filter for some smoothing
 		'	float g = toGrey(texture2D(map, vUv).xyz);',
 
 		'	g += toGrey(texture2D(map, vUv + vec2( -s.x, -s.y) ).xyz);',
@@ -66,8 +68,7 @@ var BackgroundWebcamMaterial = function(params)
 
 		'	g /= 9.;',
 
-
-		'	gl_FragColor = vec4( getVignette(vUv) * vec3( pow(g * 1.025, 1.5) ) * color, 1.);',
+		'	gl_FragColor = vec4( getVignette(vUv) * vec3( pow(g * 1.025, brightnessExpo) ) * color, 1.);',
 		'}'
 		].join('\n'),
 

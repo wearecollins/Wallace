@@ -185,15 +185,6 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 			}
 		});
 
-
-
-
-		// backgroundWebcamMat = new THREE.MeshBasicMaterial( {
-		// 	map: cameraTexture.texture,
-		// 	color: 0xFFFFFF,
-		// 	side: 2 
-		// });
-
 		// mesh for showing double high videos
 		azealiaMesh = new THREE.Mesh(screenPlane, new VideoMaterial({map: THREE.ImageUtils.loadTexture("images/debugImg.png")}))
 		azealiaMesh.position.z = 10;
@@ -209,6 +200,7 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 			side: 2
 		} ) );
 		debugBox.scale.set(-1, 1, 1);
+		debugBox.visible = false;
 		debugFlipper.add(debugBox);
 		scene.add(debugFlipper);
 		// debugBox.visible = false;
@@ -259,8 +251,8 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 	 */
 
 	var rate = 2;
-	// var backgroundTime = {start:6.386, end: 16.124};
-	var backgroundTime = {start:162.386, end: 191.124};
+	var backgroundTime = {start:6.386, end: 16.124};
+	// var backgroundTime = {start:162.386, end: 191.124};
 	var bTransitioningBackground = false;
 	var done = false;
 
