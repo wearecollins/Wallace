@@ -181,7 +181,7 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 			{
 				console.log("got user media");	
 
-				slit.setTexture(texture);
+				// slit.setTexture(texture);
 				slitMesh.material.map = slit.texture;
 
 				backgroundWebcamMat.uniforms.map.value = texture;
