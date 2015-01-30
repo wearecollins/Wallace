@@ -259,8 +259,8 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 	 */
 
 	var rate = 2;
-	var backgroundTime = {start:6.386, end: 191.124};
-	// var backgroundTime = {start:162.386, end: 191.124};
+	// var backgroundTime = {start:6.386, end: 9.124};
+	var backgroundTime = {start:162.386, end: 191.124};
 	var bTransitioningBackground = false;
 	var done = false;
 
