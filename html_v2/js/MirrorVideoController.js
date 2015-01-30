@@ -80,11 +80,11 @@ AB_1_Up.mp4
 	} else if ( !this.doubleWide ){
 		this.videoFiles = params.videoFiles || {
 			"BackgroundVideo": {path: "../WALLACE_TESTS/BG_PREVIEW_07_1" + fmt},
-			"01": {path: 	"../720p/AB_1_Down_1_1" + fmt},
-			"02": {path: 	"../720p/AB_1_Left_1_1_1" + fmt},
-			"03": {path: 	"../720p/AB_1_Right_1" + fmt},
-			"04": {path: 	"../720p/AB_1_Straight_1" + fmt},
-			"05": {path: 	"../720p/AB_1_Up" + fmt},
+			"01": {path: 	"../720p/AB_1_Straight_1" + fmt},
+			"02": {path: 	"../720p/AB_1_Up" + fmt},	
+			"03": {path: 	"../720p/AB_1_Down_1_1" + fmt},
+			"04": {path: 	"../720p/AB_1_Left_1_1_1" + fmt},
+			"05": {path: 	"../720p/AB_1_Right_1" + fmt},
 		};
 	} else {
 		this.videoFiles = params.videoFiles || {
@@ -143,7 +143,7 @@ AB_1_Up.mp4
 
 			background: {t:"BackgroundVideo", uOffset:0}
 		}
-			
+		
 		this.inverseVideoMap = {
 			straight: "01",
 			weird: "01",

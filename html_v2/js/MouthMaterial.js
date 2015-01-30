@@ -28,7 +28,6 @@ var MouthMaterial = function(params)
 		'uniform float screenAspect;',
 		'varying vec2 mUv;',
 		'varying vec2 vUv;',
-		'varying vec2 vUvAlpha;',
 
 		'float mapLinear( in float x, in float a1, in float a2, in float b1, in float b2 ) {',
 		'	return b1 + ( x - a1 ) * ( b2 - b1 ) / ( a2 - a1 );',
@@ -49,7 +48,6 @@ var MouthMaterial = function(params)
 		'uniform float opacity;',
 		'varying vec2 mUv;',
 		'varying vec2 vUv;',
-		'varying vec2 vUvAlpha;',
 
 		'void main()',
 		'{',

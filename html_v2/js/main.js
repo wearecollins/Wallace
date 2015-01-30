@@ -48,6 +48,7 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 	var lastMouse = new THREE.Vector2(), mouse = new THREE.Vector2();
 	var lastDelta = new THREE.Vector2();
 
+
 	//basic stuff
 	var camera, light, projector;
 	var clock = new THREE.Clock();
@@ -80,7 +81,7 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 	}
 
 	// var motionThresholds = new MotionThresholds();
-	var videoContrller = new MirrorVideoController({
+	var videoController = new MirrorVideoController({
 		muteVideo: muteVideo,
 		useBackground: useBackground,
 		subtitleHander: addSubtitles
@@ -94,9 +95,11 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 		"down": new THREE.Vector3( 0, -.22, .05 )
 	}
 
-	// videoContrller.setVolume(0);
+	// videoController.setVolume(0);
 
 	var currentVideo = "straight", previousVideo = "doYouLikeHorses?";
+
+	var backgroundWebcamMat, backgroundVideoMat;
 	
 	// camera
 	var webcam;
@@ -115,11 +118,12 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 		// MESHES
 		screenPlane = new THREE.PlaneBufferGeometry(1,1, 12, 7 );
 
-		backgroundMesh = new THREE.Mesh(screenPlane, new THREE.MeshBasicMaterial( {
-			map: videoContrller.getVideo("background").t, //THREE.ImageUtils.loadTexture("images/face.png"),
+		backgroundVideoMat = new THREE.MeshBasicMaterial( {
+			map: videoController.getVideo("background").t, //THREE.ImageUtils.loadTexture("images/face.png"),
 			color: 0xFFFFFF,
 			side: 2 
-		}) );
+		});
+		backgroundMesh = new THREE.Mesh(screenPlane, backgroundVideoMat );
 		backgroundMesh.position.z = -10;
 		scene.add(backgroundMesh);
 
@@ -137,15 +141,14 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 		mouthRect = new THREE.Mesh(
 			new THREE.PlaneBufferGeometry(.2, .2),
 			new MouthMaterial( {
-				map: videoContrller.getVideo("straight").t,
+				map: videoController.getVideo("straight").t,
 				aspect: 720 / 1280
 			} ) );
 		mouthRect.position.copy( mouthPositions["straight"] );
 		slitMesh.add(mouthRect);
 
-
 		// VIDEO CONTROLLER
-		videoContrller.playVideos();
+		videoController.playVideos();
 
 		// LETTER BOXING
 		var barGeom = new THREE.PlaneBufferGeometry(1,1, 12, 7 );
@@ -161,7 +164,7 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 		slit = new SlitScan({
 			width: slitWidth,
 			height: Math.floor( slitWidth / vidAspect),
-			depth: 60,
+			depth: 45,
 			renderer: renderer
 		});
 		tracking = new AzealiaTracking({
@@ -181,6 +184,13 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 			}
 		});
 
+
+		backgroundWebcamMat = new THREE.MeshBasicMaterial( {
+			map: cameraTexture.texture,
+			color: 0xFFFFFF,
+			side: 2 
+		});
+
 		// mesh for showing double high videos
 		azealiaMesh = new THREE.Mesh(screenPlane, new VideoMaterial({map: THREE.ImageUtils.loadTexture("images/debugImg.png")}))
 		azealiaMesh.position.z = 10;
@@ -196,28 +206,29 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 			side: 2
 		} ) );
 		debugBox.scale.set(-1, 1, 1);
-		// debugBox.visible = false;
 		debugFlipper.add(debugBox);
 		scene.add(debugFlipper);
+		// debugBox.visible = false;
 
 		//RESIZE THE SCREEN PLANES
 		scaleVidMesh();
 
+		//html controls
 		$("#play").click(function(){
 			var wasPlaying = PLAYING;
 			PLAYING = !PLAYING;
 			if (!HAS_PLAYED ){
 				HAS_PLAYED = true;
-				videoContrller.setVideoPosition(0);
-				videoContrller.setVolume(1);// videoContrller.muteVideo? 0 : 1.0);
+				videoController.setVideoPosition(0);
+				videoController.setVolume(1);// videoController.muteVideo? 0 : 1.0);
 			}
 
 			if ( !wasPlaying ){
 				$("#play").html("PAUSE");
-				videoContrller.playVideos();
+				videoController.playVideos();
 			} else {
 				$("#play").html("PLAY");
-				videoContrller.pauseVideos();
+				videoController.pauseVideos();
 			}
 		})
 
@@ -246,6 +257,7 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 
 	var rate = 2;
 	var backgroundTime = {start:162.386, end: 191.124};
+	var bTransitioningBackground = false;
 	var done = false;
 
 	function update()
@@ -253,7 +265,7 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 		frame++;
 		stats.update();
 
-		if ( videoContrller.videoToLoadCount != 0 ) return;
+		if ( videoController.videoToLoadCount != 0 ) return;
 		
 		//
 
@@ -270,12 +282,50 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 
 		depthSampleScale = Math.max(Math.min(1, lastDelta.distanceTo( tracking.delta ) * 50.), depthSampleScale * .985);
 		slit.setDepthSampleScale( depthSampleScale );
-
 		lastDelta.copy( tracking.delta );
 
 		getCurrentVideo();
 
-		videoContrller.update();
+		videoController.update();
+
+		//webcam backgroun
+		var vTime = videoController.vidPosition.position * videoController.videoDuration;
+		var bWebcamBackground = ( vTime >= backgroundTime.start && vTime < backgroundTime.end );
+		if(bWebcamBackground)
+		{
+
+			if(backgroundMesh.material !== backgroundWebcamMat)
+			{
+				backgroundWebcamMat.map = cameraTexture.texture;
+				backgroundMesh.material = backgroundWebcamMat;	
+
+				backgroundWebcamMat.color.setRGB(0,0,0);
+				new TWEEN.Tween( backgroundWebcamMat.color )
+					.to( { r: 1, g: 1, b: 1 }, 500 )
+					.start();
+			}
+			bTransitioningBackground = true;
+		}
+		else
+		{
+			if(bTransitioningBackground)
+			{
+				bTransitioningBackground = false;
+
+				new TWEEN.Tween( backgroundWebcamMat.color )
+					.to( { r: 0, g: 0, b: 0 }, 250 )
+					.onComplete(function()
+					{
+						backgroundMesh.material = backgroundVideoMat;
+						backgroundVideoMat.color.setRGB(0,0,0);
+						new TWEEN.Tween( backgroundVideoMat.color )
+							.to( { r: 1, g: 1, b: 1 }, 250 )
+							.start();
+					})
+					.start();
+				// backgroundMesh.material = backgroundVideoMat;	
+			}
+		}
 	}
 
 	function getCurrentVideo()
@@ -320,7 +370,7 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 	function setVideo( videoName )
 	{
 
-		var t = videoContrller.getVideo( videoName ).t;
+		var t = videoController.getVideo( videoName ).t;
 		slit.setTexture( t );
 
 		mouthRect.material.uniforms.map.value = t;
@@ -453,8 +503,14 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 
 	function onKeyDown( event )
 	{
+			console.log(event.keyCode)
 		switch( event.keyCode )
 		{
+			case 32:
+				console.log("videoController.vidPosition.position: " + videoController.vidPosition.position);
+				break;
+			default:
+			break;
 		}
 	}
 
