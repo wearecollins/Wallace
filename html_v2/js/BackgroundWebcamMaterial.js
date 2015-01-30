@@ -49,8 +49,23 @@ var BackgroundWebcamMaterial = function(params)
 
 		'void main()',
 		'{',
-		'	float g = toGrey(texture2D(map, vUv).xyz) * getVignette(vUv);',
-		'	gl_FragColor = vec4(vec3(g) * color, 1.);',
+		'	vec2 s = vec2(1. / 320., 1. / 240.);',
+		'	float g = toGrey(texture2D(map, vUv).xyz);',
+		'	g += toGrey(texture2D(map, vUv + vec2( -s.x, -s.y) ).xyz);',
+		'	g += toGrey(texture2D(map, vUv + vec2( -s.x, 0.) ).xyz);',
+		'	g += toGrey(texture2D(map, vUv + vec2( -s.x, s.y) ).xyz);',
+
+		'	g += toGrey(texture2D(map, vUv + vec2( s.x, -s.y) ).xyz);',
+		'	g += toGrey(texture2D(map, vUv + vec2( s.x, 0.) ).xyz);',
+		'	g += toGrey(texture2D(map, vUv + vec2( s.x, s.y) ).xyz);',
+
+		'	g += toGrey(texture2D(map, vUv + vec2( 0., -s.y) ).xyz);',
+		'	g += toGrey(texture2D(map, vUv + vec2( 0., s.y) ).xyz);',
+
+		'	g /= 9.;',
+
+
+		'	gl_FragColor = vec4(vec3( pow(g * getVignette(vUv) * 2., 2.) ) * color, 1.);',
 		'}'
 		].join('\n'),
 
