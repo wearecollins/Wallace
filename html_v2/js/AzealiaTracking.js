@@ -8,7 +8,7 @@ var AzealiaTracking = function(params)
 	var avgDelta = new THREE.Vector3(0,0,0);
 	var smoothedDelta = new THREE.Vector3();
 
-	var smoothing = .85;
+	var smoothing = .95;
 	var attenuation = .005;
 
 	var dimX = width;

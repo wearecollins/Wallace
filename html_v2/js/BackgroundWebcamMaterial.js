@@ -13,6 +13,7 @@ var BackgroundWebcamMaterial = function(params)
 
 		uniforms: {
 			map: {type: 't', value: params.map },
+			color: {type: 'c', value: new THREE.Color( 0xFFFFFF )},
 			// screenAspect: {type: 'f', value: params.screenAspect || (window.innerHeight / window.innerWidth)},
 			opacity: {type: 'f', value: params.opacity !== undefined ? params.opacity : 1. }
 		},
@@ -36,6 +37,7 @@ var BackgroundWebcamMaterial = function(params)
 		fragmentShader: [
 		'uniform sampler2D map;',
 		'varying vec2 vUv;',
+		'uniform vec3 color;',
 
 		'float toGrey(vec3 rgb){',
 		'	return dot(rgb, vec3(0.299, 0.587, 0.114));',
@@ -48,7 +50,7 @@ var BackgroundWebcamMaterial = function(params)
 		'void main()',
 		'{',
 		'	float g = toGrey(texture2D(map, vUv).xyz) * getVignette(vUv);',
-		'	gl_FragColor = vec4(vec3(g), 1.);',
+		'	gl_FragColor = vec4(vec3(g) * color, 1.);',
 		'}'
 		].join('\n'),
 

@@ -179,9 +179,6 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 			height: tracking.height,
 			onGetUserMedia: function(texture)
 			{
-				console.log("got user media");	
-
-				// slit.setTexture(texture);
 				slitMesh.material.map = slit.texture;
 
 				backgroundWebcamMat.uniforms.map.value = texture;
@@ -262,8 +259,8 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 	 */
 
 	var rate = 2;
-	// var backgroundTime = {start:6.386, end: 191.124};
-	var backgroundTime = {start:162.386, end: 191.124};
+	var backgroundTime = {start:6.386, end: 191.124};
+	// var backgroundTime = {start:162.386, end: 191.124};
 	var bTransitioningBackground = false;
 	var done = false;
 
@@ -306,10 +303,10 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 				// backgroundWebcamMat.map = cameraTexture.texture;
 				backgroundMesh.material = backgroundWebcamMat;	
 
-				// backgroundWebcamMat.color.setRGB(0,0,0);
-				// new TWEEN.Tween( backgroundWebcamMat.color )
-				// 	.to( { r: 1, g: 1, b: 1 }, 500 )
-				// 	.start();
+				backgroundWebcamMat.uniforms.color.value.setRGB(0,0,0);
+				new TWEEN.Tween( backgroundWebcamMat.uniforms.color.value )
+					.to( { r: 1, g: 1, b: 1 }, 500 )
+					.start();
 			}
 			bTransitioningBackground = true;
 		}
@@ -319,7 +316,7 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 			{
 				bTransitioningBackground = false;
 
-				new TWEEN.Tween( backgroundWebcamMat.color )
+				new TWEEN.Tween( backgroundWebcamMat.uniforms.color.value )
 					.to( { r: 0, g: 0, b: 0 }, 250 )
 					.onComplete(function()
 					{
