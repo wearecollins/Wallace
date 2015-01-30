@@ -172,6 +172,8 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 			height: 120
 		});
 
+
+		backgroundWebcamMat = new BackgroundWebcamMaterial();
 		cameraTexture = new CameraTexture({
 			width: tracking.width,
 			height: tracking.height,
@@ -181,15 +183,19 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 
 				slit.setTexture(texture);
 				slitMesh.material.map = slit.texture;
+
+				backgroundWebcamMat.uniforms.map.value = texture;
 			}
 		});
 
 
-		backgroundWebcamMat = new THREE.MeshBasicMaterial( {
-			map: cameraTexture.texture,
-			color: 0xFFFFFF,
-			side: 2 
-		});
+
+
+		// backgroundWebcamMat = new THREE.MeshBasicMaterial( {
+		// 	map: cameraTexture.texture,
+		// 	color: 0xFFFFFF,
+		// 	side: 2 
+		// });
 
 		// mesh for showing double high videos
 		azealiaMesh = new THREE.Mesh(screenPlane, new VideoMaterial({map: THREE.ImageUtils.loadTexture("images/debugImg.png")}))
@@ -256,7 +262,8 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 	 */
 
 	var rate = 2;
-	var backgroundTime = {start:162.386, end: 191.124};
+	var backgroundTime = {start:6.386, end: 191.124};
+	// var backgroundTime = {start:162.386, end: 191.124};
 	var bTransitioningBackground = false;
 	var done = false;
 
@@ -296,13 +303,13 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 
 			if(backgroundMesh.material !== backgroundWebcamMat)
 			{
-				backgroundWebcamMat.map = cameraTexture.texture;
+				// backgroundWebcamMat.map = cameraTexture.texture;
 				backgroundMesh.material = backgroundWebcamMat;	
 
-				backgroundWebcamMat.color.setRGB(0,0,0);
-				new TWEEN.Tween( backgroundWebcamMat.color )
-					.to( { r: 1, g: 1, b: 1 }, 500 )
-					.start();
+				// backgroundWebcamMat.color.setRGB(0,0,0);
+				// new TWEEN.Tween( backgroundWebcamMat.color )
+				// 	.to( { r: 1, g: 1, b: 1 }, 500 )
+				// 	.start();
 			}
 			bTransitioningBackground = true;
 		}

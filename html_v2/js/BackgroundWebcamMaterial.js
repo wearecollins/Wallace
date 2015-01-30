@@ -1,7 +1,7 @@
-// MouthMaterial.js
+// BackgroundWebcamMaterial.js
 
 
-var MouthMaterial = function(params)
+var BackgroundWebcamMaterial = function(params)
 {
 	params = params || {};
 	
@@ -13,8 +13,7 @@ var MouthMaterial = function(params)
 
 		uniforms: {
 			map: {type: 't', value: params.map },
-			aspect: {type: 'f', value: params.aspect || 0.5625},
-			screenAspect: {type: 'f', value: params.screenAspect || (window.innerHeight / window.innerWidth)},
+			// screenAspect: {type: 'f', value: params.screenAspect || (window.innerHeight / window.innerWidth)},
 			opacity: {type: 'f', value: params.opacity !== undefined ? params.opacity : 1. }
 		},
 
@@ -22,9 +21,7 @@ var MouthMaterial = function(params)
 		},
 
 		vertexShader: [
-		'uniform float aspect;',
-		'uniform float screenAspect;',
-		'varying vec2 mUv;',
+		// 'uniform float screenAspect;',
 		'varying vec2 vUv;',
 
 		'float mapLinear( in float x, in float a1, in float a2, in float b1, in float b2 ) {',
@@ -32,23 +29,26 @@ var MouthMaterial = function(params)
 		'}',
 
 		'void main() {',
+		'	vUv = uv * vec2(1., 0.749);',
 		'	gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );',
-		'	mUv = uv;',
-		'	vUv.x = mapLinear(gl_Position.x, -1., 1., 0., 1.);',
-		'	vUv.y = mapLinear(gl_Position.y, - aspect / screenAspect, aspect / screenAspect, 0.5, 1.);',
-
 		'}'].join('\n'),
 
 		fragmentShader: [
 		'uniform sampler2D map;',
-		'uniform float opacity;',
-		'varying vec2 mUv;',
 		'varying vec2 vUv;',
+
+		'float toGrey(vec3 rgb){',
+		'	return dot(rgb, vec3(0.299, 0.587, 0.114));',
+		'}',
+
+		'float getVignette(vec2 uv){',
+		'	return pow(1.7 - length(uv*2. - 1.), 2.);',
+		'}',
 
 		'void main()',
 		'{',
-		'	float alpha =  opacity * (1. - pow(length( (mUv*2.-1.) ), 4.));',
-		'	gl_FragColor = texture2D(map, vUv) * vec4(1., 1., 1. , alpha);',
+		'	float g = toGrey(texture2D(map, vUv).xyz) * getVignette(vUv);',
+		'	gl_FragColor = vec4(vec3(g), 1.);',
 		'}'
 		].join('\n'),
 
@@ -58,4 +58,4 @@ var MouthMaterial = function(params)
 }
 
 
-MouthMaterial.prototype = Object.create( THREE.ShaderMaterial.prototype );
+BackgroundWebcamMaterial.prototype = Object.create( THREE.ShaderMaterial.prototype );
