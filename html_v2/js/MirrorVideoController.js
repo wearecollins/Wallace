@@ -268,8 +268,8 @@ MirrorVideoController.prototype.setVolume = function(value)
 			this.videos[v].video.volume = value;
 		}
 	} else {
-			this.videos['01'].video.muted = false;
-			this.videos['01'].video.volume = value;
+			this.videos['BackgroundVideo'].video.muted = false;
+			this.videos['BackgroundVideo'].video.volume = value;
 	}
 };
 
@@ -414,7 +414,7 @@ MirrorVideoController.prototype.loadVideo = function ( name, url, type, onLoadCo
 	videoElement.setAttribute("type", type);
 	videoElement.setAttribute("preload", "auto");
 	
-	if(this.muteVideo == true || name != "01")
+	if(this.muteVideo == true || name != "BackgroundVideo")
 	{
 		videoElement.setAttribute("muted", "");
 	}
@@ -423,6 +423,10 @@ MirrorVideoController.prototype.loadVideo = function ( name, url, type, onLoadCo
 	var source = document.createElement('source');
 	source.setAttribute('crossorigin', 'anonymous');
 	videoElement.setAttribute('crossorigin', 'anonymous');
+
+	source.setAttribute('crossOrigin', 'anonymous');
+	videoElement.setAttribute('crossOrigin', 'anonymous');
+
 	source.src = url;
 	videoElement.load();
 	videoElement.appendChild(source);
