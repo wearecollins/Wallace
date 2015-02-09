@@ -9,7 +9,7 @@ var VideoMaterial = function(params)
 	var matParams = {
 		transparent: true,
 		blending: params.blending || 1,
-		depthTest: params.depthTest || true,
+		depthTest: params.depthTest || false,
 		side: params.side || 2,// 0 = backFaceCull, 1 = frontFaceCull, 2 = doubleSided
 
 		uniforms: {

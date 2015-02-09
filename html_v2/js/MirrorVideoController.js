@@ -61,28 +61,14 @@ MirrorVideoController = function(params)
 	if ( iOS ){
 		fmt = "_mobile" + fmt;
 	}
-
-	this.videoFiles = params.videoFiles || {
+		this.videoFiles = params.videoFiles || {
 			"BackgroundVideo": {path: "../720p/AB_BACKGROUND" + fmt},
-			"01": {path: 	"../720p/AB_1_Straight_1" + fmt},
+			"01": {path: 	"../720p/AB_1_Straight_1_1" + fmt},
 			"02": {path: 	"../720p/AB_1_Up" + fmt},	
-			"03": {path: 	"../720p/AB_1_Down_1_1" + fmt},
-			"04": {path: 	"../720p/AB_1_Left_1_1_1" + fmt},
-			"05": {path: 	"../720p/AB_1_Right_1" + fmt},
+			"03": {path: 	"../720p/AB_1_Down_1" + fmt},
+			"04": {path: 	"../720p/AB_1_Left_1_2" + fmt},
+			"05": {path: 	"../720p/AB_1_Right" + fmt},
 		};
-
-		/*this.videoFiles = params.videoFiles || {
-			"BackgroundVideo": {path: "http://storage.googleapis.com/wallace_videos/AB_BACKGROUND" + fmt},
-			"01": {path: 	"http://storage.googleapis.com/wallace_videos/AB_1_Straight_1_1" + fmt},
-			"02": {path: 	"http://storage.googleapis.com/wallace_videos/AB_1_Up" + fmt},	
-			"03": {path: 	"http://storage.googleapis.com/wallace_videos/AB_1_Down_1" + fmt},
-			"04": {path: 	"http://storage.googleapis.com/wallace_videos/AB_1_Left_1_2" + fmt},
-			"05": {path: 	"http://storage.googleapis.com/wallace_videos/AB_1_Right" + fmt},
-		};*/
-
-
-
-
 
 	// if ( this.backgroundRendered ){
 	// 	this.videoFiles = params.videoFiles || {
@@ -290,8 +276,8 @@ MirrorVideoController.prototype.update = function()
 	if ( !PLAYING ){
 		if ( this.vidPosition.position > .02 ){
 			this.setVideoTime(0.0);
-			this.videos['01'].video.currentTime = 0;
-			window.debugVideo = this.videos['01'];
+			this.videos['BackgroundVideo'].video.currentTime = 0;
+			window.debugVideo = this.videos['BackgroundVideo'];
 		}
 	// check on lyrics
 	} else {
@@ -345,7 +331,7 @@ MirrorVideoController.prototype.update = function()
 			{
 				if ( this.videos[i].video.currentTime != this.videos["BackgroundVideo"].video.currentTime)
 				{
-					this.videos[i].video.currentTime = this.videos["BackgroundVideo"].video.currentTime;
+					// this.videos[i].video.currentTime = this.videos["BackgroundVideo"].video.currentTime;
 				}
 			} else {
 				this.vidPosition.position = this.videos[i].video.currentTime / this.videoDuration;
@@ -462,9 +448,7 @@ MirrorVideoController.prototype.loadVideo = function ( name, url, type, onLoadCo
 	{
 		console.log( "verbose" );
 
-		//https://developer.mozilla.org/en-US/docs/Web/Guide/Events/Media_events
-		//
-		var otherListeners = [ 
+		var otherListeners = [
 			"abort",
 			"canplay",
 			"canplaythrough",
@@ -481,7 +465,7 @@ MirrorVideoController.prototype.loadVideo = function ( name, url, type, onLoadCo
 			"pause",
 			"play",
 			"playing",
-			"progress",
+			// "progress",
 			"ratechange",
 			"seeked",
 			"seeking",
@@ -490,26 +474,11 @@ MirrorVideoController.prototype.loadVideo = function ( name, url, type, onLoadCo
 			// "timeupdate",
 			"volumechange",
 			"waiting"
-		];
+		]
 		for(var i=0; i<otherListeners.length; i++)
 		{	
-			videoElement.addEventListener(otherListeners[i], function(e)
-			{
-				if(e.type == "canplaythrough")
-				{
-					console.log( "CANPLAYTHROUGH!!!!!!!!!!", e.target.id, e.type );
-				}
-
-				if(e.type == "progress")
-				{
-					// console.log( e.target.id, e.type );
-				}
-
-				else
-				{
-					console.log( e.target.id, e.type );
-				}
-			   
+			videoElement.addEventListener(otherListeners[i], function(e) {
+			   console.log( e.target.id, e.type );
 			}, false);
 		}
 	}

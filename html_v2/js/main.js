@@ -188,11 +188,6 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 				slit.webcamMesh.material.uniforms.map.value = texture;
 			}
 		});
-
-		// mesh for showing double high videos
-		azealiaMesh = new THREE.Mesh(screenPlane, new VideoMaterial({map: THREE.ImageUtils.loadTexture("images/debugImg.png")}))
-		azealiaMesh.position.z = 10;
-		slit.scene.add(azealiaMesh);
 	
 		//TRACKING DEBGUG
 		var debugFlipper = new THREE.Object3D();
@@ -218,7 +213,7 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 			if (!HAS_PLAYED ){
 				HAS_PLAYED = true;
 				videoController.setVideoPosition(0);
-				videoController.setVolume(1);// videoController.muteVideo? 0 : 1.0);
+				videoController.setVolume( 1. );// videoController.muteVideo? 0 : 1.0);
 			}
 
 			if ( !wasPlaying ){
@@ -271,8 +266,8 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 	 * [update description]
 	 * @return {[type]} [description]
 	 */
-	var backgroundTime = {start:5, end: 30};
-	// var backgroundTime = {start:162.386, end: 191.124};
+	// var webcamBackgroundTime = {start:5, end: 30};
+	var webcamBackgroundTime = {start:162.386, end: 191.124};
 	var bTransitioningBackground = false, bFadeInWebcam = true;
 
 	function update()
@@ -303,11 +298,15 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 
 		//webcam backgroun
 		var vTime = videoController.vidPosition.position * videoController.videoDuration;
-		var bWebcamBackground = ( vTime >= backgroundTime.start && vTime < backgroundTime.end );
+		var bWebcamBackground = ( vTime >= webcamBackgroundTime.start && vTime < webcamBackgroundTime.end );
 		if(bWebcamBackground)
 		{
+			console.log("bWebcamBackground");
 			if(bFadeInWebcam)
 			{
+				console.log( "if(bFadeInWebcam) ");
+
+				slit.webcamMesh.visible = true;
 				slit.webcamMesh.material.uniforms.color.value.setRGB(0,0,0);
 				new TWEEN.Tween( slit.webcamMesh.material.uniforms.color.value )
 					.to( { r: 1, g: 1, b: 1 }, 500 )
@@ -332,6 +331,9 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 					.to( { r: 0, g: 0, b: 0 }, 250 )
 					.onUpdate(function(k){
 						slit.webcamMesh.material.uniforms.opacity.value = 1. - k;
+					})
+					.onComplete(function(e){
+						slit.webcamMesh.visible = false;
 					})
 					.start();
 			}

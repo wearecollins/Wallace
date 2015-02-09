@@ -95,7 +95,7 @@ var SlitScan = function( params )
 
 			var index = 0;
 			for (var i = 0; i < rgbData.length; i = i + 4) {
-				data[index] = rgbData[i] / 255;
+				data[index] = Math.pow(rgbData[i] / 255, 2.);
 				index++;
 			};
 
