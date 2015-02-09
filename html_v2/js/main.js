@@ -88,7 +88,7 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 		muteVideo: muteVideo,
 		useBackground: useBackground,
 		subtitleHander: addSubtitles,
-		verbose: true
+		verbose: false
 	});
 	var mouthRect ;
 	var mouthPositions = {
@@ -144,7 +144,7 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 		slitScene.add(slitMesh);
 
 		mouthRect = new THREE.Mesh(
-			new THREE.PlaneBufferGeometry(.125, .225),
+			new THREE.PlaneBufferGeometry(.2, .225),
 			new MouthMaterial( {
 				map: videoController.getVideo("straight").t,
 				aspect: 720 / 1280

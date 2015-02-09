@@ -62,6 +62,28 @@ MirrorVideoController = function(params)
 		fmt = "_mobile" + fmt;
 	}
 
+	this.videoFiles = params.videoFiles || {
+			"BackgroundVideo": {path: "../720p/AB_BACKGROUND" + fmt},
+			"01": {path: 	"../720p/AB_1_Straight_1" + fmt},
+			"02": {path: 	"../720p/AB_1_Up" + fmt},	
+			"03": {path: 	"../720p/AB_1_Down_1_1" + fmt},
+			"04": {path: 	"../720p/AB_1_Left_1_1_1" + fmt},
+			"05": {path: 	"../720p/AB_1_Right_1" + fmt},
+		};
+
+		/*this.videoFiles = params.videoFiles || {
+			"BackgroundVideo": {path: "http://storage.googleapis.com/wallace_videos/AB_BACKGROUND" + fmt},
+			"01": {path: 	"http://storage.googleapis.com/wallace_videos/AB_1_Straight_1_1" + fmt},
+			"02": {path: 	"http://storage.googleapis.com/wallace_videos/AB_1_Up" + fmt},	
+			"03": {path: 	"http://storage.googleapis.com/wallace_videos/AB_1_Down_1" + fmt},
+			"04": {path: 	"http://storage.googleapis.com/wallace_videos/AB_1_Left_1_2" + fmt},
+			"05": {path: 	"http://storage.googleapis.com/wallace_videos/AB_1_Right" + fmt},
+		};*/
+
+
+
+
+
 	// if ( this.backgroundRendered ){
 	// 	this.videoFiles = params.videoFiles || {
 	// 		"01": 	{path: 	"../WALLACE_TESTS/01_STRAIGHT_WEIRD_BLEND" + fmt},
@@ -70,14 +92,14 @@ MirrorVideoController = function(params)
 	// 		"04": {path: 	"../WALLACE_TESTS/04_UL_UR_BLEND" + fmt},
 	// 	};
 	// } else if ( !this.doubleWide ){
-		this.videoFiles = params.videoFiles || {
-			"BackgroundVideo": {path: "http://storage.googleapis.com/wallace_videos/AB_BACKGROUND" + fmt},
-			"01": {path: 	"http://storage.googleapis.com/wallace_videos/AB_1_Straight_1_1" + fmt},
-			"02": {path: 	"http://storage.googleapis.com/wallace_videos/AB_1_Up" + fmt},	
-			"03": {path: 	"http://storage.googleapis.com/wallace_videos/AB_1_Down_1" + fmt},
-			"04": {path: 	"http://storage.googleapis.com/wallace_videos/AB_1_Left_1_2" + fmt},
-			"05": {path: 	"http://storage.googleapis.com/wallace_videos/AB_1_Right" + fmt},
-		};
+		// this.videoFiles = params.videoFiles || {
+		// 	"BackgroundVideo": {path: "http://storage.googleapis.com/wallace_videos/AB_BACKGROUND" + fmt},
+		// 	"01": {path: 	"http://storage.googleapis.com/wallace_videos/AB_1_Straight_1_1" + fmt},
+		// 	"02": {path: 	"http://storage.googleapis.com/wallace_videos/AB_1_Up" + fmt},	
+		// 	"03": {path: 	"http://storage.googleapis.com/wallace_videos/AB_1_Down_1" + fmt},
+		// 	"04": {path: 	"http://storage.googleapis.com/wallace_videos/AB_1_Left_1_2" + fmt},
+		// 	"05": {path: 	"http://storage.googleapis.com/wallace_videos/AB_1_Right" + fmt},
+		// };
 		
 	// 	"01": {path: 	"http://storage.googleapis.com/wallace_videos/AB_1_Straight_1_1" + fmt},
 	// 		"02": {path: 	"http://storage.googleapis.com/wallace_videos/AB_1_Up" + fmt},	
