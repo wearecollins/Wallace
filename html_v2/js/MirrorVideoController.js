@@ -231,14 +231,14 @@ MirrorVideoController.prototype.pauseVideos = function ()
 MirrorVideoController.prototype.setVideoPosition = function (percent)
 {
 	try {
-		// for(var v in this.videos)	this.videos[v].video.currentTime = percent * this.videoDuration; 
+		for(var v in this.videos)	this.videos[v].video.currentTime = percent * this.videoDuration; 
 	} catch(e){
 
 	}
 }
 MirrorVideoController.prototype.setVideoTime = function (videotime)
 {
-	// for(var v in this.videos)	this.videos[v].video.currentTime = videotime;
+	for(var v in this.videos)	this.videos[v].video.currentTime = videotime;
 }
 
 MirrorVideoController.prototype.stopVideos = function ()
@@ -267,8 +267,8 @@ MirrorVideoController.prototype.update = function()
 {
 	if ( !PLAYING ){
 		if ( this.vidPosition.position > .02 ){
-			// this.setVideoTime(0.0);
-			// this.videos['01'].video.currentTime = 0;
+			this.setVideoTime(0.0);
+			this.videos['01'].video.currentTime = 0;
 			window.debugVideo = this.videos['01'];
 		}
 	// check on lyrics
@@ -323,7 +323,7 @@ MirrorVideoController.prototype.update = function()
 			{
 				if ( this.videos[i].video.currentTime != this.videos["BackgroundVideo"].video.currentTime)
 				{
-					// this.videos[i].video.currentTime = this.videos["BackgroundVideo"].video.currentTime;
+					this.videos[i].video.currentTime = this.videos["BackgroundVideo"].video.currentTime;
 				}
 			} else {
 				this.vidPosition.position = this.videos[i].video.currentTime / this.videoDuration;
