@@ -231,14 +231,14 @@ MirrorVideoController.prototype.pauseVideos = function ()
 MirrorVideoController.prototype.setVideoPosition = function (percent)
 {
 	try {
-		for(var v in this.videos)	this.videos[v].video.currentTime = percent * this.videoDuration; 
+		// for(var v in this.videos)	this.videos[v].video.currentTime = percent * this.videoDuration; 
 	} catch(e){
 
 	}
 }
 MirrorVideoController.prototype.setVideoTime = function (videotime)
 {
-	for(var v in this.videos)	this.videos[v].video.currentTime = videotime;
+	// for(var v in this.videos)	this.videos[v].video.currentTime = videotime;
 }
 
 MirrorVideoController.prototype.stopVideos = function ()
@@ -267,14 +267,14 @@ MirrorVideoController.prototype.update = function()
 {
 	if ( !PLAYING ){
 		if ( this.vidPosition.position > .02 ){
-			this.setVideoTime(0.0);
-			this.videos['01'].video.currentTime = 0;
+			// this.setVideoTime(0.0);
+			// this.videos['01'].video.currentTime = 0;
 			window.debugVideo = this.videos['01'];
 		}
 	// check on lyrics
 	} else {
 		for ( var i=0; i<window.textMeshes.length; i++){
-			if ( this.videos['01'].video.currentTime >= window.textMeshes[i].time && window.textMeshes[i].started == false){
+			if ( this.videos['BackgroundVideo'].video.currentTime >= window.textMeshes[i].time && window.textMeshes[i].started == false){
 				window.textMeshes[i].started = true;
 				window.textMeshes[i].mesh.rotation.z = 0;
 				window.textMeshes[i].mesh.position.y = -window.innerHeight * .6;
@@ -440,11 +440,54 @@ MirrorVideoController.prototype.loadVideo = function ( name, url, type, onLoadCo
 	{
 		console.log( "verbose" );
 
-		var otherListeners = [ "canplay", "playing ", "waiting", "ended", "loadedmetadata", "suspend","stalled","emptied"]
+		//https://developer.mozilla.org/en-US/docs/Web/Guide/Events/Media_events
+		//
+		var otherListeners = [ 
+			"abort",
+			"canplay",
+			"canplaythrough",
+			"durationchange",
+			"emptied",
+			"ended",
+			"error",
+			"interruptbegin",
+			"interruptend",
+			"loadeddata",
+			"loadedmetadata",
+			"loadstart",
+			"mozaudioavailable",
+			"pause",
+			"play",
+			"playing",
+			"progress",
+			"ratechange",
+			"seeked",
+			"seeking",
+			"stalled",
+			"suspend",
+			// "timeupdate",
+			"volumechange",
+			"waiting"
+		];
 		for(var i=0; i<otherListeners.length; i++)
 		{	
-			videoElement.addEventListener(otherListeners[i], function(e) {
-			   console.log( e.target.id, e.type );
+			videoElement.addEventListener(otherListeners[i], function(e)
+			{
+				if(e.type == "canplaythrough")
+				{
+					console.log( "CANPLAYTHROUGH!!!!!!!!!!", e.target.id, e.type );
+				}
+
+				if(e.type == "progress")
+				{
+					// console.log( e.target.id, e.type );
+				}
+
+				else
+				{
+					console.log( e.target.id, e.type );
+				}
+			   
 			}, false);
 		}
 	}
