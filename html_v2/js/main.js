@@ -50,6 +50,7 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 
 
 	//basic stuff
+	var gui;
 	var camera, light, projector;
 	var clock = new THREE.Clock();
 	var scene = new THREE.Scene(), slitScene = new THREE.Scene();
@@ -139,7 +140,7 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 		// 	new THREE.PlaneBufferGeometry(.15, .15), 
 			// new THREE.MeshBasicMaterial( {color: "red", side: 2} ));
 		mouthRect = new THREE.Mesh(
-			new THREE.PlaneBufferGeometry(.2, .2),
+			new THREE.PlaneBufferGeometry(.1, .2),
 			new MouthMaterial( {
 				map: videoController.getVideo("straight").t,
 				aspect: 720 / 1280
@@ -243,18 +244,35 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 				$("#lyrics").html("LYRICS");
 			}
 		})
+
+
+		//GUI
+		// gui = new dat.GUI();
+		// console.log(gui);
+		// container.append
+		// container.appendChild( gui.domElement );
+
+		gui = new dat.GUI({ autoPlace: false });
+
+		// var customContainer = document.getElementById('my-gui-container');
+		container.appendChild(gui.domElement);
+		var temp = $(gui.domElement);
+		temp.css({
+			position: "absolute",
+			color: "red",
+			left: 10,
+			top: 100
+		})
+		
 	}
 
 	/**
 	 * [update description]
 	 * @return {[type]} [description]
 	 */
-
-	var rate = 2;
-	var backgroundTime = {start:6.386, end: 16.124};
-	// var backgroundTime = {start:162.386, end: 191.124};
+	// var backgroundTime = {start:6.386, end: 16.124};
+	var backgroundTime = {start:162.386, end: 191.124};
 	var bTransitioningBackground = false;
-	var done = false;
 
 	function update()
 	{

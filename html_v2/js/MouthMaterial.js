@@ -8,7 +8,7 @@ var MouthMaterial = function(params)
 	var matParams = {
 		transparent: true,
 		blending: params.blending || 1,
-		depthTest: params.depthTest || true,
+		depthTest: params.depthTest || false,
 		side: params.side || 2,// 0 = backFaceCull, 1 = frontFaceCull, 2 = doubleSided
 
 		uniforms: {
@@ -47,8 +47,8 @@ var MouthMaterial = function(params)
 
 		'void main()',
 		'{',
-		'	float alpha =  opacity * (1. - pow(length( (mUv*2.-1.) ), 4.));',
-		'	gl_FragColor = texture2D(map, vUv) * vec4(1., 1., 1. , alpha);',
+		'	float alpha =  opacity * (1. - pow(length( (mUv*2.-1.) ), 2.));',
+		'	gl_FragColor = texture2D(map, vUv) * vec4(0., 1., 1. , alpha);',
 		'}'
 		].join('\n'),
 
