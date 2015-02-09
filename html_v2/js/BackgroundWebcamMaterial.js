@@ -6,15 +6,15 @@ var BackgroundWebcamMaterial = function(params)
 	params = params || {};
 	
 	var matParams = {
-		transparent: true,
+		transparent: false,
 		blending: params.blending || 1,
-		depthTest: params.depthTest || true,
+		depthTest: params.depthTest || false,
 		side: params.side || 2,// 0 = backFaceCull, 1 = frontFaceCull, 2 = doubleSided
 
 		uniforms: {
 			map: {type: 't', value: params.map },
 			color: {type: 'c', value: new THREE.Color( 0xFFFFFF )},
-			opacity: {type: 'f', value: params.opacity !== undefined ? params.opacity : 1. },
+			opacity: {type: 'f', value: params.opacity !== undefined ? params.opacity : 0. },
 			brightnessExpo: {type: 'f', value: params.brightnessExpo || 1.5}
 		},
 
@@ -32,12 +32,14 @@ var BackgroundWebcamMaterial = function(params)
 		'void main() {',
 		'	vUv = vec2(1. - uv.x, 0.749 * uv.y);',
 		'	gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );',
+		// '	gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );',
 		'}'].join('\n'),
 
 		fragmentShader: [
 		'uniform sampler2D map;',
 		'varying vec2 vUv;',
 		'uniform vec3 color;',
+		'uniform float opacity;',
 		'uniform float brightnessExpo;',
 
 		'float toGrey(vec3 rgb){',
@@ -68,7 +70,7 @@ var BackgroundWebcamMaterial = function(params)
 
 		'	g /= 9.;',
 
-		'	gl_FragColor = vec4( getVignette(vUv) * vec3( pow(g * 1.025, brightnessExpo) ) * color, 1.);',
+		'	gl_FragColor = vec4( getVignette(vUv) * vec3( pow(g * 1.025, brightnessExpo) ) * color, opacity);',
 		'}'
 		].join('\n'),
 

@@ -26,13 +26,25 @@ var SlitScan = function( params )
 	//SCENE AND MESH
 	var scene = new THREE.Scene();
 
+	var tempPixels = [255,255,255,255];
+	var tempTexture = new THREE.DataTexture( new Uint8Array(tempPixels), 1, 1, THREE.RGBAFormat);
+	tempTexture.minFilter = THREE.NearestFilter;
+	tempTexture.needsUpdate = true;
+
 	var vidMesh = new THREE.Mesh(new THREE.PlaneBufferGeometry(dimX, dimY), new VideoMaterial( {
 		color: 0xFFFFFF,
 		side: 2,
-		map: THREE.ImageUtils.loadTexture("images/face.png")
+		map: tempTexture,
 	} ) );
 	vidMesh.visible = true;
+	vidMesh.position = -10;
 	scene.add(vidMesh);	
+
+	var webcamMesh = new THREE.Mesh( vidMesh.geometry, new BackgroundWebcamMaterial({
+		map: tempTexture
+	}));
+	webcamMesh.visible = false;
+	scene.add( webcamMesh );
 
 	//SLIT SCAN
 	for(var i=0; i<dimY; i++)
@@ -76,12 +88,6 @@ var SlitScan = function( params )
 	function imageToSlitData( imagePath, data, context, dimX, dimY )
 	{
 		bDistortionLoaded = false;
-		console.log("imagePath: " + imagePath);
-
-		// $('<img src="'+ imagePath +'">').load(function(e) 
-		// {
-		// 	console.log(e);
-		// });		
 
 		var tempTex = THREE.ImageUtils.loadTexture (imagePath, undefined, function(e){
 			context.drawImage(tempTex.image, 0, 0, dimX, dimY);
@@ -173,7 +179,8 @@ var SlitScan = function( params )
 		camera: dimCamera,
 		scene: scene,
 		videoMesh: vidMesh,
-		setDepthSampleScale: setDepthSampleScale
+		setDepthSampleScale: setDepthSampleScale,
+		webcamMesh: webcamMesh
 	}
 }
 

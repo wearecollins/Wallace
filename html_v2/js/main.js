@@ -91,11 +91,11 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 	});
 	var mouthRect ;
 	var mouthPositions = {
-		"straight": new THREE.Vector3( -.02, -.085, .05 ),
-		"left": new THREE.Vector3( -.05, -.07, .05 ),
-		"right": new THREE.Vector3( .05, -.07, .05 ),
-		"up": new THREE.Vector3( 0.01, .035, .05 ),
-		"down": new THREE.Vector3( 0, -.22, .05 )
+		"straight": new THREE.Vector3( -.01, -.18, .05 ),
+		"left": new THREE.Vector3( -.07, -.15, .05 ),
+		"right": new THREE.Vector3( .05, -.15, .05 ),
+		"up": new THREE.Vector3( -0.0, -.1, .05 ),
+		"down": new THREE.Vector3( 0., -.25, .05 )
 	}
 
 	// videoController.setVolume(0);
@@ -117,6 +117,10 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 		scene.add( light );
 		scene.add( group );	
 
+		var tempPixels = [255,255,255,255];
+		var tempTexture = new THREE.DataTexture( new Uint8Array(tempPixels), 1, 1, THREE.RGBAFormat);
+		tempTexture.minFilter = THREE.NearestFilter;
+		tempTexture.needsUpdate = true;
 
 		// MESHES
 		screenPlane = new THREE.PlaneBufferGeometry(1,1, 12, 7 );
@@ -131,18 +135,15 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 		scene.add(backgroundMesh);
 
 		slitMesh = new THREE.Mesh(screenPlane, new THREE.MeshBasicMaterial( {
-			map: THREE.ImageUtils.loadTexture("images/blank.png"),
+			map: tempTexture,
 			color: 0xffffff,
 			side: 2,
 			transparent: true
 		}) );
 		slitScene.add(slitMesh);
 
-		// mouthRect = new THREE.Mesh(
-		// 	new THREE.PlaneBufferGeometry(.15, .15), 
-			// new THREE.MeshBasicMaterial( {color: "red", side: 2} ));
 		mouthRect = new THREE.Mesh(
-			new THREE.PlaneBufferGeometry(.1, .2),
+			new THREE.PlaneBufferGeometry(.125, .225),
 			new MouthMaterial( {
 				map: videoController.getVideo("straight").t,
 				aspect: 720 / 1280
@@ -176,15 +177,14 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 		});
 
 
-		backgroundWebcamMat = new BackgroundWebcamMaterial();
+		// backgroundWebcamMat = new BackgroundWebcamMaterial();
 		cameraTexture = new CameraTexture({
 			width: tracking.width,
 			height: tracking.height,
 			onGetUserMedia: function(texture)
 			{
 				slitMesh.material.map = slit.texture;
-
-				backgroundWebcamMat.uniforms.map.value = texture;
+				slit.webcamMesh.material.uniforms.map.value = texture;
 			}
 		});
 
@@ -206,7 +206,6 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 		debugBox.visible = false;
 		debugFlipper.add(debugBox);
 		scene.add(debugFlipper);
-		// debugBox.visible = false;
 
 		//RESIZE THE SCREEN PLANES
 		scaleVidMesh();
@@ -218,7 +217,7 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 			if (!HAS_PLAYED ){
 				HAS_PLAYED = true;
 				videoController.setVideoPosition(0);
-				videoController.setVolume(1);// videoController.muteVideo? 0 : 1.0);
+				videoController.setVolume( videoController.muteVideo? 0 : 1.0);
 			}
 
 			if ( !wasPlaying ){
@@ -265,16 +264,15 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 			left: 10,
 			top: 100
 		})
-		
 	}
 
 	/**
 	 * [update description]
 	 * @return {[type]} [description]
 	 */
-	// var backgroundTime = {start:6.386, end: 16.124};
-	var backgroundTime = {start:162.386, end: 191.124};
-	var bTransitioningBackground = false;
+	var backgroundTime = {start:5, end: 30};
+	// var backgroundTime = {start:162.386, end: 191.124};
+	var bTransitioningBackground = false, bFadeInWebcam = true;
 
 	function update()
 	{
@@ -282,8 +280,6 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 		stats.update();
 
 		if ( videoController.videoToLoadCount != 0 ) return;
-		
-		//
 
 		//this just updates the webcam texture(for debugging), not the canvas
 		cameraTexture.update();
@@ -297,7 +293,7 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 
 
 		depthSampleScale = Math.max(Math.min(1, lastDelta.distanceTo( tracking.delta ) * 50.), depthSampleScale * .985);
-		slit.setDepthSampleScale( depthSampleScale );
+		slit.setDepthSampleScale( depthSampleScale * .5 + .5 );
 		lastDelta.copy( tracking.delta );
 
 		getCurrentVideo();
@@ -306,40 +302,37 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 
 		//webcam backgroun
 		var vTime = videoController.vidPosition.position * videoController.videoDuration;
-		var bWebcamBackground = false;//( vTime >= backgroundTime.start && vTime < backgroundTime.end );
+		var bWebcamBackground = ( vTime >= backgroundTime.start && vTime < backgroundTime.end );
 		if(bWebcamBackground)
 		{
-
-			if(backgroundMesh.material !== backgroundWebcamMat)
+			if(bFadeInWebcam)
 			{
-				// backgroundWebcamMat.map = cameraTexture.texture;
-				backgroundMesh.material = backgroundWebcamMat;	
-
-				backgroundWebcamMat.uniforms.color.value.setRGB(0,0,0);
-				new TWEEN.Tween( backgroundWebcamMat.uniforms.color.value )
+				slit.webcamMesh.material.uniforms.color.value.setRGB(0,0,0);
+				new TWEEN.Tween( slit.webcamMesh.material.uniforms.color.value )
 					.to( { r: 1, g: 1, b: 1 }, 500 )
+					.onUpdate(function(k){
+						slit.webcamMesh.material.uniforms.opacity.value = k;
+					})
 					.start();
+
+				bFadeInWebcam = false;
 			}
+			
 			bTransitioningBackground = true;
 		}
 		else
 		{
 			if(bTransitioningBackground)
 			{
+				bFadeInWebcam = true;
 				bTransitioningBackground = false;
 
-				new TWEEN.Tween( backgroundWebcamMat.uniforms.color.value )
+				new TWEEN.Tween( slit.webcamMesh.material.uniforms.color.value )
 					.to( { r: 0, g: 0, b: 0 }, 250 )
-					.onComplete(function()
-					{
-						backgroundMesh.material = backgroundVideoMat;
-						backgroundVideoMat.color.setRGB(0,0,0);
-						new TWEEN.Tween( backgroundVideoMat.color )
-							.to( { r: 1, g: 1, b: 1 }, 250 )
-							.start();
+					.onUpdate(function(k){
+						slit.webcamMesh.material.uniforms.opacity.value = 1. - k;
 					})
 					.start();
-				// backgroundMesh.material = backgroundVideoMat;	
 			}
 		}
 	}
@@ -348,7 +341,7 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 	{
 		var samplePos = debugBox.position;
 
-		var leftRightThreshold = 110, upThreshold = 30, downThreshold = 45;
+		var leftRightThreshold = 110, upThreshold = 25, downThreshold = 35;
 		if(samplePos.x < -leftRightThreshold)
 		{
 			debugBox.material.color.set(0xFF0000);
