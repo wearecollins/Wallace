@@ -43,9 +43,6 @@ var AzealiaVideoObject = function(params, useWebGL)
 
 	this.vidAspect = params.aspect || 1280 / 720;
 
-	this.verbose = params.verbose || false;
-
-
 	this.vidPosition = {position: 0.0001};
 }
 
@@ -56,28 +53,23 @@ MirrorVideoController = function(params)
 	this.doubleWide = params.doubleWide || false;
 	this.onSubtitlesMade = params.subtitleHander || undefined;
 
+	this.verbose = params.verbose || false;
+
+
 	var fmt = supports_h264_baseline_video() !== "" ? ".mp4" : ".webm";
 
 	if ( iOS ){
 		fmt = "_mobile" + fmt;
 	}
 
-	/**
-AB_1_Down_1_1.mp4
-AB_1_Left_1_1_1.mp4
-AB_1_Right_1.mp4
-AB_1_Straight_1.mp4
-AB_1_Up.mp4
-	 */
-
-	if ( this.backgroundRendered ){
-		this.videoFiles = params.videoFiles || {
-			"01": 	{path: 	"../WALLACE_TESTS/01_STRAIGHT_WEIRD_BLEND" + fmt},
-			"02": {path: 	"../WALLACE_TESTS/02_UP_DOWN_BLEND" + fmt},
-			"03": {path: 	"../WALLACE_TESTS/03_LEFT_RIGHT_BLEND" + fmt},
-			"04": {path: 	"../WALLACE_TESTS/04_UL_UR_BLEND" + fmt},
-		};
-	} else if ( !this.doubleWide ){
+	// if ( this.backgroundRendered ){
+	// 	this.videoFiles = params.videoFiles || {
+	// 		"01": 	{path: 	"../WALLACE_TESTS/01_STRAIGHT_WEIRD_BLEND" + fmt},
+	// 		"02": {path: 	"../WALLACE_TESTS/02_UP_DOWN_BLEND" + fmt},
+	// 		"03": {path: 	"../WALLACE_TESTS/03_LEFT_RIGHT_BLEND" + fmt},
+	// 		"04": {path: 	"../WALLACE_TESTS/04_UL_UR_BLEND" + fmt},
+	// 	};
+	// } else if ( !this.doubleWide ){
 		this.videoFiles = params.videoFiles || {
 			"BackgroundVideo": {path: "http://storage.googleapis.com/wallace_videos/AB_BACKGROUND" + fmt},
 			"01": {path: 	"http://storage.googleapis.com/wallace_videos/AB_1_Straight_1_1" + fmt},
@@ -86,24 +78,22 @@ AB_1_Up.mp4
 			"04": {path: 	"http://storage.googleapis.com/wallace_videos/AB_1_Left_1_2" + fmt},
 			"05": {path: 	"http://storage.googleapis.com/wallace_videos/AB_1_Right" + fmt},
 		};
-
-		/*
 		
-		"01": {path: 	"http://storage.googleapis.com/wallace_videos/AB_1_Straight_1_1" + fmt},
-			"02": {path: 	"http://storage.googleapis.com/wallace_videos/AB_1_Up" + fmt},	
-			"03": {path: 	"http://storage.googleapis.com/wallace_videos/AB_1_Down_1" + fmt},
-			"04": {path: 	"http://storage.googleapis.com/wallace_videos/AB_1_Left_1_2" + fmt},
-			"05": {path: 	"http://storage.googleapis.com/wallace_videos/AB_1_Right" + fmt},
-		 */
-	} else {
-		this.videoFiles = params.videoFiles || {
-			"BackgroundVideo": {path: "../WALLACE_TESTS/BG_PREVIEW_07_1" + fmt},
-			"01": 	{path: 	"../WALLACE_TESTS/01_STRAIGHT_WEIRD" + fmt},
-			"02": {path: 	"../WALLACE_TESTS/02_UP_DOWN" + fmt},
-			"03": {path: 	"../WALLACE_TESTS/03_LEFT_RIGHT" + fmt},
-			"04": {path: 	"../WALLACE_TESTS/04_UL_UR" + fmt},
-		};
-	}
+	// 	"01": {path: 	"http://storage.googleapis.com/wallace_videos/AB_1_Straight_1_1" + fmt},
+	// 		"02": {path: 	"http://storage.googleapis.com/wallace_videos/AB_1_Up" + fmt},	
+	// 		"03": {path: 	"http://storage.googleapis.com/wallace_videos/AB_1_Down_1" + fmt},
+	// 		"04": {path: 	"http://storage.googleapis.com/wallace_videos/AB_1_Left_1_2" + fmt},
+	// 		"05": {path: 	"http://storage.googleapis.com/wallace_videos/AB_1_Right" + fmt},
+		 
+	// } else {
+	// 	this.videoFiles = params.videoFiles || {
+	// 		"BackgroundVideo": {path: "../WALLACE_TESTS/BG_PREVIEW_07_1" + fmt},
+	// 		"01": 	{path: 	"../WALLACE_TESTS/01_STRAIGHT_WEIRD" + fmt},
+	// 		"02": {path: 	"../WALLACE_TESTS/02_UP_DOWN" + fmt},
+	// 		"03": {path: 	"../WALLACE_TESTS/03_LEFT_RIGHT" + fmt},
+	// 		"04": {path: 	"../WALLACE_TESTS/04_UL_UR" + fmt},
+	// 	};
+	// }
 
 	// 1 - straight / up / down (has audio)
 	// 2 - left / right / upperLeft (no audio)
@@ -329,10 +319,12 @@ MirrorVideoController.prototype.update = function()
 			if ( this.videos[i].texture ) this.videos[i].texture.needsUpdate = true;
 
 
-			if( i != "01" && this.videos["01"].video.readyState)
+			if( i != "BackgroundVideo" && this.videos["BackgroundVideo"].video.readyState)
 			{
-				// if ( this.videos[i].video.currentTime != this.videos["01"].video.currentTime)
-				// 	this.videos[i].video.currentTime = this.videos["01"].video.currentTime;
+				if ( this.videos[i].video.currentTime != this.videos["BackgroundVideo"].video.currentTime)
+				{
+					// this.videos[i].video.currentTime = this.videos["BackgroundVideo"].video.currentTime;
+				}
 			} else {
 				this.vidPosition.position = this.videos[i].video.currentTime / this.videoDuration;
 			}
@@ -446,12 +438,13 @@ MirrorVideoController.prototype.loadVideo = function ( name, url, type, onLoadCo
 
 	if(this.verbose)
 	{
+		console.log( "verbose" );
 
-		var otherListeners = [ "canplay", "playing ", "waiting", "ended", "loadedmetadata", "suspend","stalled" ,"emptied"]
-		for(var i in otherListeners)
-		{
-			videoElement.addEventListener(otherListeners[i], function() {
-			   console.log( "\n" + name + " " + otherListeners[i] + " \n" );
+		var otherListeners = [ "canplay", "playing ", "waiting", "ended", "loadedmetadata", "suspend","stalled","emptied"]
+		for(var i=0; i<otherListeners.length; i++)
+		{	
+			videoElement.addEventListener(otherListeners[i], function(e) {
+			   console.log( e.target.id, e.type );
 			}, false);
 		}
 	}

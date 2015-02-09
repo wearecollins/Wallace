@@ -87,7 +87,8 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 	var videoController = new MirrorVideoController({
 		muteVideo: muteVideo,
 		useBackground: useBackground,
-		subtitleHander: addSubtitles
+		subtitleHander: addSubtitles,
+		verbose: true
 	});
 	var mouthRect ;
 	var mouthPositions = {
@@ -217,7 +218,7 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 			if (!HAS_PLAYED ){
 				HAS_PLAYED = true;
 				videoController.setVideoPosition(0);
-				videoController.setVolume( videoController.muteVideo? 0 : 1.0);
+				videoController.setVolume(1);// videoController.muteVideo? 0 : 1.0);
 			}
 
 			if ( !wasPlaying ){
