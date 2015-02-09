@@ -28,7 +28,7 @@ var CameraTexture = function(params)
 
 CameraTexture.prototype.update = function()
 {
-	if (this.video.readyState === this.video.HAVE_ENOUGH_DATA) {
+	if (this.video && this.video.readyState === this.video.HAVE_ENOUGH_DATA) {
 		this.texture.needsUpdate = true;
 	}
 }

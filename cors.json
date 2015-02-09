@@ -1,0 +1,8 @@
+[
+    {
+      "origin": ["wallace-01.appspot.com", "localhost", "*"],
+      "responseHeader": ["video/mp4"],
+      "method": ["GET", "HEAD", "PUT", "DELETE"],
+      "maxAgeSeconds": 36000
+    }
+]

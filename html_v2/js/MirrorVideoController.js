@@ -79,13 +79,22 @@ AB_1_Up.mp4
 		};
 	} else if ( !this.doubleWide ){
 		this.videoFiles = params.videoFiles || {
-			"BackgroundVideo": {path: "../WALLACE_TESTS/BG_PREVIEW_07_1" + fmt},
-			"01": {path: 	"../720p/AB_1_Straight_1" + fmt},
-			"02": {path: 	"../720p/AB_1_Up" + fmt},	
-			"03": {path: 	"../720p/AB_1_Down_1_1" + fmt},
-			"04": {path: 	"../720p/AB_1_Left_1_1_1" + fmt},
-			"05": {path: 	"../720p/AB_1_Right_1" + fmt},
+			"BackgroundVideo": {path: "http://storage.googleapis.com/wallace_videos/AB_BACKGROUND" + fmt},
+			"01": {path: 	"http://storage.googleapis.com/wallace_videos/AB_1_Straight_1_1" + fmt},
+			"02": {path: 	"http://storage.googleapis.com/wallace_videos/AB_1_Up" + fmt},	
+			"03": {path: 	"http://storage.googleapis.com/wallace_videos/AB_1_Down_1" + fmt},
+			"04": {path: 	"http://storage.googleapis.com/wallace_videos/AB_1_Left_1_2" + fmt},
+			"05": {path: 	"http://storage.googleapis.com/wallace_videos/AB_1_Right" + fmt},
 		};
+
+		/*
+		
+		"01": {path: 	"http://storage.googleapis.com/wallace_videos/AB_1_Straight_1_1" + fmt},
+			"02": {path: 	"http://storage.googleapis.com/wallace_videos/AB_1_Up" + fmt},	
+			"03": {path: 	"http://storage.googleapis.com/wallace_videos/AB_1_Down_1" + fmt},
+			"04": {path: 	"http://storage.googleapis.com/wallace_videos/AB_1_Left_1_2" + fmt},
+			"05": {path: 	"http://storage.googleapis.com/wallace_videos/AB_1_Right" + fmt},
+		 */
 	} else {
 		this.videoFiles = params.videoFiles || {
 			"BackgroundVideo": {path: "../WALLACE_TESTS/BG_PREVIEW_07_1" + fmt},
@@ -259,8 +268,8 @@ MirrorVideoController.prototype.setVolume = function(value)
 			this.videos[v].video.volume = value;
 		}
 	} else {
-			this.videos['01'].video.muted = false;
-			this.videos['01'].video.volume = value;
+			this.videos['BackgroundVideo'].video.muted = false;
+			this.videos['BackgroundVideo'].video.volume = value;
 	}
 };
 
@@ -353,7 +362,7 @@ MirrorVideoController.prototype.loadVideos = function (fmt)
 	// var files = [];
 	for( var id in this.videoFiles )
 	{
-		this.loadVideo( id, this.videoFiles[id].path, fmt == "mp4" ? "video/mp4" : "video/webm");
+		this.loadVideo( id, this.videoFiles[id].path, "video/mp4" );//fmt == "mp4" ? "video/mp4" : "video/webm");
 		//this.videoToLoadCount++;
 	}
 	// videoLoader.addFiles(files);
@@ -405,13 +414,19 @@ MirrorVideoController.prototype.loadVideo = function ( name, url, type, onLoadCo
 	videoElement.setAttribute("type", type);
 	videoElement.setAttribute("preload", "auto");
 	
-	if(this.muteVideo == true || name != "01")
+	if(this.muteVideo == true || name != "BackgroundVideo")
 	{
 		videoElement.setAttribute("muted", "");
 	}
 
 	videoElement.setAttribute("id", name);
 	var source = document.createElement('source');
+	source.setAttribute('crossorigin', 'anonymous');
+	videoElement.setAttribute('crossorigin', 'anonymous');
+
+	source.setAttribute('crossOrigin', 'anonymous');
+	videoElement.setAttribute('crossOrigin', 'anonymous');
+
 	source.src = url;
 	videoElement.load();
 	videoElement.appendChild(source);

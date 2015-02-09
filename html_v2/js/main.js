@@ -7,6 +7,8 @@ var HAS_PLAYED 	= false;
 var iOS = ( navigator.userAgent.match(/(iPad|iPhone|iPod)/g) ? true : false );
 
 $(window).bind("load", function() {
+	THREE.ImageUtils.crossOrigin = '';
+	
 	var debug = getQuerystring('debug') == "true";
 	var useStats = getQuerystring('useStats') == "true";
 	var muteVideo = getQuerystring('mute') == "true";
@@ -129,7 +131,7 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 		scene.add(backgroundMesh);
 
 		slitMesh = new THREE.Mesh(screenPlane, new THREE.MeshBasicMaterial( {
-			map: THREE.ImageUtils.loadTexture("images/face.png"),
+			map: THREE.ImageUtils.loadTexture("images/blank.png"),
 			color: 0xffffff,
 			side: 2,
 			transparent: true
@@ -304,7 +306,7 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 
 		//webcam backgroun
 		var vTime = videoController.vidPosition.position * videoController.videoDuration;
-		var bWebcamBackground = ( vTime >= backgroundTime.start && vTime < backgroundTime.end );
+		var bWebcamBackground = false;//( vTime >= backgroundTime.start && vTime < backgroundTime.end );
 		if(bWebcamBackground)
 		{
 
