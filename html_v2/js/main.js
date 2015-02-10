@@ -266,8 +266,9 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 	 * [update description]
 	 * @return {[type]} [description]
 	 */
-	// var webcamBackgroundTime = {start:5, end: 30};
-	var webcamBackgroundTime = {start:162.386, end: 191.124};
+	// var webcamBackgroundTime1 = {start:4, end: 110};
+	var webcamBackgroundTime1 = {start:119, end: 146};
+	var webcamBackgroundTime2 = {start:162.386, end: 191.124};
 	var bTransitioningBackground = false, bFadeInWebcam = true;
 
 	function update()
@@ -298,13 +299,24 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 
 		//webcam backgroun
 		var vTime = videoController.vidPosition.position * videoController.videoDuration;
-		var bWebcamBackground = ( vTime >= webcamBackgroundTime.start && vTime < webcamBackgroundTime.end );
-		if(bWebcamBackground)
+		var bWebcamBackground1 = vTime >= webcamBackgroundTime1.start && vTime < webcamBackgroundTime1.end;
+		var bWebcamBackground2 = vTime >= webcamBackgroundTime2.start && vTime < webcamBackgroundTime2.end;
+
+		if( bWebcamBackground1 || bWebcamBackground2 )
 		{
-			console.log("bWebcamBackground");
+			slit.webcamMesh.material.uniforms.time.value = clock.getElapsedTime();
+
 			if(bFadeInWebcam)
 			{
-				console.log( "if(bFadeInWebcam) ");
+				if(bWebcamBackground1)
+				{
+					slit.setDistortion(1);
+				}
+
+				else if(bWebcamBackground2)
+				{
+					slit.setDistortion(2);
+				}
 
 				slit.webcamMesh.visible = true;
 				slit.webcamMesh.material.uniforms.color.value.setRGB(0,0,0);
@@ -334,6 +346,7 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 					})
 					.onComplete(function(e){
 						slit.webcamMesh.visible = false;
+						slit.setDistortion(0);
 					})
 					.start();
 			}

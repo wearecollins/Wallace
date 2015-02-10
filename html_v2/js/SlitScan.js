@@ -82,7 +82,7 @@ var SlitScan = function( params )
 	canvas.height = dimY;
 	canvasContext = canvas.getContext('2d');
 
-	var distortionData = [];
+
 
 
 	function imageToSlitData( imagePath, data, context, dimX, dimY )
@@ -104,7 +104,19 @@ var SlitScan = function( params )
 		});
 	}
 
-	imageToSlitData("images/hr_noise.png", distortionData, canvasContext, dimX, dimY);
+	var distortionNoise = [], distortionGradients = [], distortionBoobs = [];
+
+	imageToSlitData("images/hr_noise.png", distortionNoise, canvasContext, dimX, dimY);
+	imageToSlitData("images/barGradients.jpeg", distortionGradients, canvasContext, dimX, dimY);
+	imageToSlitData("images/boobs.jpg", distortionBoobs, canvasContext, dimX, dimY);
+
+	var distortionData;// = distortionNoise;
+
+	setDistortion(0);
+	
+
+	// imageToSlitData("images/fluid.jpg", distortionData, canvasContext, dimX, dimY);
+	
 
 
 	function sampleDepth(x, y)
@@ -166,6 +178,23 @@ var SlitScan = function( params )
 		depthSampleScale = val;
 	}
 
+	function setDistortion( distortionType )
+	{
+		console.log( this );
+		if(distortionType == 0)
+		{
+			distortionData = distortionNoise;
+		}
+		else if(distortionType == 1)
+		{
+			distortionData = distortionGradients;
+		}
+		else if(distortionType == 2)
+		{
+			distortionData = distortionBoobs;
+		}
+	}
+
 
 	return {
 		texture: dataTexture,
@@ -180,7 +209,8 @@ var SlitScan = function( params )
 		scene: scene,
 		videoMesh: vidMesh,
 		setDepthSampleScale: setDepthSampleScale,
-		webcamMesh: webcamMesh
+		webcamMesh: webcamMesh,
+		setDistortion: setDistortion
 	}
 }
 
