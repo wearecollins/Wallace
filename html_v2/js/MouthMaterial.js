@@ -13,9 +13,11 @@ var MouthMaterial = function(params)
 
 		uniforms: {
 			map: {type: 't', value: params.map },
-			aspect: {type: 'f', value: params.aspect || 0.5625},
+			aspect: {type: 'f', value: params.aspect || 0.5625}, // 720 / 1280
 			screenAspect: {type: 'f', value: params.screenAspect || (window.innerHeight / window.innerWidth)},
-			opacity: {type: 'f', value: params.opacity !== undefined ? params.opacity : 1. }
+			opacity: {type: 'f', value: params.opacity !== undefined ? params.opacity : 1. },
+			w: {type: 'f', value: 1 },
+			h: {type: 'f', value: 1 }
 		},
 
 		attributes: {
@@ -24,6 +26,9 @@ var MouthMaterial = function(params)
 		vertexShader: [
 		'uniform float aspect;',
 		'uniform float screenAspect;',
+		'uniform float w;',
+		'uniform float h;',
+
 		'varying vec2 mUv;',
 		'varying vec2 vUv;',
 
@@ -34,21 +39,22 @@ var MouthMaterial = function(params)
 		'void main() {',
 		'	gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );',
 		'	mUv = uv;',
-		'	vUv.x = mapLinear(gl_Position.x, -1., 1., 0., 1.);',
-		'	vUv.y = mapLinear(gl_Position.y, - aspect / screenAspect, aspect / screenAspect, 0.5, 1.);',
+		'	vUv.x = mapLinear(gl_Position.x, -w, w, 0., 1.);',
+		'	vUv.y = mapLinear(gl_Position.y, -h, h, .5, 1.);',
 
 		'}'].join('\n'),
 
 		fragmentShader: [
 		'uniform sampler2D map;',
 		'uniform float opacity;',
+
 		'varying vec2 mUv;',
 		'varying vec2 vUv;',
 
 		'void main()',
 		'{',
-		'	float alpha =  opacity * (1. - pow(length( (mUv*2.-1.) ), 2.));',
-		'	gl_FragColor = texture2D(map, vUv) * vec4(1., 1., 1. , alpha);',
+		'	float alpha = opacity * (1. - pow(length( (mUv*2.-1.) ), 2.));',
+		'	gl_FragColor = texture2D(map, vUv) * vec4(1., 1., 1., alpha);',
 		'}'
 		].join('\n'),
 

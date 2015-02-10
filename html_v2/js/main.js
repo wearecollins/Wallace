@@ -124,7 +124,7 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 		screenPlane = new THREE.PlaneBufferGeometry(1,1, 12, 7 );
 
 		backgroundVideoMat = new THREE.MeshBasicMaterial( {
-			map: videoController.getVideo("background").t, //THREE.ImageUtils.loadTexture("images/face.png"),
+			map: videoController.getVideo("background").t,
 			color: 0xFFFFFF,
 			side: 2 
 		});
@@ -159,6 +159,8 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 		barMeshes[1] = new THREE.Mesh( barGeom, barMat );
 		barMeshes[0].position.z = 3;
 		barMeshes[1].position.z = 3;
+		barMeshes[0].visible = false;
+		barMeshes[1].visible = false;
 		slitScene.add( barMeshes[0] );
 		slitScene.add( barMeshes[1] );
 
@@ -410,20 +412,24 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 
 	function scaleVidMesh()
 	{
-		var h = -window.innerWidth / vidAspect;
+		var w = window.innerWidth;
+		var h = window.innerHeight;
+		var wAspect = window.innerWidth / window.innerHeight;
 
-		var yPos = 0;
+		if(wAspect >= vidAspect)
+		{
+			w *= vidAspect / wAspect;
+		}
+		else
+		{
+			h *= wAspect / vidAspect;
+		}
 
-		slitMesh.scale.set( window.innerWidth, h, 1);
-		backgroundMesh.scale.set( window.innerWidth, h, 1);
+		mouthRect.material.uniforms.w.value = w / Math.max(1., window.innerWidth);
+		mouthRect.material.uniforms.h.value = h / Math.max(1., window.innerHeight);
 
-		mouthRect.material.uniforms.screenAspect.value = window.innerHeight / window.innerWidth;
-
-		var bar_h = window.innerHeight - (-h);
-		barMeshes[0].scale.set( window.innerWidth, -bar_h, 1);
-		barMeshes[0].position.y = -window.innerHeight/2.0;
-		barMeshes[1].scale.set( window.innerWidth, -bar_h, 1);
-		barMeshes[1].position.y = window.innerHeight/2.0;
+		slitMesh.scale.set( w, -h, 1);
+		backgroundMesh.scale.set( w, -h, 1);
 	}
 
 	function resetCamera()
@@ -501,7 +507,6 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 	{
 			
 	}
-
 
 	function onKeyDown( event )
 	{
