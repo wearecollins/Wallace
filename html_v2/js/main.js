@@ -19,7 +19,7 @@ $(window).bind("load", function() {
 
 function APP( _useStats, _debug, _muteVideo, _auto)
 {
-	var muteVideo = _muteVideo || !PLAYING;
+	var muteVideo = _muteVideo;// || !PLAYING;
 	var auto = _auto || false;
 
 	var barMeshes = [];
@@ -82,7 +82,7 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 
 	// var motionThresholds = new MotionThresholds();
 	var videoController = new MirrorVideoController({
-		muteVideo: muteVideo,
+		muteVideo: muteVideo || !PLAYING,
 		useBackground: useBackground,
 		subtitleHander: addSubtitles,
 		verbose: false
@@ -210,7 +210,7 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 			if (!HAS_PLAYED ){
 				HAS_PLAYED = true;
 				videoController.setVideoPosition(0);
-				videoController.setVolume( 1. );// videoController.muteVideo? 0 : 1.0);
+				videoController.setVolume( muteVideo? 0 : 1.0);
 			}
 
 			if ( !wasPlaying ){
