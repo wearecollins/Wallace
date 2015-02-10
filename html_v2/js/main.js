@@ -34,7 +34,7 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 
 
 
-	var debug = false;//(_debug == true)? false : false;
+	var debug = _debug;
 	var useStats = debug;//_useStats || true;
 	var frame = 0;
 

@@ -84,6 +84,7 @@ var SlitScan = function( params )
 
 
 
+	var bDistortionLoaded = false;
 
 	function imageToSlitData( imagePath, data, context, dimX, dimY )
 	{
