@@ -33,26 +33,23 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 	document.body.appendChild( container );
 
 
-	//STATS
-	var stats = new Stats();
-	stats.domElement.style.position = 'absolute';
-	stats.domElement.style.top = '10px';
-	stats.domElement.style.left = '10px';
-	container.appendChild( stats.domElement );
 
 	var debug = false;//(_debug == true)? false : false;
 	var useStats = debug;//_useStats || true;
 	var frame = 0;
 
+
+	//STATS
+	var stats; 
+
 	var vidAspect = 1280 / 720;
-	var gui, stats, renderer;
+	var renderer;
 	var mouseDown = false, mouseDragged = false;
 	var lastMouse = new THREE.Vector2(), mouse = new THREE.Vector2();
 	var lastDelta = new THREE.Vector2();
 
 
 	//basic stuff
-	var gui;
 	var camera, light, projector;
 	var clock = new THREE.Clock();
 	var scene = new THREE.Scene(), slitScene = new THREE.Scene();
@@ -118,7 +115,7 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 		scene.add( light );
 		scene.add( group );	
 
-		var tempPixels = [255,255,255,255];
+		var tempPixels = [0,0,0,255];
 		var tempTexture = new THREE.DataTexture( new Uint8Array(tempPixels), 1, 1, THREE.RGBAFormat);
 		tempTexture.minFilter = THREE.NearestFilter;
 		tempTexture.needsUpdate = true;
@@ -241,25 +238,6 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 				$("#lyrics").html("LYRICS");
 			}
 		})
-
-
-		//GUI
-		// gui = new dat.GUI();
-		// console.log(gui);
-		// container.append
-		// container.appendChild( gui.domElement );
-
-		gui = new dat.GUI({ autoPlace: false });
-
-		// var customContainer = document.getElementById('my-gui-container');
-		container.appendChild(gui.domElement);
-		var temp = $(gui.domElement);
-		temp.css({
-			position: "absolute",
-			color: "red",
-			left: 10,
-			top: 100
-		})
 	}
 
 	/**
@@ -274,7 +252,6 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 	function update()
 	{
 		frame++;
-		stats.update();
 
 		if ( videoController.videoToLoadCount != 0 ) return;
 

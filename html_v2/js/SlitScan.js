@@ -26,7 +26,7 @@ var SlitScan = function( params )
 	//SCENE AND MESH
 	var scene = new THREE.Scene();
 
-	var tempPixels = [255,255,255,255];
+	var tempPixels = [0,0,0,255];
 	var tempTexture = new THREE.DataTexture( new Uint8Array(tempPixels), 1, 1, THREE.RGBAFormat);
 	tempTexture.minFilter = THREE.NearestFilter;
 	tempTexture.needsUpdate = true;
