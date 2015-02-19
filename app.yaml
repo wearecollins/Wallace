@@ -56,9 +56,9 @@ handlers:
   mime_type: video/mp4
   expiration: "7d"
 
-- url: /(.*\.(gif|png|jpg|mp4|vtt))$
+- url: /(.*\.(gif|png|jpg|jpeg|mp4|vtt))$
   static_files: html_v2/\1
-  upload: html_v2/.*\.(gif|png|jpg|mp4)$
+  upload: html_v2/.*\.(gif|png|jpg|jpeg|mp4)$
 
 - url: /(.*\.(html))$
   static_files: html_v2/\1
