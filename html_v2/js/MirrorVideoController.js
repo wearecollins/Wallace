@@ -4,6 +4,12 @@ function supports_video() {
   return !!document.createElement('video').canPlayType;
 }
 
+function supports_crossorigin() {
+  if (!supports_video()) { return false; }
+  var v = document.createElement("video");
+  return v.hasOwnProperty("crossOrigin");
+}
+
 function supports_h264_baseline_video() {
   if (!supports_video()) { return false; }
   var v = document.createElement("video");
@@ -59,8 +65,29 @@ MirrorVideoController = function(params)
 	var fmt = supports_h264_baseline_video() !== "" ? ".mp4" : ".webm";
 
 	if ( iOS ){
-		fmt = "_mobile" + fmt;
+		//fmt = "_mobile" + fmt;
 	}
+
+	this.videoFiles = params.videoFiles || {
+		"BackgroundVideo": {path: "../720p/AB_BACKGROUND" + fmt},
+		"01": {path: 	"../720p/AB_1_Straight_1_1" + fmt},
+		"02": {path: 	"../720p/AB_1_Up" + fmt},	
+		"03": {path: 	"../720p/AB_1_Down_1" + fmt},
+		"04": {path: 	"../720p/AB_1_Left_1_2" + fmt},
+		"05": {path: 	"../720p/AB_1_Right" + fmt},
+	};
+
+	if ( supports_crossorigin() ){
+
+		this.videoFiles = params.videoFiles || {
+			"BackgroundVideo": {path: "http://storage.googleapis.com/wallace_videos/AB_BACKGROUND" + fmt},
+			"01": {path: 	"http://storage.googleapis.com/wallace_videos/AB_1_Straight_1_1" + fmt},
+			"02": {path: 	"http://storage.googleapis.com/wallace_videos/AB_1_Up" + fmt},	
+			"03": {path: 	"http://storage.googleapis.com/wallace_videos/AB_1_Down_1" + fmt},
+			"04": {path: 	"http://storage.googleapis.com/wallace_videos/AB_1_Left_1_2" + fmt},
+			"05": {path: 	"http://storage.googleapis.com/wallace_videos/AB_1_Right" + fmt},
+		};
+	} else {
 		this.videoFiles = params.videoFiles || {
 			"BackgroundVideo": {path: "../720p/AB_BACKGROUND" + fmt},
 			"01": {path: 	"../720p/AB_1_Straight_1_1" + fmt},
@@ -69,39 +96,7 @@ MirrorVideoController = function(params)
 			"04": {path: 	"../720p/AB_1_Left_1_2" + fmt},
 			"05": {path: 	"../720p/AB_1_Right" + fmt},
 		};
-
-	// if ( this.backgroundRendered ){
-	// 	this.videoFiles = params.videoFiles || {
-	// 		"01": 	{path: 	"../WALLACE_TESTS/01_STRAIGHT_WEIRD_BLEND" + fmt},
-	// 		"02": {path: 	"../WALLACE_TESTS/02_UP_DOWN_BLEND" + fmt},
-	// 		"03": {path: 	"../WALLACE_TESTS/03_LEFT_RIGHT_BLEND" + fmt},
-	// 		"04": {path: 	"../WALLACE_TESTS/04_UL_UR_BLEND" + fmt},
-	// 	};
-	// } else if ( !this.doubleWide ){
-		// this.videoFiles = params.videoFiles || {
-		// 	"BackgroundVideo": {path: "http://storage.googleapis.com/wallace_videos/AB_BACKGROUND" + fmt},
-		// 	"01": {path: 	"http://storage.googleapis.com/wallace_videos/AB_1_Straight_1_1" + fmt},
-		// 	"02": {path: 	"http://storage.googleapis.com/wallace_videos/AB_1_Up" + fmt},	
-		// 	"03": {path: 	"http://storage.googleapis.com/wallace_videos/AB_1_Down_1" + fmt},
-		// 	"04": {path: 	"http://storage.googleapis.com/wallace_videos/AB_1_Left_1_2" + fmt},
-		// 	"05": {path: 	"http://storage.googleapis.com/wallace_videos/AB_1_Right" + fmt},
-		// };
-		
-	// 	"01": {path: 	"http://storage.googleapis.com/wallace_videos/AB_1_Straight_1_1" + fmt},
-	// 		"02": {path: 	"http://storage.googleapis.com/wallace_videos/AB_1_Up" + fmt},	
-	// 		"03": {path: 	"http://storage.googleapis.com/wallace_videos/AB_1_Down_1" + fmt},
-	// 		"04": {path: 	"http://storage.googleapis.com/wallace_videos/AB_1_Left_1_2" + fmt},
-	// 		"05": {path: 	"http://storage.googleapis.com/wallace_videos/AB_1_Right" + fmt},
-		 
-	// } else {
-	// 	this.videoFiles = params.videoFiles || {
-	// 		"BackgroundVideo": {path: "../WALLACE_TESTS/BG_PREVIEW_07_1" + fmt},
-	// 		"01": 	{path: 	"../WALLACE_TESTS/01_STRAIGHT_WEIRD" + fmt},
-	// 		"02": {path: 	"../WALLACE_TESTS/02_UP_DOWN" + fmt},
-	// 		"03": {path: 	"../WALLACE_TESTS/03_LEFT_RIGHT" + fmt},
-	// 		"04": {path: 	"../WALLACE_TESTS/04_UL_UR" + fmt},
-	// 	};
-	// }
+	}
 
 	// 1 - straight / up / down (has audio)
 	// 2 - left / right / upperLeft (no audio)

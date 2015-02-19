@@ -4,6 +4,8 @@ var LYRICS_ON 	= false;
 var PLAYING		= false;
 var HAS_PLAYED 	= false;
 
+// this should change to a more general mobile detection
+// maybe "supports WebGL?"
 var iOS = ( navigator.userAgent.match(/(iPad|iPhone|iPod)/g) ? true : false );
 
 $(window).bind("load", function() {
