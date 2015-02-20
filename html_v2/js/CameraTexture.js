@@ -1,6 +1,23 @@
 //CameraTexture.js
 //
 
+/**
+  compatibility.getUserMedia({video: true}, function(stream) {
+                    try {
+                        video.src = compatibility.URL.createObjectURL(stream);
+                    } catch (error) {
+                        video.src = stream;
+                    }
+                    setTimeout(function() {
+                            video.play();
+                        }, 500);
+                }, function (error) {
+                    $('#canvas').hide();
+                    $('#log').hide();
+                    $('#no_rtc').html('<h4>WebRTC not available.</h4>');
+                    $('#no_rtc').show();
+                });
+ */
 var CameraTexture = function(params)
 {
 	this.texture = undefined;
@@ -11,6 +28,7 @@ var CameraTexture = function(params)
 	this.height = 240;
 
 	this.onGetUserMedia = function(e){};
+	this.onGetUserMediaFail = function(e){console.log( e, "onGetUserMediaFail... no camera!" );}
 
 	for(var i in params)	this[i] = params[i];
 
@@ -70,10 +88,9 @@ CameraTexture.prototype.init = function()
 
 		this.onGetUserMedia(this.texture);
 
-	}).bind(this), function() {
-		console.log( "no camera" );
-		//insertAltVideo(video);
-	});
+	}).bind(this),
+	this.onGetUserMediaFail
+	);
 }
 
 

@@ -1,8 +1,14 @@
+//TODO:
+//	confirm that touch input works
+//
+
+
 var app;
 
 var LYRICS_ON 	= false;
 var PLAYING		= false;
 var HAS_PLAYED 	= false;
+var HAS_WEBCAM = false;
 
 // this should change to a more general mobile detection
 // maybe "supports WebGL?"
@@ -34,8 +40,6 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 	container.style.top = '0px';
 	document.body.appendChild( container );
 
-
-
 	var debug = _debug;
 	var useStats = debug;//_useStats || true;
 	var frame = 0;
@@ -46,8 +50,7 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 
 	var vidAspect = 1280 / 720;
 	var renderer;
-	var mouseDown = false, mouseDragged = false;
-	var lastMouse = new THREE.Vector2(), mouse = new THREE.Vector2();
+	var mouse = new THREE.Vector2();
 	var lastDelta = new THREE.Vector2();
 
 
@@ -106,7 +109,7 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 	
 	// camera
 	var webcam;
-	var cameraTexture, slit, tracking, debugBox, azealiaMesh, depthSampleScale = 0;
+	var cameraTexture, slit, tracking, videoSelectionBox, azealiaMesh, depthSampleScale = 0;
 
 	function setup() 
 	{
@@ -179,29 +182,36 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 		});
 
 
+				slitMesh.material.map = slit.texture;
+
 		// backgroundWebcamMat = new BackgroundWebcamMaterial();
 		cameraTexture = new CameraTexture({
 			width: tracking.width,
 			height: tracking.height,
 			onGetUserMedia: function(texture)
 			{
-				slitMesh.material.map = slit.texture;
 				slit.webcamMesh.material.uniforms.map.value = texture;
+				HAS_WEBCAM = true;
+			},
+			onGetUserMedia: function(texture)
+			{
+				slit.webcamMesh.material.uniforms.map.value = texture;
+				HAS_WEBCAM = true;
 			}
 		});
 	
 		//TRACKING DEBGUG
 		var debugFlipper = new THREE.Object3D();
 		debugFlipper.scale.y = -1;
-		debugBox = new THREE.Mesh(new THREE.PlaneBufferGeometry( 400,400), new THREE.MeshBasicMaterial( {
+		videoSelectionBox = new THREE.Mesh(new THREE.PlaneBufferGeometry( 400,400), new THREE.MeshBasicMaterial( {
 			transparent: true,
 			opacity: .4,
 			map: THREE.ImageUtils.loadTexture("images/face.png"),
 			side: 2
 		} ) );
-		debugBox.scale.set(-1, 1, 1);
-		debugBox.visible = false;
-		debugFlipper.add(debugBox);
+		videoSelectionBox.scale.set(-1, 1, 1);
+		videoSelectionBox.visible = debug;
+		debugFlipper.add(videoSelectionBox);
 		scene.add(debugFlipper);
 
 		//RESIZE THE SCREEN PLANES
@@ -259,18 +269,30 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 
 		if ( videoController.videoToLoadCount != 0 ) return;
 
-		//this just updates the webcam texture(for debugging), not the canvas
-		cameraTexture.update();
-		// slit.setTexture(cameraTexture.texture);
+		var delta = new THREE.Vector3();
+
 		slit.update();
-		tracking.update(cameraTexture.getData(), cameraTexture.width, cameraTexture.height );
 
-		debugBox.setRotationFromAxisAngle({x:0,y:0,z:1}, tracking.delta.x  *.25 );
-		debugBox.position.x = tracking.delta.x * -100;	
-		debugBox.position.y = tracking.delta.y * -150;	
+		if(HAS_WEBCAM)
+		{
+			//this just updates the webcam texture(for debugging), not the canvas
+			cameraTexture.update();
+			tracking.update(cameraTexture.getData(), cameraTexture.width, cameraTexture.height );
+			delta.copy(tracking.delta);
+		}
+		else
+		{
+			mouse.lerp( {x: 0, y: 0}, .015 );
+			delta.copy( mouse );
+			delta.x *= 3;
+		}
+
+		videoSelectionBox.setRotationFromAxisAngle({x:0,y:0,z:1}, delta.x  *.25 );
+		videoSelectionBox.position.x = delta.x * -100;	
+		videoSelectionBox.position.y = delta.y * -150;	
 
 
-		depthSampleScale = Math.max(Math.min(1, lastDelta.distanceTo( tracking.delta ) * 50.), depthSampleScale * .985);
+		depthSampleScale = Math.max(Math.min(1, lastDelta.distanceTo( delta ) * 50.), depthSampleScale * .985);
 		slit.setDepthSampleScale( depthSampleScale * .5 + .5 );
 		lastDelta.copy( tracking.delta );
 
@@ -336,31 +358,31 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 
 	function getCurrentVideo()
 	{
-		var samplePos = debugBox.position;
+		var samplePos = videoSelectionBox.position;
 
 		var leftRightThreshold = 110, upThreshold = 25, downThreshold = 35;
 		if(samplePos.x < -leftRightThreshold)
 		{
-			debugBox.material.color.set(0xFF0000);
+			videoSelectionBox.material.color.set(0xFF0000);
 			currentVideo = "left";
 		}
 		else if(samplePos.x > leftRightThreshold)
 		{
-			debugBox.material.color.set(0x0000FF);
+			videoSelectionBox.material.color.set(0x0000FF);
 			currentVideo = "right";
 		}
 		else if(samplePos.y > upThreshold)
 		{
-			debugBox.material.color.set(0x00FFFF);
+			videoSelectionBox.material.color.set(0x00FFFF);
 			currentVideo = "up";
 		}
 		else if(samplePos.y < -downThreshold)
 		{
-			debugBox.material.color.set(0xFFFF00);
+			videoSelectionBox.material.color.set(0xFFFF00);
 			currentVideo = "down";
 		}
 		else{
-			debugBox.material.color.set(0xFFFFFF);
+			videoSelectionBox.material.color.set(0xFFFFFF);
 			currentVideo = "straight";
 		}
 
@@ -401,11 +423,7 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 	 * @return {none} 
 	 */
 	function draw()
-	{
-		//draw the slits to thier render targets
-		// slits.draw();
-		// webcamslits.draw();
-		
+	{	
 		//to the background & slitShader to screen
 		renderer.render( scene, camera, null, true );
 
@@ -483,33 +501,9 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 
 	function onMouseMove( event , still )
 	{
-		mouse.set( event.x, event.y );
-
-
-		// if(mouseDown)
-		// {
-		// 	onMouseDragged( event );
-		// }
-
-		// lastMouse.set( mouse.x, mouse.y );
+		mouse.set( 1 + -2 * event.x / window.innerWidth, -1 + 2 * event.y / window.innerHeight );
 	}
-
-	function onMouseUp( event )
-	{
-		mouseDown = false;
-	}
-
-	function onMouseDown( event )
-	{
-		// event.preventDefault();
-		mouseDown = true;
-	}
-
-	function onMouseDragged( event ) 
-	{
-			
-	}
-
+	
 	function onKeyDown( event )
 	{
 			console.log(event.keyCode)
@@ -539,12 +533,7 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 		//events
 		window.addEventListener( 'resize', onWindowResize, false );
 		document.addEventListener( 'mousemove', onMouseMove, false );
-		document.addEventListener( 'mouseup', onMouseUp, false );
-		document.addEventListener( 'mousedown', onMouseDown, false );
 		document.addEventListener( "keydown", onKeyDown, false);
-
-		mouseDown = false;
-		mouseDragged = false;
 	}
 
 	function animate() {
