@@ -50,8 +50,7 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 
 	var vidAspect = 1280 / 720;
 	var renderer;
-	var mouse = new THREE.Vector2();
-	var delta = new THREE.Vector2(), lastDelta = new THREE.Vector2();
+	var mouse = new THREE.Vector2(), delta = new THREE.Vector2(), lastDelta = new THREE.Vector2();
 
 
 	//basic stuff
@@ -282,7 +281,7 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 		}
 		else
 		{
-			mouse.lerp( {x: 0, y: 0}, .015 );
+			mouse.lerp( new THREE.Vector2( 0, 0 ), .015 );
 			delta.copy( mouse );
 			delta.x *= 3;
 		}
@@ -501,19 +500,20 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 
 	function onMouseMove( event , still )
 	{
-		mouse.set( 1 + -2 * event.x / window.innerWidth, -1 + 2 * event.y / window.innerHeight );
+		// console.log( event );
+		mouse.set( 1 + -2 * event.clientX / window.innerWidth, -1 + 2 * event.clientY / window.innerHeight );
 	}
 	
 	function onKeyDown( event )
 	{
-		switch( event.keyCode )
-		{
-			case 32:
-				console.log("chill");
-				break;
-			default:
-			break;
-		}
+		console.log("chill out");
+		// switch( event.keyCode )
+		// {
+		// 	case 32:
+		// 		break;
+		// 	default:
+		// 	break;
+		// }
 	}
 
 	function rendererSetup()

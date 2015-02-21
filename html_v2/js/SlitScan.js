@@ -81,9 +81,6 @@ var SlitScan = function( params )
 	canvas.width  = dimX;
 	canvas.height = dimY;
 	canvasContext = canvas.getContext('2d');
-	console.log( canvasContext );
-
-
 
 	var bDistortionLoaded = false;
 
@@ -100,8 +97,6 @@ var SlitScan = function( params )
 				data[index] = rgbData[i] / 255;
 				index++;
 			};
-
-			console.log("data.length: ", data.length)
 
 			bDistortionLoaded = true;
 			tempTex.dispose();
@@ -129,8 +124,8 @@ var SlitScan = function( params )
 
 	function sampleDepth(x, y)
 	{
-		var depth = 0;// Math.max(0, Math.floor(distortionData[(y * dimX + x) ] * (pixelStackSize - 1) * depthSampleScale ) );
-		return depth;
+		var depth = Math.max(0, Math.floor(distortionData[(y * dimX + x) ] * (pixelStackSize - 1) * depthSampleScale ) );
+		return THREE.Math.clamp(depth, 0, pixelStack.length - 10);
 	}
 
 
@@ -153,6 +148,8 @@ var SlitScan = function( params )
 		//SLIT
 		var data = dataTexture.image.data;
 		var depthIndex = 0;
+
+		if(pixelStack.length === 0)	return;
 
 		for(var i=0; i<dimY; i++)
 		{

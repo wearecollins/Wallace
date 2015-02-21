@@ -482,7 +482,7 @@ MirrorVideoController.prototype.loadVideo = function ( name, url, type, onLoadCo
 MirrorVideoController.prototype.createFallMesh = function(string, time) {
 	if ( !window.textMeshes ){
 		window.textMeshes = [];
-		console.log(time)
+		// console.log(time)
 	}
 
 	window.textMeshes.push( {started: false, mesh:new THREE.TextTexture(string, 24, "#fff", "Helvetica", "#000", 10), time:time});
