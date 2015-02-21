@@ -1,4 +1,4 @@
-// SlitScan.js
+// SlitScan.js by lars berg https://github.com/larsberg
 
 var SlitScan = function( params )
 {
@@ -81,12 +81,13 @@ var SlitScan = function( params )
 	canvas.width  = dimX;
 	canvas.height = dimY;
 	canvasContext = canvas.getContext('2d');
+	console.log( canvasContext );
 
 
 
 	var bDistortionLoaded = false;
 
-	function imageToSlitData( imagePath, data, context, dimX, dimY )
+	function imageToSlitData( imagePath, data, context, dimX, dimY, callback )
 	{
 		bDistortionLoaded = false;
 
@@ -100,20 +101,26 @@ var SlitScan = function( params )
 				index++;
 			};
 
+			console.log("data.length: ", data.length)
+
 			bDistortionLoaded = true;
 			tempTex.dispose();
+
+			if(callback !== undefined)	callback();
 		});
 	}
 
 	var distortionNoise = [], distortionGradients = [], distortionBoobs = [];
 
-	imageToSlitData("images/hr_noise.png", distortionNoise, canvasContext, dimX, dimY);
+	var distortionData = [];// = distortionNoise;
+	for(var i=0; i<dimX * dimY; i++)	distortionData[i] = 0;
+
+	imageToSlitData("images/hr_noise.png", distortionNoise, canvasContext, dimX, dimY, function(){setDistortion(0)});
 	imageToSlitData("images/barGradients.jpg", distortionGradients, canvasContext, dimX, dimY);
 	imageToSlitData("images/boobs.jpg", distortionBoobs, canvasContext, dimX, dimY);
 
-	var distortionData;// = distortionNoise;
 
-	setDistortion(0);
+	// setDistortion(0);
 	
 
 	// imageToSlitData("images/fluid.jpg", distortionData, canvasContext, dimX, dimY);
@@ -122,7 +129,8 @@ var SlitScan = function( params )
 
 	function sampleDepth(x, y)
 	{
-		return Math.max(0, Math.floor(distortionData[(y * dimX + x) ] * (pixelStackSize - 1) * depthSampleScale ) );
+		var depth = 0;// Math.max(0, Math.floor(distortionData[(y * dimX + x) ] * (pixelStackSize - 1) * depthSampleScale ) );
+		return depth;
 	}
 
 
@@ -145,6 +153,7 @@ var SlitScan = function( params )
 		//SLIT
 		var data = dataTexture.image.data;
 		var depthIndex = 0;
+
 		for(var i=0; i<dimY; i++)
 		{
 			for (var j = 0; j < dimX; j++) 
@@ -176,12 +185,12 @@ var SlitScan = function( params )
 
 	function setDepthSampleScale( val )
 	{
+		// console.log("val: ", val );
 		depthSampleScale = val;
 	}
 
 	function setDistortion( distortionType )
 	{
-		console.log( this );
 		if(distortionType == 0)
 		{
 			distortionData = distortionNoise;

@@ -27,6 +27,8 @@ var CameraTexture = function(params)
 	this.width = 320;
 	this.height = 240;
 
+	this.firefoxBug = false;
+
 	this.onGetUserMedia = function(e){};
 	this.onGetUserMediaFail = function(e){console.log( e, "onGetUserMediaFail... no camera!" );}
 
@@ -38,6 +40,7 @@ var CameraTexture = function(params)
 
 	if (!hasGetUserMedia) {
 		console.log( "This demo requires webcam support " );
+		this.init();
 	}  else {
 		console.log( "Please allow camera access." );
 		this.init();
@@ -84,22 +87,44 @@ CameraTexture.prototype.init = function()
 		this.canvas = canvas;
 		this.ctx = canvas.getContext('2d');
 
+		console.log(this.ctx);
+
 		this.initialized = true;
 
 		this.onGetUserMedia(this.texture);
 
 	}).bind(this),
-	this.onGetUserMediaFail
+	function(e){
+		this.onGetUserMediaFail(e)
+	}.bind(this)
 	);
 }
 
 
 CameraTexture.prototype.getData = function()
 {
-	if(this.initialized)
+	if(this.initialized && !this.firefoxBug)
 	{
-		this.ctx.drawImage(this.video, 0, 0, this.canvas.width, this.canvas.height);
-		return this.ctx.getImageData(0, 0, this.canvas.width, this.canvas.height).data;	
+
+		//FIREFOX BUG!!!! what a shit show
+		//http://stackoverflow.com/a/18580878/4589264
+		try{
+			this.ctx.drawImage(this.video, 0, 0, this.canvas.width, this.canvas.height);
+			return this.ctx.getImageData(0, 0, this.canvas.width, this.canvas.height).data;
+		} 
+		catch(e){
+			if (e.name == "NS_ERROR_NOT_AVAILABLE") {
+				this.firefoxBug = true
+			// Wait a bit before trying again; you may wish to change the
+			// length of this delay.
+			setTimeout(function(){this.firefoxBug = false;}.bind(this), 100);
+			} 
+			else {
+				throw e;
+			}
+			return [];
+		}
+
 	}
 
 	return [];

@@ -51,7 +51,7 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 	var vidAspect = 1280 / 720;
 	var renderer;
 	var mouse = new THREE.Vector2();
-	var lastDelta = new THREE.Vector2();
+	var delta = new THREE.Vector2(), lastDelta = new THREE.Vector2();
 
 
 	//basic stuff
@@ -182,7 +182,7 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 		});
 
 
-				slitMesh.material.map = slit.texture;
+		slitMesh.material.map = slit.texture;
 
 		// backgroundWebcamMat = new BackgroundWebcamMaterial();
 		cameraTexture = new CameraTexture({
@@ -190,13 +190,14 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 			height: tracking.height,
 			onGetUserMedia: function(texture)
 			{
+				console.log("onGetUserMedia: ", "success");
 				slit.webcamMesh.material.uniforms.map.value = texture;
 				HAS_WEBCAM = true;
 			},
-			onGetUserMedia: function(texture)
+			onGetUserMediaFail: function(e)
 			{
-				slit.webcamMesh.material.uniforms.map.value = texture;
-				HAS_WEBCAM = true;
+				console.log("onGetUserMediaFail:", e)
+				HAS_WEBCAM = false;
 			}
 		});
 	
@@ -210,7 +211,8 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 			side: 2
 		} ) );
 		videoSelectionBox.scale.set(-1, 1, 1);
-		videoSelectionBox.visible = debug;
+		videoSelectionBox.visible = debug
+		;
 		debugFlipper.add(videoSelectionBox);
 		scene.add(debugFlipper);
 
@@ -268,8 +270,6 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 		frame++;
 
 		if ( videoController.videoToLoadCount != 0 ) return;
-
-		var delta = new THREE.Vector3();
 
 		slit.update();
 
@@ -506,11 +506,10 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 	
 	function onKeyDown( event )
 	{
-			console.log(event.keyCode)
 		switch( event.keyCode )
 		{
 			case 32:
-				console.log("videoController.vidPosition.position: " + videoController.vidPosition.position);
+				console.log("chill");
 				break;
 			default:
 			break;
