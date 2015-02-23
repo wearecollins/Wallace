@@ -312,7 +312,7 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 			{
 				if(bWebcamBackground1)
 				{
-					slit.setDistortion(1);
+					slit.setDistortion(0);
 				}
 
 				else if(bWebcamBackground2)

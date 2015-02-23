@@ -111,7 +111,7 @@ var SlitScan = function( params )
 	for(var i=0; i<dimX * dimY; i++)	distortionData[i] = 0;
 
 	imageToSlitData("images/hr_noise.png", distortionNoise, canvasContext, dimX, dimY, function(){setDistortion(0)});
-	imageToSlitData("images/barGradients.jpg", distortionGradients, canvasContext, dimX, dimY);
+	//imageToSlitData("images/barGradients.jpg", distortionGradients, canvasContext, dimX, dimY);
 	imageToSlitData("images/boobs.jpg", distortionBoobs, canvasContext, dimX, dimY);
 
 
