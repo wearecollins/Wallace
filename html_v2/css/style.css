@@ -1,8 +1,3 @@
-@font-face{
-	font-family: Univers;
-	src: url("../fonts/univers_55.otf");
-}
-
 html, body {
 	width: 100%;
 	height: 100%;
@@ -11,7 +6,7 @@ html, body {
 	margin: 0px;
 	background-color: black;
 	overflow:hidden;
-	font-family: Univers;
+	font-family: 'Cardo', serif;
 	font-size: 16px;
 }
 html, body {
