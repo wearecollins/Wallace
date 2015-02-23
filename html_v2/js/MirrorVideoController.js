@@ -7,7 +7,7 @@ function supports_video() {
 function supports_crossorigin() {
   if (!supports_video()) { return false; }
   var v = document.createElement("video");
-  return v.hasOwnProperty("crossOrigin");
+  return v.crossOrigin === undefined;// || v.hasOwnProperty("crossOrigin");
 }
 
 function supports_h264_baseline_video() {
