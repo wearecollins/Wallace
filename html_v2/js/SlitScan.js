@@ -145,6 +145,10 @@ var SlitScan = function( params )
 		//
 		draw()
 
+		setTimeout(updateTexture,0);
+	}
+
+	function updateTexture(){
 		//SLIT
 		var data = dataTexture.image.data;
 		var depthIndex = 0;
