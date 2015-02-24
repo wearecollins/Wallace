@@ -573,6 +573,10 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 		container.appendChild( stats.domElement );
 	}	
 
+	if ( isMobile ){
+		document.body.addEventListener('touchstart', function(e){ e.preventDefault(); });
+	}
+
 	setup();
 	this.s = scene;
 	events();
