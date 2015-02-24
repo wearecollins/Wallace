@@ -63,7 +63,16 @@ CameraTexture.prototype.init = function()
 
 	//make it cross browser
 	window.URL = window.URL || window.webkitURL;
-	navigator.getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia || navigator.msGetUserMedia;
+	// this happens in main.js as well
+	if (!navigator.getUserMedia) {
+    	navigator.getUserMedia = navigator.getUserMedia ||
+                             navigator.webkitGetUserMedia ||
+                             navigator.mozGetUserMedia ||
+                             navigator.msGetUserMedia || null;
+	}
+
+	// return if null, otherwise we have it and are just waiting
+	if ( navigator.getUserMedia == null ) return;
 
 	// set up stream
 	navigator.getUserMedia({video : true}, (function( stream ) 

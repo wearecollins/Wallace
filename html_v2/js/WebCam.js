@@ -49,7 +49,7 @@ function WebCam(defaultVideoTag) {
             videoTag.setAttribute('width', 160);
             videoTag.setAttribute('height', 120);
             
-            if ( navigator.getUserMedia == null ){
+            if ( navigator.getUserMedia == null || !hasUserMedia ){
                 errorCallback({code:0});
                 return;
             }
@@ -83,12 +83,13 @@ function WebCam(defaultVideoTag) {
             this.updatePixels();
         };
 
-    if (!navigator.getUserMedia) {
-        navigator.getUserMedia = navigator.getUserMedia ||
-                                 navigator.webkitGetUserMedia ||
-                                 navigator.mozGetUserMedia ||
-                                 navigator.msGetUserMedia || null;
-    }
+    // moving this to main
+    // if (!navigator.getUserMedia) {
+    //     navigator.getUserMedia = navigator.getUserMedia ||
+    //                              navigator.webkitGetUserMedia ||
+    //                              navigator.mozGetUserMedia ||
+    //                              navigator.msGetUserMedia || null;
+    // }
     
     // our public API
     this.startCapture = function ( bAnimate, errorCallback ) {

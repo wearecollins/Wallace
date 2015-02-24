@@ -2,7 +2,6 @@
 //	confirm that touch input works
 //
 
-
 var app;
 
 var LYRICS_ON 	= false;
@@ -10,9 +9,19 @@ var PLAYING		= false;
 var HAS_PLAYED 	= false;
 var HAS_WEBCAM = false;
 
-// this should change to a more general mobile detection
-// maybe "supports WebGL?"
+// ABOUT
 var iOS = ( navigator.userAgent.match(/(iPad|iPhone|iPod)/g) ? true : false );
+var isMobile = ( navigator.userAgent.match(/mobile|tablet|ip(ad|hone|od)|android|silk/i) ? true : false );
+
+if (!navigator.getUserMedia) {
+    navigator.getUserMedia = navigator.getUserMedia ||
+                             navigator.webkitGetUserMedia ||
+                             navigator.mozGetUserMedia ||
+                             navigator.msGetUserMedia || null;
+}
+
+var hasWebGL 		= Modernizr.webgl;
+var hasUserMedia 	= (Modernizr.webgl ? navigator.getUserMedia === null : false );
 
 $(window).bind("load", function() {
 	THREE.ImageUtils.crossOrigin = '';
@@ -63,10 +72,6 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 	var useBackground = false;
 
 	var elapsedTime = 0;
-
-	// ABOUT
-	var hasWebGL 		= true;
-	var hasUserMedia 	= true;
 
 	var slitMesh;
 	var backgroundFlipped = false;

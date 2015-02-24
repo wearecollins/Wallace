@@ -1,7 +1,8 @@
 // MirrorVideoController.js
 
 function supports_video() {
-  return !!document.createElement('video').canPlayType;
+  // return !!document.createElement('video').canPlayType;
+  return Modernizr.video == true;
 }
 
 function supports_crossorigin() {
@@ -12,8 +13,9 @@ function supports_crossorigin() {
 
 function supports_h264_baseline_video() {
   if (!supports_video()) { return false; }
-  var v = document.createElement("video");
-  return v.canPlayType('video/mp4; codecs="avc1.42E01E, mp4a.40.2"');
+  // var v = document.createElement("video");
+  // return v.canPlayType('video/mp4; codecs="avc1.42E01E, mp4a.40.2"');
+  return Modernizr.video.h264;
 }
 
 // convert hh:mm::ss to int (seconds)
@@ -30,8 +32,14 @@ function timeCodeToInt(tcStr){
 
 var AzealiaVideoObject = function(params, useWebGL)
 {
-	this.video = params.video;
-	if ( useWebGL ) this.texture = new THREE.Texture( this.video );
+	this.video = params.video !== undefined ? params.video : {};
+	if ( useWebGL ){
+		if ( params.texture ){
+			this.texture = params.texture;
+		} else {
+			this.texture = new THREE.Texture( this.video );
+		}
+	}
 	this.name = params.name || "blank";
 	
 	if ( useWebGL ) this.texture.minFilter = THREE.LinearFilter;
@@ -61,33 +69,18 @@ MirrorVideoController = function(params)
 
 	this.verbose = params.verbose || false;
 
+	//this.isVideo = (supports_video() && supports_crossorigin()) ? true : false;
+	this.isVideo = (supports_video() && !isMobile) ? true : false;
 
-	var fmt = supports_h264_baseline_video() !== "" ? ".mp4" : ".webm";
+	var fmt = Modernizr.video.webm !== "" ? ".webm" : ".mp4";
 
 	if ( iOS ){
 		//fmt = "_mobile" + fmt;
 	}
 
-	this.videoFiles = params.videoFiles || {
-		"BackgroundVideo": {path: "../720p/AB_BACKGROUND" + fmt},
-		"01": {path: 	"../720p/AB_1_Straight_1_1" + fmt},
-		"02": {path: 	"../720p/AB_1_Up" + fmt},	
-		"03": {path: 	"../720p/AB_1_Down_1" + fmt},
-		"04": {path: 	"../720p/AB_1_Left_1_2" + fmt},
-		"05": {path: 	"../720p/AB_1_Right" + fmt},
-	};
+	// IF we're safari... I think maybe here we'll just load an image?
+	if ( this.isVideo ){
 
-	if ( supports_crossorigin() ){
-
-		this.videoFiles = params.videoFiles || {
-			"BackgroundVideo": {path: "http://storage.googleapis.com/wallace_videos/AB_BACKGROUND" + fmt},
-			"01": {path: 	"http://storage.googleapis.com/wallace_videos/AB_1_Straight_1_1" + fmt},
-			"02": {path: 	"http://storage.googleapis.com/wallace_videos/AB_1_Up" + fmt},	
-			"03": {path: 	"http://storage.googleapis.com/wallace_videos/AB_1_Down_1" + fmt},
-			"04": {path: 	"http://storage.googleapis.com/wallace_videos/AB_1_Left_1_2" + fmt},
-			"05": {path: 	"http://storage.googleapis.com/wallace_videos/AB_1_Right" + fmt},
-		};
-	} else {
 		this.videoFiles = params.videoFiles || {
 			"BackgroundVideo": {path: "../720p/AB_BACKGROUND" + fmt},
 			"01": {path: 	"../720p/AB_1_Straight_1_1" + fmt},
@@ -95,6 +88,36 @@ MirrorVideoController = function(params)
 			"03": {path: 	"../720p/AB_1_Down_1" + fmt},
 			"04": {path: 	"../720p/AB_1_Left_1_2" + fmt},
 			"05": {path: 	"../720p/AB_1_Right" + fmt},
+		};
+
+		if ( supports_crossorigin() ){
+
+			this.videoFiles = params.videoFiles || {
+				"BackgroundVideo": {path: "http://storage.googleapis.com/wallace_videos/AB_BACKGROUND" + fmt},
+				"01": {path: 	"http://storage.googleapis.com/wallace_videos/AB_1_Straight_1_1" + fmt},
+				"02": {path: 	"http://storage.googleapis.com/wallace_videos/AB_1_Up" + fmt},	
+				"03": {path: 	"http://storage.googleapis.com/wallace_videos/AB_1_Down_1" + fmt},
+				"04": {path: 	"http://storage.googleapis.com/wallace_videos/AB_1_Left_1_2" + fmt},
+				"05": {path: 	"http://storage.googleapis.com/wallace_videos/AB_1_Right" + fmt},
+			};
+		} else {
+			this.videoFiles = params.videoFiles || {
+				"BackgroundVideo": {path: "../720p/AB_BACKGROUND" + fmt},
+				"01": {path: 	"../720p/AB_1_Straight_1_1" + fmt},
+				"02": {path: 	"../720p/AB_1_Up" + fmt},	
+				"03": {path: 	"../720p/AB_1_Down_1" + fmt},
+				"04": {path: 	"720p/AB_1_Left_1_2" + fmt},
+				"05": {path: 	"../720p/AB_1_Right" + fmt},
+			};
+		}
+	} else {
+		this.videoFiles = params.videoFiles || {
+			"BackgroundVideo": {path: "images/black.jpg"},
+			"01": {path: 	"images/banks_straight.jpg"},
+			"02": {path: 	"images/banks_up.jpg"},	
+			"03": {path: 	"images/banks_down.jpg"},
+			"04": {path: 	"images/banks_left.jpg"},
+			"05": {path: 	"images/banks_right.jpg"},
 		};
 	}
 
@@ -208,9 +231,11 @@ MirrorVideoController = function(params)
 
 MirrorVideoController.prototype.playVideos = function ()
 {
-	for(var v in this.videos)
-	{
-		this.videos[v].video.play();
+	if ( this.isVideo ){
+		for(var v in this.videos)
+		{
+			this.videos[v].video.play();
+		}
 	}
 
 	this.bPaused = false;
@@ -257,12 +282,16 @@ MirrorVideoController.prototype.setVolume = function(value)
 {
 	if ( value == 0 ){
 		for(var v in this.videos){
-			this.videos[v].video.muted = false;
-			this.videos[v].video.volume = value;
+			if ( this.videos[v].video ){
+				this.videos[v].video.muted = false;
+				this.videos[v].video.volume = value;
+			}
 		}
 	} else {
+		if ( this.videos['BackgroundVideo'].video ){
 			this.videos['BackgroundVideo'].video.muted = false;
 			this.videos['BackgroundVideo'].video.volume = value;
+		}
 	}
 };
 
@@ -357,20 +386,31 @@ MirrorVideoController.prototype.loadVideos = function (fmt)
 	// var files = [];
 	for( var id in this.videoFiles )
 	{
-		this.loadVideo( id, this.videoFiles[id].path, "video/mp4" );//fmt == "mp4" ? "video/mp4" : "video/webm");
+		if ( this.isVideo ){
+			this.loadVideo( id, this.videoFiles[id].path, fmt == "mp4" ? "video/mp4" : "video/webm");
+		} else {
+
+		}
 		//this.videoToLoadCount++;
 	}
 	// videoLoader.addFiles(files);
 
 	for(var id in this.videoFiles)
 	{
-		// console.log( 'info' );this.videos["BackgroundVideo"]
 		var active = id == "BackgroundVideo";
-		this.videos[id] = new AzealiaVideoObject({
-			video: document.getElementById( id ),
-			name: id,
-			bIsActive: true
-		}, true);
+		if ( this.isVideo ){
+			this.videos[id] = new AzealiaVideoObject({
+				video: document.getElementById( id ),
+				name: id,
+				bIsActive: true
+			}, true);
+		} else {
+			this.videos[id] = new AzealiaVideoObject({
+				texture: THREE.ImageUtils.loadTexture( this.videoFiles[id].path ),
+				name: id,
+				bIsActive: true
+			}, true);
+		}
 	}
 	this.playVideos();
 }

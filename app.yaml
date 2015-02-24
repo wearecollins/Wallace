@@ -33,6 +33,11 @@ handlers:
   login: required
   auth_fail_action: redirect
 
+- url: /720p
+  static_dir: 720p
+  login: required
+  auth_fail_action: redirect
+
 - url: /includes
   static_dir: includes
 
@@ -54,6 +59,18 @@ handlers:
   static_files: WALLACE_TESTS/\1
   upload: WALLACE_TESTS/.*\.(gif|png|jpg|mp4|vtt)$
   mime_type: video/mp4
+  expiration: "7d"
+
+- url: /720p/(.*\.(mp4))$
+  static_files: 720p/\1
+  upload: 720p/(.*\.(mp4))$
+  mime_type: video/mp4
+  expiration: "7d"
+
+- url: /720p/(.*\.(webm))$
+  static_files: 720p/\1
+  upload: 720p/(.*\.(webm))$
+  mime_type: video/webm
   expiration: "7d"
 
 - url: /(.*\.(gif|png|jpg|jpeg|mp4|vtt))$
