@@ -1,28 +1,12 @@
 //CameraTexture.js
 //
 
-/**
-  compatibility.getUserMedia({video: true}, function(stream) {
-                    try {
-                        video.src = compatibility.URL.createObjectURL(stream);
-                    } catch (error) {
-                        video.src = stream;
-                    }
-                    setTimeout(function() {
-                            video.play();
-                        }, 500);
-                }, function (error) {
-                    $('#canvas').hide();
-                    $('#log').hide();
-                    $('#no_rtc').html('<h4>WebRTC not available.</h4>');
-                    $('#no_rtc').show();
-                });
- */
 var CameraTexture = function(params)
 {
 	this.texture = undefined;
 	this.video = undefined;
 	this.initialized= false;
+	this.mobile = false;
 
 	this.width = 320;
 	this.height = 240;
@@ -35,12 +19,11 @@ var CameraTexture = function(params)
 	for(var i in params)	this[i] = params[i];
 
 	var hasGetUserMedia = (function() {
-		return !!(navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia || navigator.msGetUserMedia);
+		return ((navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia || navigator.msGetUserMedia) !== undefined);
 	})();
 
 	if (!hasGetUserMedia) {
 		console.log( "This demo requires webcam support " );
-		this.init();
 	}  else {
 		console.log( "Please allow camera access." );
 		this.init();
@@ -56,23 +39,8 @@ CameraTexture.prototype.update = function()
 
 CameraTexture.prototype.init = function()
 {
-	//init webcam texture
-	this.video = document.createElement('video');
-	this.video.autoplay = true;
-	this.video.loop = true;
-
 	//make it cross browser
 	window.URL = window.URL || window.webkitURL;
-	// this happens in main.js as well
-	if (!navigator.getUserMedia) {
-    	navigator.getUserMedia = navigator.getUserMedia ||
-                             navigator.webkitGetUserMedia ||
-                             navigator.mozGetUserMedia ||
-                             navigator.msGetUserMedia || null;
-	}
-
-	// return if null, otherwise we have it and are just waiting
-	if ( navigator.getUserMedia == null ) return;
 
 	// set up stream
 	navigator.getUserMedia({video : true}, (function( stream ) 
@@ -95,8 +63,6 @@ CameraTexture.prototype.init = function()
 		canvas.height = this.video.height;
 		this.canvas = canvas;
 		this.ctx = canvas.getContext('2d');
-
-		console.log(this.ctx);
 
 		this.initialized = true;
 
