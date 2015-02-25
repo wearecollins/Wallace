@@ -505,6 +505,7 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 
 	function onMouseMove( event , still )
 	{
+		event.preventDefault();
 		// console.log( event );
 		mouse.set( 1 + -2 * event.clientX / window.innerWidth, -1 + 2 * event.clientY / window.innerHeight );
 	}
@@ -537,6 +538,10 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 		//events
 		window.addEventListener( 'resize', onWindowResize, false );
 		document.addEventListener( 'mousemove', onMouseMove, false );
+		if ( isMobile ){
+			document.addEventListener( 'touchstart', onMouseMove, false );
+			document.addEventListener( 'touchmove', onMouseMove, false );
+		}
 		document.addEventListener( "keydown", onKeyDown, false);
 	}
 
@@ -572,10 +577,6 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 		stats.domElement.style.left = '400px';
 		container.appendChild( stats.domElement );
 	}	
-
-	if ( isMobile ){
-		document.body.addEventListener('touchstart', function(e){ e.preventDefault(); });
-	}
 
 	setup();
 	this.s = scene;

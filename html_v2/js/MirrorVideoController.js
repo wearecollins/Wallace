@@ -15,7 +15,7 @@ function supports_h264_baseline_video() {
   if (!supports_video()) { return false; }
   // var v = document.createElement("video");
   // return v.canPlayType('video/mp4; codecs="avc1.42E01E, mp4a.40.2"');
-  return Modernizr.video.h264;
+  return Modernizr.video.h264 != "";
 }
 
 // convert hh:mm::ss to int (seconds)
