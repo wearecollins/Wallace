@@ -177,7 +177,7 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 		slit = new SlitScan({
 			width: slitWidth,
 			height: Math.floor( slitWidth / vidAspect),
-			depth: 60,
+			depth: isMobile ? 20 : 60,
 			renderer: renderer
 		});
 		tracking = new AzealiaTracking({
