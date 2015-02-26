@@ -2,6 +2,17 @@
 //	confirm that touch input works
 //
 
+//TOODO
+/**
+ * mobile -> images
+ √ * coors support -> image version
+ * play pause broken
+ * 
+ * clean up
+ * centralize & fall backs
+ */
+
+
 var app;
 
 var LYRICS_ON 	= false;

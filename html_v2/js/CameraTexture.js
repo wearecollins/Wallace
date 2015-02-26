@@ -23,15 +23,16 @@ var CameraTexture = function(params)
 	})();
 
 	if (!hasGetUserMedia) {
-		console.log( "This demo requires webcam support " );
+		console.log( "use your mouse to move around" );
 	}  else {
-		console.log( "Please allow camera access." );
+		console.log( "Please allow camera access or else use you mouse." );
 		this.init();
 	}
 }
 
 CameraTexture.prototype.update = function()
 {
+	console.log( "CameraTexture.prototype.update" );
 	if (this.video && this.video.readyState === this.video.HAVE_ENOUGH_DATA) {
 		this.texture.needsUpdate = true;
 	}
@@ -73,6 +74,9 @@ CameraTexture.prototype.init = function()
 		this.onGetUserMediaFail(e)
 	}.bind(this)
 	);
+
+	
+	console.log( "CameraTexture.prototype.init" );
 }
 
 

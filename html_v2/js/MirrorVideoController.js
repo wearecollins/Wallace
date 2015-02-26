@@ -63,14 +63,13 @@ var AzealiaVideoObject = function(params, useWebGL)
 MirrorVideoController = function(params)
 {
 	params = params || {};
-	this.backgroundRendered = params.useBackground || false;
 	this.doubleWide = params.doubleWide || false;
 	this.onSubtitlesMade = params.subtitleHander || undefined;
 
 	this.verbose = params.verbose || false;
 
 	//this.isVideo = (supports_video() && supports_crossorigin()) ? true : false;
-	this.isVideo = (supports_video() && !isMobile) ? true : false;
+	this.isVideo = params.isVideo;// (supports_video() && !isMobile) ? true : false;
 
 	var fmt = Modernizr.video.webm !== "" ? ".webm" : ".mp4";
 
@@ -79,8 +78,8 @@ MirrorVideoController = function(params)
 	}
 
 	// IF we're safari... I think maybe here we'll just load an image?
-	if ( this.isVideo ){
-
+	if ( this.isVideo )
+	{
 		this.videoFiles = params.videoFiles || {
 			"BackgroundVideo": {path: "../720p/AB_BACKGROUND" + fmt},
 			"01": {path: 	"../720p/AB_1_Straight_1_1" + fmt},
@@ -90,8 +89,8 @@ MirrorVideoController = function(params)
 			"05": {path: 	"../720p/AB_1_Right" + fmt},
 		};
 
-		if ( supports_crossorigin() ){
-
+		if ( supports_crossorigin() )
+		{
 			this.videoFiles = params.videoFiles || {
 				"BackgroundVideo": {path: "http://storage.googleapis.com/wallace_videos/AB_BACKGROUND" + fmt},
 				"01": {path: 	"http://storage.googleapis.com/wallace_videos/AB_1_Straight_1_1" + fmt},
@@ -100,7 +99,9 @@ MirrorVideoController = function(params)
 				"04": {path: 	"http://storage.googleapis.com/wallace_videos/AB_1_Left_1_2" + fmt},
 				"05": {path: 	"http://storage.googleapis.com/wallace_videos/AB_1_Right" + fmt},
 			};
-		} else {
+		}
+		else
+		{
 			this.videoFiles = params.videoFiles || {
 				"BackgroundVideo": {path: "../720p/AB_BACKGROUND" + fmt},
 				"01": {path: 	"../720p/AB_1_Straight_1_1" + fmt},
@@ -110,7 +111,11 @@ MirrorVideoController = function(params)
 				"05": {path: 	"../720p/AB_1_Right" + fmt},
 			};
 		}
-	} else {
+	} 
+	else
+	{
+		console.log( "this.isVideo == false" );
+		
 		this.videoFiles = params.videoFiles || {
 			"BackgroundVideo": {path: "images/black.jpg"},
 			"01": {path: 	"images/banks_straight.jpg"},
@@ -120,65 +125,32 @@ MirrorVideoController = function(params)
 			"05": {path: 	"images/banks_right.jpg"},
 		};
 	}
+	
+	this.videoMap = {
+		straight: 	{t: "01", uOffset: 0},
+		weird: 	{t: "01", uOffset: 0},
 
-	// 1 - straight / up / down (has audio)
-	// 2 - left / right / upperLeft (no audio)
-	// 3 - upperRight / weird1 / weird2 (no audio)
-	// 4 - background
-	if ( this.doubleWide ){
-		this.videoMap = {
-			straight: 	{t: "01", uOffset: 0},
-			weird: 	{t: "01", uOffset: this.backgroundRendered ? -.5 : .5},
+		up: 	{t: "02", uOffset: 0},
+		down: 	{t: "03", uOffset: 0},
 
-			up: 	{t: "02", uOffset: 0},
-			down: 	{t: "02", uOffset: this.backgroundRendered ? -.5 : .5},
+		left: 	{t: "04", uOffset: 0},
+		right: 	{t: "05", uOffset: 0},
 
-			left: 	{t: "03", uOffset: 0},
-			right: 	{t: "03", uOffset: this.backgroundRendered ? -.5 : .5},
+		tiltLeft: 	{t: "04", uOffset: 0},
+		tiltRight: {t: "05", uOffset: 0},
 
-			tiltLeft: 	{t: "04", uOffset: 0},
-			tiltRight: {t: "04", uOffset: this.backgroundRendered ? -.5 : .5},
-
-			background: {t:"BackgroundVideo", uOffset:0}
-		}
-
-		this.inverseVideoMap = {
-			straight: "01",
-			weird: "01",
-			up: "02",
-			down: "02",
-			left: "03",
-			right: "03",
-			tiltLeft: "04",
-			tiltRight: "04"
-		}
-	} else {
-		this.videoMap = {
-			straight: 	{t: "01", uOffset: 0},
-			weird: 	{t: "01", uOffset: 0},
-
-			up: 	{t: "02", uOffset: 0},
-			down: 	{t: "03", uOffset: 0},
-
-			left: 	{t: "04", uOffset: 0},
-			right: 	{t: "05", uOffset: 0},
-
-			tiltLeft: 	{t: "04", uOffset: 0},
-			tiltRight: {t: "05", uOffset: 0},
-
-			background: {t:"BackgroundVideo", uOffset:0}
-		}
-		
-		this.inverseVideoMap = {
-			straight: "01",
-			weird: "01",
-			up: "02",
-			down: "03",
-			left: "04",
-			right: "05",
-			tiltLeft: "04",
-			tiltRight: "05"
-		}
+		background: {t:"BackgroundVideo", uOffset:0}
+	}
+	
+	this.inverseVideoMap = {
+		straight: "01",
+		weird: "01",
+		up: "02",
+		down: "03",
+		left: "04",
+		right: "05",
+		tiltLeft: "04",
+		tiltRight: "05"
 	}
 
 
@@ -467,8 +439,6 @@ MirrorVideoController.prototype.loadVideo = function ( name, url, type, onLoadCo
 	videoElement.appendChild(source);
 	videoElement.style.visibility = "hidden";
 	videoElement.style.display = "none";
-	
-	// if ( name != "BackgroundVideo"|| this.backgroundRendered ){
 
 	videoElement.addEventListener('loadeddata', function() {
 	   this.videoLoadCount++;
