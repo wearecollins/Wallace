@@ -110,17 +110,8 @@ var SlitScan = function( params )
 	var distortionData = [];// = distortionNoise;
 	for(var i=0; i<dimX * dimY; i++)	distortionData[i] = 0;
 
-	imageToSlitData("images/hr_noise.png", distortionNoise, canvasContext, dimX, dimY, function(){setDistortion(0)});
-	//imageToSlitData("images/barGradients.jpg", distortionGradients, canvasContext, dimX, dimY);
+	imageToSlitData("images/hr_noise.png", distortionNoise, canvasContext, dimX, dimY, function(){ setDistortion(0) });
 	imageToSlitData("images/twoCircleGradient.jpg", distortionGradients, canvasContext, dimX, dimY);
-
-
-	// setDistortion(0);
-	
-
-	// imageToSlitData("images/fluid.jpg", distortionData, canvasContext, dimX, dimY);
-	
-
 
 	function sampleDepth(x, y)
 	{
@@ -200,9 +191,10 @@ var SlitScan = function( params )
 		{
 			distortionData = distortionGradients;
 		}
-		else if(distortionType == 2)
+		else
 		{
-			distortionData = distortionGradients;
+			distortionData = distortionNoise;
+			//distortionData = distortionGradients;
 		}
 	}
 

@@ -19,10 +19,17 @@ var LYRICS_ON 	= false;
 var PLAYING		= false;
 var HAS_PLAYED 	= false;
 var HAS_WEBCAM = false;
+var HAS_COORS = supports_crossorigin();
+var IS_SAFARI = (navigator.userAgent.indexOf('Safari') != -1 && navigator.userAgent.indexOf('Chrome') == -1);
+
+
+console.log( "HAS_COORS: " + HAS_COORS );
+console.log( "IS_SAFARI: " + IS_SAFARI )
 
 // ABOUT
 var iOS = ( navigator.userAgent.match(/(iPad|iPhone|iPod)/g) ? true : false );
 var isMobile = ( navigator.userAgent.match(/mobile|tablet|ip(ad|hone|od)|android|silk/i) ? true : false );
+console.log( navigator.userAgent );
 
 if (!navigator.getUserMedia) {
     navigator.getUserMedia = navigator.getUserMedia ||
@@ -74,10 +81,9 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 
 
 	//basic stuff
-	var camera, light, projector;
-	var clock = new THREE.Clock();
+	var camera;
+	// var clock = new THREE.Clock();
 	var scene = new THREE.Scene(), slitScene = new THREE.Scene();
-	var group = new THREE.Object3D();
 
 	// use alpha or background
 	var useBackground = false;
@@ -105,7 +111,8 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 		muteVideo: muteVideo || !PLAYING,
 		useBackground: useBackground,
 		subtitleHander: addSubtitles,
-		verbose: false
+		verbose: false,
+		isVideo:  ( supports_video() && !isMobile && HAS_COORS && !IS_SAFARI) ? true : false
 	});
 	var mouthRect ;
 	var mouthPositions = {
@@ -132,8 +139,6 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 		resetCamera()
 		
 		scene.add( camera );
-		scene.add( light );
-		scene.add( group );	
 
 		var tempPixels = [0,0,0,255];
 		var tempTexture = new THREE.DataTexture( new Uint8Array(tempPixels), 1, 1, THREE.RGBAFormat);
@@ -215,6 +220,8 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 				HAS_WEBCAM = false;
 			}
 		});
+
+
 	
 		//TRACKING DEBGUG
 		var debugFlipper = new THREE.Object3D();
@@ -244,9 +251,15 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 				videoController.setVolume( muteVideo? 0 : 1.0);
 			}
 
-			if ( !wasPlaying ){
+			if ( !wasPlaying )
+			{
 				$("#play").html("PAUSE");
-				videoController.playVideos();
+				if(videoController.bPaused)	{
+					console.log( "videoController.bPaused" );
+					videoController.pauseVideos();
+				}else{
+					videoController.playVideos();
+				}
 			} else {
 				$("#play").html("PLAY");
 				videoController.pauseVideos();
@@ -322,7 +335,7 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 
 		if( bWebcamBackground1 || bWebcamBackground2 )
 		{
-			slit.webcamMesh.material.uniforms.time.value = clock.getElapsedTime();
+			// slit.webcamMesh.material.uniforms.time.value = clock.getElapsedTime();
 
 			if(bFadeInWebcam)
 			{
@@ -505,12 +518,14 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 	}
 
 	//-----------------------------------------------------------
-	function onWindowResize() {
+	function onWindowResize() 
+	{
 		resetCamera();
 		scaleVidMesh();
 
 		positionSubtitles();
 
+		console.log( "onWindowResize: window.innerWidth: " + window.innerWidth, "window.innerHeight: " + window.innerHeight );
 		renderer.setSize( window.innerWidth, window.innerHeight );
 	}
 
@@ -523,14 +538,17 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 	
 	function onKeyDown( event )
 	{
-		console.log("chill out");
-		// switch( event.keyCode )
-		// {
-		// 	case 32:
-		// 		break;
-		// 	default:
-		// 	break;
-		// }
+		switch( event.keyCode )
+		{
+			//space bar
+			case 32:
+				videoController.pauseVideos();
+				break;
+
+			default:
+				console.log("chill out");
+				break;
+		}
 	}
 
 	function rendererSetup()
@@ -548,12 +566,13 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 	{
 		//events
 		window.addEventListener( 'resize', onWindowResize, false );
-		document.addEventListener( 'mousemove', onMouseMove, false );
 		if ( isMobile ){
 			document.addEventListener( 'touchstart', onMouseMove, false );
 			document.addEventListener( 'touchmove', onMouseMove, false );
+		}else{
+			document.addEventListener( 'mousemove', onMouseMove, false );
+			document.addEventListener( "keydown", onKeyDown, false);
 		}
-		document.addEventListener( "keydown", onKeyDown, false);
 	}
 
 	function animate() {

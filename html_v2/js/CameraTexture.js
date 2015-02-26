@@ -33,7 +33,7 @@ var CameraTexture = function(params)
 CameraTexture.prototype.update = function()
 {
 	console.log( "CameraTexture.prototype.update" );
-	if (this.video && this.video.readyState === this.video.HAVE_ENOUGH_DATA) {
+	if (this.video.readyState === this.video.HAVE_ENOUGH_DATA) {
 		this.texture.needsUpdate = true;
 	}
 }
@@ -49,7 +49,7 @@ CameraTexture.prototype.init = function()
 		this.texture = new THREE.Texture(this.video);
 		this.texture.minFilter = THREE.LinearFilter;
 
-		if (this.video.mozCaptureStream) {
+		if (this.video && this.video.mozCaptureStream && this.video.mozSrcObject) {
 		  this.video.mozSrcObject = stream;
 		} else {
 		  this.video.src = (window.URL && window.URL.createObjectURL(stream)) || stream;

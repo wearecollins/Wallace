@@ -71,7 +71,7 @@ MirrorVideoController = function(params)
 	//this.isVideo = (supports_video() && supports_crossorigin()) ? true : false;
 	this.isVideo = params.isVideo;// (supports_video() && !isMobile) ? true : false;
 
-	var fmt = Modernizr.video.webm !== "" ? ".webm" : ".mp4";
+	var fmt = ".mp4";// Modernizr.video.webm !== "" ? ".webm" : ".mp4";
 
 	if ( iOS ){
 		//fmt = "_mobile" + fmt;
@@ -156,7 +156,7 @@ MirrorVideoController = function(params)
 
 	this.videos = {};
 
-	this.bPaused = false;
+	this.bPaused = true;
 	this.videoLoadCount = 0;
 	this.videoToLoadCount = 0;
 
@@ -222,7 +222,6 @@ MirrorVideoController.prototype.pauseVideos = function ()
 	else
 	{
 		for(var v in this.videos)	this.videos[v].video.pause();
-		// console.log( videos );
 	}
 
 	this.bPaused = !this.bPaused;
