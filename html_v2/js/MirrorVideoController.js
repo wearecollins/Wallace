@@ -107,7 +107,7 @@ MirrorVideoController = function(params)
 				"01": {path: 	"../720p/AB_1_Straight_1_1" + fmt},
 				"02": {path: 	"../720p/AB_1_Up" + fmt},	
 				"03": {path: 	"../720p/AB_1_Down_1" + fmt},
-				"04": {path: 	"720p/AB_1_Left_1_2" + fmt},
+				"04": {path: 	"..720p/AB_1_Left_1_2" + fmt},
 				"05": {path: 	"../720p/AB_1_Right" + fmt},
 			};
 		}
@@ -271,7 +271,6 @@ MirrorVideoController.prototype.update = function()
 {
 	if ( !PLAYING && !this.bPaused ){
 		if ( this.vidPosition.position > .02 ){
-			console.log("!PLAYING")
 			this.setVideoTime(0.0);
 			this.videos['BackgroundVideo'].video.currentTime = 0;
 			window.debugVideo = this.videos['BackgroundVideo'];
