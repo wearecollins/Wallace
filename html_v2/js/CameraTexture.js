@@ -32,7 +32,6 @@ var CameraTexture = function(params)
 
 CameraTexture.prototype.update = function()
 {
-	console.log( "CameraTexture.prototype.update" );
 	if (this.video.readyState === this.video.HAVE_ENOUGH_DATA) {
 		this.texture.needsUpdate = true;
 	}
@@ -40,6 +39,10 @@ CameraTexture.prototype.update = function()
 
 CameraTexture.prototype.init = function()
 {
+	this.video = document.createElement('video');		
+	this.video.autoplay = true;		
+	this.video.loop = true;
+
 	//make it cross browser
 	window.URL = window.URL || window.webkitURL;
 
