@@ -14,7 +14,8 @@ var AzealiaPopcornPlayer = function(params)
 		videos: {},
 		textures: {},
 		currentTexture: undefined,
-		fmt: Modernizr.video.webm !== "" ? ".webm" : ".mp4"
+		fmt: Modernizr.video.webm !== "" ? ".webm" : ".mp4",
+		onCanPlayThrough: params.onCanPlayThrough || function(e){}
 	}
 
 	var inverseVideoMap = {
@@ -130,6 +131,8 @@ var AzealiaPopcornPlayer = function(params)
 			settings.textures[i].magFilter = THREE.LinearFilter;
 			settings.textures[i].format = THREE.RGBFormat;
 			settings.textures[i].generateMipmaps = false;
+
+			console.log( "settings.textures[" + i + "]" );
 			// settings.textures[i].needsUpdate = false;
 		}
 
@@ -149,7 +152,8 @@ var AzealiaPopcornPlayer = function(params)
 				console.log( "canplaythrough fired! " + playThroughCount, e );
 				if(playThroughCount == 6)
 				{
-					play();
+					settings.onCanPlayThrough();
+					//play();
 				}
 			}, false );
 
@@ -209,17 +213,13 @@ var AzealiaPopcornPlayer = function(params)
 		createVideos();
 	}
 
-	function mute( bMute )
-	{
-		bMute = bMute || !muted;
-		muted = bMute;
-	}
-
 	function play()
 	{
 		if( settings.verbose )	console.log( "play()" );
+		if( !settings.muted )	settings.videos["BackgroundVideo"].unmute(); 
+		else 	settings.videos["BackgroundVideo"].mute();
+
 		settings.videos["BackgroundVideo"].play();
-		settings.videos["BackgroundVideo"].unmute();
 	}
 
 
@@ -257,8 +257,7 @@ var AzealiaPopcornPlayer = function(params)
 
 	function getTexture( videoName )
 	{
-
-		if( loadCount == 6 )
+		if( playThroughCount == 6 )
 		{
 			var textureName = inverseVideoMap[videoName];
 			
@@ -267,18 +266,21 @@ var AzealiaPopcornPlayer = function(params)
 				settings.currentTexture = settings.textures[textureName];
 				return settings.currentTexture;
 			}
+			else{
+				console.log( "settings.textures["+ textureName + "] === undefined" );
+			}
 		}
 
-		console.error("bring the beef like a trucker to Fuddruckers");
+		// console.error("bring the beef like a trucker to Fuddruckers");
 		return null;
 	}
 
 	return {
-		mute: mute,
 		settings: settings,
 		setup: setup,
 		sync: sync,
 		play: play,
+		pause: pause,
 		currentTime: currentTime,
 		getTexture: getTexture
 	}
