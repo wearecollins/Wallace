@@ -237,6 +237,7 @@ MirrorVideoController.prototype.setVideoPosition = function (percent)
 }
 MirrorVideoController.prototype.setVideoTime = function (videotime)
 {
+	console.log( "MirrorVideoController.prototype.videotime(" + videotime + ")" );
 	for(var v in this.videos)	this.videos[v].video.currentTime = videotime;
 }
 
@@ -268,8 +269,9 @@ MirrorVideoController.prototype.setVolume = function(value)
 
 MirrorVideoController.prototype.update = function()
 {
-	if ( !PLAYING ){
+	if ( !PLAYING && !this.bPaused ){
 		if ( this.vidPosition.position > .02 ){
+			console.log("!PLAYING")
 			this.setVideoTime(0.0);
 			this.videos['BackgroundVideo'].video.currentTime = 0;
 			window.debugVideo = this.videos['BackgroundVideo'];
@@ -314,21 +316,10 @@ MirrorVideoController.prototype.update = function()
 		// var pc = parseInt(((this.videos[i].video.buffered.end(0) / this.videos[i].video.duration) * 100));
 		if (this.videos[i].bIsActive && this.videos[i].video.readyState === this.videos[i].video.HAVE_ENOUGH_DATA )
 		{
-			// loaded++;
-			// if ( loaded == count ){
-			// 	this.playVideos();
-			// }
-
 			if ( this.videos[i].texture ) this.videos[i].texture.needsUpdate = true;
 
-
-			if( i != "BackgroundVideo" && this.videos["BackgroundVideo"].video.readyState)
+			if( i == "BackgroundVideo" && this.videos[i].video.readyState)
 			{
-				if ( this.videos[i].video.currentTime != this.videos["BackgroundVideo"].video.currentTime)
-				{
-					// this.videos[i].video.currentTime = this.videos["BackgroundVideo"].video.currentTime;
-				}
-			} else {
 				this.vidPosition.position = this.videos[i].video.currentTime / this.videoDuration;
 			}
 		}
