@@ -7,7 +7,7 @@ var AzealiaPopcornPlayer = function(params)
 
 	var settings = {
 		isVideo: params.isVideo || false,
-		muted: false, // params.muted || false,
+		muted: params.muted || false,
 		verbose: params.verbose || false,
 		onSubtitlesMade: params.subtitleHander || undefined,
 		videoFiles: undefined,
@@ -25,10 +25,11 @@ var AzealiaPopcornPlayer = function(params)
 		left: "04",
 		right: "05",
 		tiltLeft: "04",
-		tiltRight: "05"
+		tiltRight: "05",
+		background: "BackgroundVideo"
 	}
 
-	var loadCount = 0;
+	var loadCount = 0, playThroughCount = 0;
 	var events = "play pause timeupdate".split(/\s+/g);
 
 	function createVideo(  name, url, type, onLoadComplete )
@@ -121,7 +122,7 @@ var AzealiaPopcornPlayer = function(params)
 
 		for(var i in settings.videoFiles)
 		{
-			var videoElement = createVideo( i, settings.videoFiles[i].path, fmt == "mp4" ? "video/mp4" : "video/webm" );
+			var videoElement = createVideo( i, settings.videoFiles[i].path, "video/mp4" );//fmt == "mp4" ? "video/mp4" : "video/webm" );
 			settings.videos[i] = Popcorn( videoElement );
 
 			settings.textures[i] = new THREE.Texture( videoElement );
@@ -132,16 +133,26 @@ var AzealiaPopcornPlayer = function(params)
 			// settings.textures[i].needsUpdate = false;
 		}
 
-		if(settings.muted)
-		{
+		// if(settings.muted)
+		// {
 			console.log( "settings.muted == true" );
 			settings.videos["BackgroundVideo"].mute();
-		}
+		// }
 
 		//BASED ON THIS: http://jsfiddle.net/aqUNf/1/
 		// iterate both media sources
 		Popcorn.forEach( settings.videos, function( media, type ) {
 			
+			//can play through
+			media.on( "canplaythrough", function( e ) {
+				playThroughCount++;
+				console.log( "canplaythrough fired! " + playThroughCount, e );
+				if(playThroughCount == 6)
+				{
+					play();
+				}
+			}, false );
+
 			// when each is ready... 
 			media.on( "canplayall", function() {
 				
@@ -208,6 +219,7 @@ var AzealiaPopcornPlayer = function(params)
 	{
 		if( settings.verbose )	console.log( "play()" );
 		settings.videos["BackgroundVideo"].play();
+		settings.videos["BackgroundVideo"].unmute();
 	}
 
 
@@ -221,15 +233,15 @@ var AzealiaPopcornPlayer = function(params)
 	{
 		if( loadCount == 6 )
 		{
-			var currentTime = settings.videos["BackgroundVideo"].currentTime();
+			// var currentTime = settings.videos["BackgroundVideo"].currentTime();
 
-			for(var i in settings.videos)
-			{
-				if(i !== "BackgroundVideo")
-				{
-					settings.videos[i].currentTime( currentTime );
-				}
-			}
+			// for(var i in settings.videos)
+			// {
+			// 	if(i !== "BackgroundVideo")
+			// 	{
+			// 		settings.videos[i].currentTime( currentTime );
+			// 	}
+			// }
 
 			if(settings.currentTexture !== undefined)
 			{	

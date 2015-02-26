@@ -108,7 +108,7 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 
 	var popcornPlayer = new AzealiaPopcornPlayer({
 		isVideo:  ( supports_video() && !isMobile && HAS_COORS && !IS_SAFARI) ? true : false,
-		muted: muteVideo || !PLAYING,
+		muted: muteVideo, // || !PLAYING,
 		useBackground: useBackground,
 		subtitleHander: addSubtitles,
 	});
