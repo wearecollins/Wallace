@@ -106,14 +106,24 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 		}
 	}
 
-	// var motionThresholds = new MotionThresholds();
-	var videoController = new MirrorVideoController({
-		muteVideo: muteVideo || !PLAYING,
+	var popcornPlayer = new AzealiaPopcornPlayer({
+		isVideo:  ( supports_video() && !isMobile && HAS_COORS && !IS_SAFARI) ? true : false,
+		muted: muteVideo || !PLAYING,
 		useBackground: useBackground,
 		subtitleHander: addSubtitles,
-		verbose: false,
-		isVideo:  ( supports_video() && !isMobile && HAS_COORS && !IS_SAFARI) ? true : false
 	});
+
+	popcornPlayer.setup();
+
+
+	// // var motionThresholds = new MotionThresholds();
+	// var videoController = new MirrorVideoController({
+	// 	muteVideo: muteVideo || !PLAYING,
+	// 	useBackground: useBackground,
+	// 	subtitleHander: addSubtitles,
+	// 	verbose: false,
+	// 	isVideo:  ( supports_video() && !isMobile && HAS_COORS && !IS_SAFARI) ? true : false
+	// });
 	var mouthRect ;
 	var mouthPositions = {
 		"straight": new THREE.Vector3( -.01, -.18, .05 ),
@@ -149,7 +159,7 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 		screenPlane = new THREE.PlaneBufferGeometry(1,1, 12, 7 );
 
 		backgroundVideoMat = new THREE.MeshBasicMaterial( {
-			map: videoController.getVideo("background").t,
+			map: popcornPlayer.getTexture("background"),//videoController.getVideo("background").t,
 			color: 0xFFFFFF,
 			side: 2 
 		});
@@ -168,14 +178,14 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 		mouthRect = new THREE.Mesh(
 			new THREE.PlaneBufferGeometry(.2, .225),
 			new MouthMaterial( {
-				map: videoController.getVideo("straight").t,
+				map: tempTexture, // videoController.getVideo("straight").t,
 				aspect: 720 / 1280
 			} ) );
 		mouthRect.position.copy( mouthPositions["straight"] );
 		slitMesh.add(mouthRect);
 
 		// VIDEO CONTROLLER
-		videoController.playVideos();
+		// videoController.playVideos();
 
 		// LETTER BOXING
 		var barGeom = new THREE.PlaneBufferGeometry(1,1, 12, 7 );
@@ -247,22 +257,22 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 			PLAYING = !PLAYING;
 			if (!HAS_PLAYED ){
 				HAS_PLAYED = true;
-				videoController.setVideoPosition(0);
-				videoController.setVolume( muteVideo? 0 : 1.0);
+				// videoController.setVideoPosition(0);
+				// videoController.setVolume( muteVideo? 0 : 1.0);
 			}
 
 			if ( !wasPlaying )
 			{
 				$("#play").html("PAUSE");
-				if(videoController.bPaused)	{
-					console.log( "videoController.bPaused" );
-					videoController.pauseVideos();
-				}else{
-					videoController.playVideos();
-				}
+				// if(videoController.bPaused)	{
+				// 	console.log( "videoController.bPaused" );
+				// 	videoController.pauseVideos();
+				// }else{
+				// 	videoController.playVideos();
+				// }
 			} else {
 				$("#play").html("PLAY");
-				videoController.pauseVideos();
+				// videoController.pauseVideos();
 			}
 		})
 
@@ -297,7 +307,7 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 	{
 		frame++;
 
-		if ( videoController.videoToLoadCount != 0 ) return;
+		// if ( videoController.videoToLoadCount != 0 ) return;
 
 		slit.update();
 
@@ -324,12 +334,14 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 		slit.setDepthSampleScale( depthSampleScale * .5 + .5 );
 		lastDelta.copy( tracking.delta );
 
+		popcornPlayer.sync();
+
 		getCurrentVideo();
 
-		videoController.update();
+		// videoController.update();
 
 		//webcam backgroun
-		var vTime = videoController.vidPosition.position * videoController.videoDuration;
+		var vTime = popcornPlayer.currentTime();//videoController.vidPosition.position * videoController.videoDuration;
 		var bWebcamBackground1 = vTime >= webcamBackgroundTime1.start && vTime < webcamBackgroundTime1.end;
 		var bWebcamBackground2 = vTime >= webcamBackgroundTime2.start && vTime < webcamBackgroundTime2.end;
 
@@ -425,14 +437,17 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 
 	function setVideo( videoName )
 	{
+		var t = popcornPlayer.getTexture( videoName ); //videoController.getVideo( videoName ).t;
+		
+		if(t !== null)
+		{
+			slit.setTexture( t );
 
-		var t = videoController.getVideo( videoName ).t;
-		slit.setTexture( t );
+			mouthRect.material.uniforms.map.value = t;
+			mouthRect.position.copy( mouthPositions[ videoName ] );
 
-		mouthRect.material.uniforms.map.value = t;
-		mouthRect.position.copy( mouthPositions[ videoName ] );
-
-		fadeMouth();
+			fadeMouth();
+		}
 	}
 
 	function fadeMouth()
@@ -501,31 +516,31 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 	}
 
 	function positionSubtitles(){
-		// move subtitles
-		for ( var i =0; i<window.textMeshes.length; i++ ){
-			var sub = window.textMeshes[i];
-			if ( !sub.started ){
-				var ran = Math.random();
-				if ( ran > .5 ){
-					sub.mesh.position.x =  -window.innerWidth * .1 - Math.random() * (window.innerWidth * .4);
-				} else {
-					sub.mesh.position.x =  window.innerWidth * .1 + Math.random() * window.innerWidth * .4;
-				}
-				sub.mesh.position.y = -window.innerHeight * .6;
-				sub.mesh.position.z = 1;
-			}
-		}
+		// // move subtitles
+		// for ( var i =0; i<window.textMeshes.length; i++ ){
+		// 	var sub = window.textMeshes[i];
+		// 	if ( !sub.started ){
+		// 		var ran = Math.random();
+		// 		if ( ran > .5 ){
+		// 			sub.mesh.position.x =  -window.innerWidth * .1 - Math.random() * (window.innerWidth * .4);
+		// 		} else {
+		// 			sub.mesh.position.x =  window.innerWidth * .1 + Math.random() * window.innerWidth * .4;
+		// 		}
+		// 		sub.mesh.position.y = -window.innerHeight * .6;
+		// 		sub.mesh.position.z = 1;
+		// 	}
+		// }
 	}
 
 	//-----------------------------------------------------------
 	function onWindowResize() 
 	{
 		resetCamera();
+
 		scaleVidMesh();
 
 		positionSubtitles();
 
-		console.log( "onWindowResize: window.innerWidth: " + window.innerWidth, "window.innerHeight: " + window.innerHeight );
 		renderer.setSize( window.innerWidth, window.innerHeight );
 	}
 
@@ -542,7 +557,8 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 		{
 			//space bar
 			case 32:
-				videoController.pauseVideos();
+				popcornPlayer.play();
+				// videoController.pauseVideos();
 				break;
 
 			default:
