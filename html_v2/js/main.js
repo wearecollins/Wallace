@@ -106,11 +106,24 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 		}
 	}
 
+
+	function kickOff()
+	{
+		console.log( "kickOff" );
+		
+		setup();
+		this.s = scene;
+		events();
+		animate();
+		this.bgm = slitMesh;
+	}
+
 	var popcornPlayer = new AzealiaPopcornPlayer({
 		isVideo:  ( supports_video() && !isMobile && HAS_COORS && !IS_SAFARI) ? true : false,
-		muted: muteVideo || !PLAYING,
+		muted: muteVideo, // || !PLAYING,
 		useBackground: useBackground,
 		subtitleHander: addSubtitles,
+		onCanPlayThrough: kickOff
 	});
 
 	popcornPlayer.setup();
@@ -135,7 +148,7 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 
 	// videoController.setVolume(0);
 
-	var currentVideo = "straight", previousVideo = "doYouLikeHorses?";
+	var currentVideo = previousVideo = "doYouLikeHorses?";
 
 	var backgroundWebcamMat, backgroundVideoMat;
 	
@@ -158,8 +171,10 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 		// MESHES
 		screenPlane = new THREE.PlaneBufferGeometry(1,1, 12, 7 );
 
+		var backgroundTexture = popcornPlayer.getTexture("background");
+		console.log( "backgroundTexture: ", backgroundTexture );
 		backgroundVideoMat = new THREE.MeshBasicMaterial( {
-			map: popcornPlayer.getTexture("background"),//videoController.getVideo("background").t,
+			map: backgroundTexture,
 			color: 0xFFFFFF,
 			side: 2 
 		});
@@ -178,7 +193,7 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 		mouthRect = new THREE.Mesh(
 			new THREE.PlaneBufferGeometry(.2, .225),
 			new MouthMaterial( {
-				map: tempTexture, // videoController.getVideo("straight").t,
+				map: popcornPlayer.getTexture("straight"), // videoController.getVideo("straight").t,
 				aspect: 720 / 1280
 			} ) );
 		mouthRect.position.copy( mouthPositions["straight"] );
@@ -264,6 +279,7 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 			if ( !wasPlaying )
 			{
 				$("#play").html("PAUSE");
+				popcornPlayer.play();
 				// if(videoController.bPaused)	{
 				// 	console.log( "videoController.bPaused" );
 				// 	videoController.pauseVideos();
@@ -272,6 +288,7 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 				// }
 			} else {
 				$("#play").html("PLAY");
+				popcornPlayer.pause();
 				// videoController.pauseVideos();
 			}
 		})
@@ -557,8 +574,7 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 		{
 			//space bar
 			case 32:
-				popcornPlayer.play();
-				// videoController.pauseVideos();
+				// popcornPlayer.play();
 				break;
 
 			default:
@@ -623,12 +639,6 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 		stats.domElement.style.left = '400px';
 		container.appendChild( stats.domElement );
 	}	
-
-	setup();
-	this.s = scene;
-	events();
-	animate();
-	this.bgm = slitMesh;
 }
 
 function getQuerystring(key, default_)

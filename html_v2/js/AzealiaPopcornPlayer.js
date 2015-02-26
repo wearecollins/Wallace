@@ -7,14 +7,15 @@ var AzealiaPopcornPlayer = function(params)
 
 	var settings = {
 		isVideo: params.isVideo || false,
-		muted: false, // params.muted || false,
+		muted: params.muted || false,
 		verbose: params.verbose || false,
 		onSubtitlesMade: params.subtitleHander || undefined,
 		videoFiles: undefined,
 		videos: {},
 		textures: {},
 		currentTexture: undefined,
-		fmt: Modernizr.video.webm !== "" ? ".webm" : ".mp4"
+		fmt: Modernizr.video.webm !== "" ? ".webm" : ".mp4",
+		onCanPlayThrough: params.onCanPlayThrough || function(e){}
 	}
 
 	var inverseVideoMap = {
@@ -25,10 +26,11 @@ var AzealiaPopcornPlayer = function(params)
 		left: "04",
 		right: "05",
 		tiltLeft: "04",
-		tiltRight: "05"
+		tiltRight: "05",
+		background: "BackgroundVideo"
 	}
 
-	var loadCount = 0;
+	var loadCount = 0, playThroughCount = 0;
 	var events = "play pause timeupdate".split(/\s+/g);
 
 	function createVideo(  name, url, type, onLoadComplete )
@@ -121,7 +123,7 @@ var AzealiaPopcornPlayer = function(params)
 
 		for(var i in settings.videoFiles)
 		{
-			var videoElement = createVideo( i, settings.videoFiles[i].path, fmt == "mp4" ? "video/mp4" : "video/webm" );
+			var videoElement = createVideo( i, settings.videoFiles[i].path, "video/mp4" );//fmt == "mp4" ? "video/mp4" : "video/webm" );
 			settings.videos[i] = Popcorn( videoElement );
 
 			settings.textures[i] = new THREE.Texture( videoElement );
@@ -129,19 +131,32 @@ var AzealiaPopcornPlayer = function(params)
 			settings.textures[i].magFilter = THREE.LinearFilter;
 			settings.textures[i].format = THREE.RGBFormat;
 			settings.textures[i].generateMipmaps = false;
+
+			console.log( "settings.textures[" + i + "]" );
 			// settings.textures[i].needsUpdate = false;
 		}
 
-		if(settings.muted)
-		{
+		// if(settings.muted)
+		// {
 			console.log( "settings.muted == true" );
 			settings.videos["BackgroundVideo"].mute();
-		}
+		// }
 
 		//BASED ON THIS: http://jsfiddle.net/aqUNf/1/
 		// iterate both media sources
 		Popcorn.forEach( settings.videos, function( media, type ) {
 			
+			//can play through
+			media.on( "canplaythrough", function( e ) {
+				playThroughCount++;
+				console.log( "canplaythrough fired! " + playThroughCount, e );
+				if(playThroughCount == 6)
+				{
+					settings.onCanPlayThrough();
+					//play();
+				}
+			}, false );
+
 			// when each is ready... 
 			media.on( "canplayall", function() {
 				
@@ -198,15 +213,12 @@ var AzealiaPopcornPlayer = function(params)
 		createVideos();
 	}
 
-	function mute( bMute )
-	{
-		bMute = bMute || !muted;
-		muted = bMute;
-	}
-
 	function play()
 	{
 		if( settings.verbose )	console.log( "play()" );
+		if( !settings.muted )	settings.videos["BackgroundVideo"].unmute(); 
+		else 	settings.videos["BackgroundVideo"].mute();
+
 		settings.videos["BackgroundVideo"].play();
 	}
 
@@ -221,15 +233,15 @@ var AzealiaPopcornPlayer = function(params)
 	{
 		if( loadCount == 6 )
 		{
-			var currentTime = settings.videos["BackgroundVideo"].currentTime();
+			// var currentTime = settings.videos["BackgroundVideo"].currentTime();
 
-			for(var i in settings.videos)
-			{
-				if(i !== "BackgroundVideo")
-				{
-					settings.videos[i].currentTime( currentTime );
-				}
-			}
+			// for(var i in settings.videos)
+			// {
+			// 	if(i !== "BackgroundVideo")
+			// 	{
+			// 		settings.videos[i].currentTime( currentTime );
+			// 	}
+			// }
 
 			if(settings.currentTexture !== undefined)
 			{	
@@ -245,8 +257,7 @@ var AzealiaPopcornPlayer = function(params)
 
 	function getTexture( videoName )
 	{
-
-		if( loadCount == 6 )
+		if( playThroughCount == 6 )
 		{
 			var textureName = inverseVideoMap[videoName];
 			
@@ -255,18 +266,21 @@ var AzealiaPopcornPlayer = function(params)
 				settings.currentTexture = settings.textures[textureName];
 				return settings.currentTexture;
 			}
+			else{
+				console.log( "settings.textures["+ textureName + "] === undefined" );
+			}
 		}
 
-		console.error("bring the beef like a trucker to Fuddruckers");
+		// console.error("bring the beef like a trucker to Fuddruckers");
 		return null;
 	}
 
 	return {
-		mute: mute,
 		settings: settings,
 		setup: setup,
 		sync: sync,
 		play: play,
+		pause: pause,
 		currentTime: currentTime,
 		getTexture: getTexture
 	}
