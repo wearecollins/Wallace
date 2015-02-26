@@ -14,7 +14,7 @@ var AzealiaPopcornPlayer = function(params)
 		videos: {},
 		textures: {},
 		currentTexture: undefined,
-		fmt: Modernizr.video.webm !== "" ? ".webm" : ".mp4",
+		fmt: Modernizr.video.h264 === "" ? ".webm" : ".mp4",
 		onCanPlayThrough: params.onCanPlayThrough || function(e){}
 	}
 
@@ -123,7 +123,7 @@ var AzealiaPopcornPlayer = function(params)
 
 		for(var i in settings.videoFiles)
 		{
-			var videoElement = createVideo( i, settings.videoFiles[i].path, "video/mp4" );//fmt == "mp4" ? "video/mp4" : "video/webm" );
+			var videoElement = createVideo( i, settings.videoFiles[i].path, fmt == ".mp4" ? "video/mp4" : "video/webm" );
 			settings.videos[i] = Popcorn( videoElement );
 
 			settings.textures[i] = new THREE.Texture( videoElement );
