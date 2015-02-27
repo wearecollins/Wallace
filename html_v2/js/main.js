@@ -57,8 +57,6 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 	var muteVideo = _muteVideo;// || !PLAYING;
 	var auto = _auto || false;
 
-	var barMeshes = [];
-
 	//main container
 	var container = document.createElement( 'div' );
 
@@ -171,6 +169,7 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 		// MESHES
 		screenPlane = new THREE.PlaneBufferGeometry(1,1, 12, 7 );
 
+		//BACKGROUND PLANE
 		var backgroundTexture = popcornPlayer.getTexture("background");
 		console.log( "backgroundTexture: ", backgroundTexture );
 		backgroundVideoMat = new THREE.MeshBasicMaterial( {
@@ -182,6 +181,7 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 		backgroundMesh.position.z = -10;
 		scene.add(backgroundMesh);
 
+		//FORGROUND AZEALIA PLANE
 		slitMesh = new THREE.Mesh(screenPlane, new THREE.MeshBasicMaterial( {
 			map: tempTexture,
 			color: 0xffffff,
@@ -199,21 +199,25 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 		mouthRect.position.copy( mouthPositions["straight"] );
 		slitMesh.add(mouthRect);
 
+		//letterbox
+
 		// VIDEO CONTROLLER
 		// videoController.playVideos();
 
 		// LETTER BOXING
-		var barGeom = new THREE.PlaneBufferGeometry(1,1, 12, 7 );
-		var barMat = new THREE.MeshBasicMaterial( { side: 2, color: 0x000000 } );
-		barMeshes[0] = new THREE.Mesh( barGeom, barMat );
-		barMeshes[1] = new THREE.Mesh( barGeom, barMat );
-		barMeshes[0].position.z = 3;
-		barMeshes[1].position.z = 3;
-		barMeshes[0].visible = false;
-		barMeshes[1].visible = false;
-		slitScene.add( barMeshes[0] );
-		slitScene.add( barMeshes[1] );
+		var letterBoxGeometryTop = new THREE.PlaneBufferGeometry(1,1);
+		var letterBoxGeometrySide = new THREE.PlaneBufferGeometry(1,1);
 
+		var letterBoxeTop = new THREE.Mesh(letterBoxGeometryTop, new THREE.MeshBasicMaterial( {color: "black", side: 2} ) );
+		letterBoxeTop.position.y = 1;
+
+		var letterBoxeBottom = new THREE.Mesh(letterBoxGeometryTop, new THREE.MeshBasicMaterial( {color: "black", side: 2} ) );
+		letterBoxeBottom.position.y = -1;
+
+		slitMesh.add( letterBoxeTop );
+		slitMesh.add( letterBoxeBottom );
+
+		//SLIT
 		var slitWidth = 640;
 		slit = new SlitScan({
 			width: slitWidth,
