@@ -199,20 +199,15 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 		mouthRect.position.copy( mouthPositions["straight"] );
 		slitMesh.add(mouthRect);
 
-		//letterbox
-
-		// VIDEO CONTROLLER
-		// videoController.playVideos();
-
 		// LETTER BOXING
-		var letterBoxGeometryTop = new THREE.PlaneBufferGeometry(1,1);
-		var letterBoxGeometrySide = new THREE.PlaneBufferGeometry(1,1);
+		var letterBoxGeometryTop = new THREE.PlaneBufferGeometry(1,4);
+		var letterBoxGeometrySide = new THREE.PlaneBufferGeometry(1,4);
 
 		var letterBoxeTop = new THREE.Mesh(letterBoxGeometryTop, new THREE.MeshBasicMaterial( {color: "black", side: 2} ) );
-		letterBoxeTop.position.y = 1;
+		letterBoxeTop.position.y = 2.5;
 
 		var letterBoxeBottom = new THREE.Mesh(letterBoxGeometryTop, new THREE.MeshBasicMaterial( {color: "black", side: 2} ) );
-		letterBoxeBottom.position.y = -1;
+		letterBoxeBottom.position.y = -2.5;
 
 		slitMesh.add( letterBoxeTop );
 		slitMesh.add( letterBoxeBottom );
