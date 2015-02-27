@@ -14,7 +14,9 @@ var AzealiaPopcornPlayer = function(params)
 		videos: {},
 		textures: {},
 		currentTexture: undefined,
-		fmt: Modernizr.video.h264 === "" ? ".webm" : ".mp4",
+		// fmt: Modernizr.video.h264 === "" ? ".webm" : ".mp4",
+		fmt: Modernizr.video.webm !== "" ? ".webm" : ".mp4",
+		bufferTime: 30,
 		onCanPlayThrough: params.onCanPlayThrough || function(e){}
 	}
 
@@ -38,7 +40,7 @@ var AzealiaPopcornPlayer = function(params)
 		var videoElement = document.createElement( 'video' );
 		videoElement.setAttribute("loop", "");
 		videoElement.setAttribute("type", type);
-		videoElement.setAttribute("preload", "auto");
+		// videoElement.setAttribute("preload", "auto");
 		
 		if(this.muteVideo == true || name != "BackgroundVideo")
 		{
@@ -126,14 +128,18 @@ var AzealiaPopcornPlayer = function(params)
 			var videoElement = createVideo( i, settings.videoFiles[i].path, fmt == ".mp4" ? "video/mp4" : "video/webm" );
 			settings.videos[i] = Popcorn( videoElement );
 
+			//set up the texture
 			settings.textures[i] = new THREE.Texture( videoElement );
 			settings.textures[i].minFilter = THREE.LinearFilter;
 			settings.textures[i].magFilter = THREE.LinearFilter;
 			settings.textures[i].format = THREE.RGBFormat;
 			settings.textures[i].generateMipmaps = false;
 
-			console.log( "settings.textures[" + i + "]" );
-			// settings.textures[i].needsUpdate = false;
+			// loading call back
+			// we only want to show the controls of our video and begin playing it once more then half of the video has been loaded
+			settings.videos[i].pause();
+			loader( settings.videos[i] );
+
 		}
 
 		// if(settings.muted)
@@ -208,6 +214,29 @@ var AzealiaPopcornPlayer = function(params)
 		});
 	}
 
+	function loader( video )
+	{
+		var loaded = function() {
+			
+			// store the returned timeRanges object as we use it more than once
+			var buff = video.buffered();
+			
+			// if we have buffered more then half the video
+			if ( buff.length > 0 && buff.end(0) > 30 )
+			{
+				console.log( video.media.id, "LOADED" );
+			// if less then half the video has loaded call our function again
+			}
+			else
+			{
+				console.log( "Still Loading...." );
+				setTimeout( loaded, 1000 );
+			}
+		}
+				
+		loaded();
+	}
+
 	function setup()
 	{
 		createVideos();
@@ -246,6 +275,8 @@ var AzealiaPopcornPlayer = function(params)
 			if(settings.currentTexture !== undefined)
 			{	
 				settings.currentTexture.needsUpdate = true;
+
+				settings.textures["BackgroundVideo"].needsUpdate = true;
 			}
 		}
 	}
