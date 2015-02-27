@@ -274,6 +274,32 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 				$("#lyrics").html("LYRICS");
 			}
 		})
+
+
+	function createFallMesh(string, time) {
+		if ( !window.textMeshes ){
+			window.textMeshes = [];
+			// console.log(time)
+		}
+
+		window.textMeshes.push( {started: false, mesh:new THREE.TextTexture(string, 24, "#fff", "Cardo", "#000", 10), time:time});
+	};
+	
+		//LYRICS
+		//	create subtitles
+		$.getJSON( "../WALLACE_TESTS/subtitles.json", 
+			function(data) {
+				var cues = data.entries;
+
+				for ( var i=0; i<cues.length; i++){
+					var cue = cues[i];
+					createFallMesh( cues[i].text, timeCodeToInt(cues[i].start) );
+				}
+
+				// alert parent we're donezo
+				if ( addSubtitles ) addSubtitles( window.textMeshes );
+			}
+		);
 	}
 
 	/**
@@ -373,6 +399,31 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 					})
 					.start();
 			}
+		}
+
+		//SUBTITLES ? LYR|CS
+		if(window.textMeshes !== undefined)
+		{
+			for ( var i=0; i<window.textMeshes.length; i++){
+				if ( popcornPlayer.currentTime() >= window.textMeshes[i].time && window.textMeshes[i].started == false){
+					window.textMeshes[i].started = true;
+					window.textMeshes[i].mesh.rotation.z = 0;
+					window.textMeshes[i].mesh.position.y = -window.innerHeight * .6;
+					window.textMeshes[i].mesh.position.parent = window.textMeshes[i].mesh;
+					new TWEEN.Tween(window.textMeshes[i].mesh.position)
+						.to({y: window.innerHeight * .75}, 5000)
+						.easing( TWEEN.Easing.Sinusoidal.Out )
+						.start()
+						.onComplete(function(){
+							this.parent.visible = false;
+						});
+
+					new TWEEN.Tween(window.textMeshes[i].mesh.rotation)
+						.to({z: Math.random() * Math.PI - Math.PI / 2.0}, 5000)
+						.easing( TWEEN.Easing.Sinusoidal.Out )
+						.start();
+				}
+			}	
 		}
 	}
 
@@ -496,20 +547,20 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 	}
 
 	function positionSubtitles(){
-		// // move subtitles
-		// for ( var i =0; i<window.textMeshes.length; i++ ){
-		// 	var sub = window.textMeshes[i];
-		// 	if ( !sub.started ){
-		// 		var ran = Math.random();
-		// 		if ( ran > .5 ){
-		// 			sub.mesh.position.x =  -window.innerWidth * .1 - Math.random() * (window.innerWidth * .4);
-		// 		} else {
-		// 			sub.mesh.position.x =  window.innerWidth * .1 + Math.random() * window.innerWidth * .4;
-		// 		}
-		// 		sub.mesh.position.y = -window.innerHeight * .6;
-		// 		sub.mesh.position.z = 1;
-		// 	}
-		// }
+		// move subtitles
+		for ( var i =0; i<window.textMeshes.length; i++ ){
+			var sub = window.textMeshes[i];
+			if ( !sub.started ){
+				var ran = Math.random();
+				if ( ran > .5 ){
+					sub.mesh.position.x =  -window.innerWidth * .1 - Math.random() * (window.innerWidth * .4);
+				} else {
+					sub.mesh.position.x =  window.innerWidth * .1 + Math.random() * window.innerWidth * .4;
+				}
+				sub.mesh.position.y = -window.innerHeight * .6;
+				sub.mesh.position.z = 1;
+			}
+		}
 	}
 
 	//-----------------------------------------------------------
