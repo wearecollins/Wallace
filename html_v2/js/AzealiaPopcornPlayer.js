@@ -14,8 +14,8 @@ var AzealiaPopcornPlayer = function(params)
 		videos: {},
 		textures: {},
 		currentTexture: undefined,
-		fmt: Modernizr.video.h264 === "" ? ".webm" : ".mp4",
-		// fmt: Modernizr.video.webm !== "" ? ".webm" : ".mp4",
+		// fmt: Modernizr.video.h264 === "" ? ".webm" : ".mp4",
+		fmt: Modernizr.video.webm !== "" ? ".webm" : ".mp4",
 		bufferTime: 20,
 		onCanPlayThrough: params.onCanPlayThrough || function(e){}
 	}
