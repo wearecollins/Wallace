@@ -14,9 +14,9 @@ var AzealiaPopcornPlayer = function(params)
 		videos: {},
 		textures: {},
 		currentTexture: undefined,
-		// fmt: Modernizr.video.h264 === "" ? ".webm" : ".mp4",
-		fmt: Modernizr.video.webm !== "" ? ".webm" : ".mp4",
-		bufferTime: 30,
+		fmt: Modernizr.video.h264 === "" ? ".webm" : ".mp4",
+		// fmt: Modernizr.video.webm !== "" ? ".webm" : ".mp4",
+		bufferTime: 20,
 		onCanPlayThrough: params.onCanPlayThrough || function(e){}
 	}
 
@@ -155,11 +155,9 @@ var AzealiaPopcornPlayer = function(params)
 			//can play through
 			media.on( "canplaythrough", function( e ) {
 				playThroughCount++;
-				console.log( "canplaythrough fired! " + playThroughCount, e );
 				if(playThroughCount == 6)
 				{
 					settings.onCanPlayThrough();
-					//play();
 				}
 			}, false );
 
@@ -222,7 +220,7 @@ var AzealiaPopcornPlayer = function(params)
 			var buff = video.buffered();
 			
 			// if we have buffered more then half the video
-			if ( buff.length > 0 && buff.end(0) > 30 )
+			if ( buff.length > 0 && buff.end(0) > settings.bufferTime )
 			{
 				console.log( video.media.id, "LOADED" );
 			// if less then half the video has loaded call our function again
