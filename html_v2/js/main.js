@@ -79,22 +79,8 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 
 
 	//basic stuff
-	var camera;
-	// var clock = new THREE.Clock();
-	var scene = new THREE.Scene(), slitScene = new THREE.Scene();
-
-	// use alpha or background
-	var useBackground = false;
-
-	var elapsedTime = 0;
-
+	var camera, scene = new THREE.Scene(), slitScene = new THREE.Scene();
 	var slitMesh;
-	var backgroundFlipped = false;
-	var webCamTexture;
-
-	var controls = {
-		slitStep: 5
-	}
 
 	function addSubtitles( subs ){
 		positionSubtitles();
@@ -119,22 +105,12 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 	var popcornPlayer = new AzealiaPopcornPlayer({
 		isVideo:  ( supports_video() && !isMobile && HAS_COORS && !IS_SAFARI) ? true : false,
 		muted: muteVideo, // || !PLAYING,
-		useBackground: useBackground,
 		subtitleHander: addSubtitles,
 		onCanPlayThrough: kickOff
 	});
 
 	popcornPlayer.setup();
 
-
-	// // var motionThresholds = new MotionThresholds();
-	// var videoController = new MirrorVideoController({
-	// 	muteVideo: muteVideo || !PLAYING,
-	// 	useBackground: useBackground,
-	// 	subtitleHander: addSubtitles,
-	// 	verbose: false,
-	// 	isVideo:  ( supports_video() && !isMobile && HAS_COORS && !IS_SAFARI) ? true : false
-	// });
 	var mouthRect ;
 	var mouthPositions = {
 		"straight": new THREE.Vector3( -.01, -.18, .05 ),
@@ -143,8 +119,6 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 		"up": new THREE.Vector3( -0.0, -.1, .05 ),
 		"down": new THREE.Vector3( 0., -.25, .05 )
 	}
-
-	// videoController.setVolume(0);
 
 	var currentVideo = previousVideo = "doYouLikeHorses?";
 
@@ -225,7 +199,6 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 			height: 120
 		});
 
-
 		slitMesh.material.map = slit.texture;
 
 		// backgroundWebcamMat = new BackgroundWebcamMaterial();
@@ -279,16 +252,9 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 			{
 				$("#play").html("PAUSE");
 				popcornPlayer.play();
-				// if(videoController.bPaused)	{
-				// 	console.log( "videoController.bPaused" );
-				// 	videoController.pauseVideos();
-				// }else{
-				// 	videoController.playVideos();
-				// }
 			} else {
 				$("#play").html("PLAY");
 				popcornPlayer.pause();
-				// videoController.pauseVideos();
 			}
 		})
 
@@ -363,8 +329,6 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 
 		if( bWebcamBackground1 || bWebcamBackground2 )
 		{
-			// slit.webcamMesh.material.uniforms.time.value = clock.getElapsedTime();
-
 			if(bFadeInWebcam)
 			{
 				if(bWebcamBackground1)

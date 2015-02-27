@@ -142,11 +142,8 @@ var AzealiaPopcornPlayer = function(params)
 
 		}
 
-		// if(settings.muted)
-		// {
-			console.log( "settings.muted == true" );
-			settings.videos["BackgroundVideo"].mute();
-		// }
+		//we want to keep it quiet until we play
+		settings.videos["BackgroundVideo"].mute();
 
 		//BASED ON THIS: http://jsfiddle.net/aqUNf/1/
 		// iterate both media sources
@@ -258,7 +255,7 @@ var AzealiaPopcornPlayer = function(params)
 	
 	function sync()
 	{
-		if( loadCount == 6 )
+		if( loadCount >= 6 )
 		{
 			// var currentTime = settings.videos["BackgroundVideo"].currentTime();
 

@@ -71,7 +71,7 @@ MirrorVideoController = function(params)
 	//this.isVideo = (supports_video() && supports_crossorigin()) ? true : false;
 	this.isVideo = params.isVideo;// (supports_video() && !isMobile) ? true : false;
 
-	var fmt = ".mp4";// Modernizr.video.webm !== "" ? ".webm" : ".mp4";
+	var fmt = Modernizr.video.webm !== "" ? ".webm" : ".mp4";
 
 	if ( iOS ){
 		//fmt = "_mobile" + fmt;
