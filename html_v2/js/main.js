@@ -210,6 +210,7 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 				console.log("onGetUserMedia: ", "success");
 				slit.webcamMesh.material.uniforms.map.value = texture;
 				HAS_WEBCAM = true;
+				$("#calltoaction").html("Move your face.");
 			},
 			onGetUserMediaFail: function(e)
 			{
@@ -250,8 +251,14 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 
 			if ( !wasPlaying )
 			{
-				$("#play").html("PAUSE");
+				// $("#play").html("PAUSE");
 				popcornPlayer.play();
+				$("#play").css("visibility", "hidden");
+				$("#play").css("display", "none");
+
+				$("#lyrics").css("visibility", "visible");
+				$("#lyrics").css("display", "visible");
+
 			} else {
 				$("#play").html("PLAY");
 				popcornPlayer.pause();
