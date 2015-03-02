@@ -79,10 +79,10 @@ var AzealiaPopcornPlayer = function(params)
 		{
 			settings.videoFiles = params.videoFiles || {
 				"BackgroundVideo": {path: "../720p/AB_BACKGROUND" + fmt},
-				"01": {path: 	"../720p/AB_1_Straight_1_1" + fmt},
+				"01": {path: 	"../720p/AB_1_Straight" + fmt},
 				"02": {path: 	"../720p/AB_1_Up" + fmt},	
-				"03": {path: 	"../720p/AB_1_Down_1" + fmt},
-				"04": {path: 	"../720p/AB_1_Left_1_2" + fmt},
+				"03": {path: 	"../720p/AB_1_Down" + fmt},
+				"04": {path: 	"../720p/AB_1_Left" + fmt},
 				"05": {path: 	"../720p/AB_1_Right" + fmt},
 			};
 
@@ -90,10 +90,10 @@ var AzealiaPopcornPlayer = function(params)
 			{
 				settings.videoFiles = params.videoFiles || {
 					"BackgroundVideo": {path: "http://storage.googleapis.com/wallace_videos/AB_BACKGROUND" + fmt},
-					"01": {path: 	"http://storage.googleapis.com/wallace_videos/AB_1_Straight_1_1" + fmt},
+					"01": {path: 	"http://storage.googleapis.com/wallace_videos/AB_1_Straight" + fmt},
 					"02": {path: 	"http://storage.googleapis.com/wallace_videos/AB_1_Up" + fmt},	
-					"03": {path: 	"http://storage.googleapis.com/wallace_videos/AB_1_Down_1" + fmt},
-					"04": {path: 	"http://storage.googleapis.com/wallace_videos/AB_1_Left_1_2" + fmt},
+					"03": {path: 	"http://storage.googleapis.com/wallace_videos/AB_1_Down" + fmt},
+					"04": {path: 	"http://storage.googleapis.com/wallace_videos/AB_1_Left" + fmt},
 					"05": {path: 	"http://storage.googleapis.com/wallace_videos/AB_1_Right" + fmt},
 				};
 			}
@@ -101,10 +101,10 @@ var AzealiaPopcornPlayer = function(params)
 			{
 				settings.videoFiles = params.videoFiles || {
 					"BackgroundVideo": {path: "../720p/AB_BACKGROUND" + fmt},
-					"01": {path: 	"../720p/AB_1_Straight_1_1" + fmt},
+					"01": {path: 	"../720p/AB_1_Straight" + fmt},
 					"02": {path: 	"../720p/AB_1_Up" + fmt},	
-					"03": {path: 	"../720p/AB_1_Down_1" + fmt},
-					"04": {path: 	"..720p/AB_1_Left_1_2" + fmt},
+					"03": {path: 	"../720p/AB_1_Down" + fmt},
+					"04": {path: 	"..720p/AB_1_Left" + fmt},
 					"05": {path: 	"../720p/AB_1_Right" + fmt},
 				};
 			}
