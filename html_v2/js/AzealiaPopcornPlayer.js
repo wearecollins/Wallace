@@ -17,7 +17,8 @@ var AzealiaPopcornPlayer = function(params)
 		fmt: Modernizr.video.h264 === "" ? ".webm" : ".mp4",
 		// fmt: Modernizr.video.webm !== "" ? ".webm" : ".mp4",
 		bufferTime: 20,
-		onCanPlayThrough: params.onCanPlayThrough || function(e){}
+		onCanPlayThrough: params.onCanPlayThrough || function(e){},
+		onReady: params.onReady || function(e){}
 	}
 
 	var inverseVideoMap = {
@@ -138,7 +139,7 @@ var AzealiaPopcornPlayer = function(params)
 			// loading call back
 			// we only want to show the controls of our video and begin playing it once more then half of the video has been loaded
 			settings.videos[i].pause();
-			loader( settings.videos[i] );
+			//loader( settings.videos[i] );
 
 		}
 
@@ -151,6 +152,7 @@ var AzealiaPopcornPlayer = function(params)
 			
 			//can play through
 			media.on( "canplaythrough", function( e ) {
+				console.log(playThroughCount);
 				playThroughCount++;
 				if(playThroughCount == 6)
 				{
@@ -169,6 +171,8 @@ var AzealiaPopcornPlayer = function(params)
 				
 				// Once both items are loaded, sync events
 				if ( ++loadCount == 6 ) {
+
+					settings.onReady();
 					
 					// Iterate all events and emit them on the video B
 					// whenever they occur on the video A
@@ -255,6 +259,8 @@ var AzealiaPopcornPlayer = function(params)
 	
 	function sync()
 	{
+		console.log();
+
 		if( loadCount >= 6 )
 		{
 			// var currentTime = settings.videos["BackgroundVideo"].currentTime();
@@ -272,6 +278,8 @@ var AzealiaPopcornPlayer = function(params)
 				settings.currentTexture.needsUpdate = true;
 
 				settings.textures["BackgroundVideo"].needsUpdate = true;
+			} else {
+				console.log("undef");
 			}
 		}
 	}
@@ -283,7 +291,7 @@ var AzealiaPopcornPlayer = function(params)
 
 	function getTexture( videoName )
 	{
-		if( playThroughCount == 6 )
+		if( playThroughCount >= 6 )
 		{
 			var textureName = inverseVideoMap[videoName];
 			

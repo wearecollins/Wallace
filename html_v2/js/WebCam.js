@@ -49,7 +49,7 @@ function WebCam(defaultVideoTag) {
             videoTag.setAttribute('width', 160);
             videoTag.setAttribute('height', 120);
             
-            if ( navigator.getUserMedia == null || !hasUserMedia ){
+            if ( navigator.getUserMedia == null || !HAS_USER_MEDIA ){
                 errorCallback({code:0});
                 return;
             }

@@ -18,13 +18,10 @@ var app;
 var LYRICS_ON 	= false;
 var PLAYING		= false;
 var HAS_PLAYED 	= false;
-var HAS_WEBCAM = false;
+var HAS_WEBCAM 	= false;
+
 var HAS_COORS = supports_crossorigin();
 var IS_SAFARI = (navigator.userAgent.indexOf('Safari') != -1 && navigator.userAgent.indexOf('Chrome') == -1);
-
-
-console.log( "HAS_COORS: " + HAS_COORS );
-console.log( "IS_SAFARI: " + IS_SAFARI )
 
 // ABOUT
 var iOS = ( navigator.userAgent.match(/(iPad|iPhone|iPod)/g) ? true : false );
@@ -38,8 +35,8 @@ if (!navigator.getUserMedia) {
                              navigator.msGetUserMedia || null;
 }
 
-var hasWebGL 		= Modernizr.webgl;
-var hasUserMedia 	= (Modernizr.webgl ? navigator.getUserMedia === null : false );
+var HAS_WEBGL 		= Modernizr.webgl;
+var HAS_USER_MEDIA 	= (Modernizr.webgl ? navigator.getUserMedia === null : false );
 
 $(window).bind("load", function() {
 	THREE.ImageUtils.crossOrigin = '';
@@ -68,6 +65,11 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 	var debug = _debug;
 	var useStats = debug;//_useStats || true;
 	var frame = 0;
+
+	if ( debug ){
+		console.log( "HAS_COORS: " + HAS_COORS );
+		console.log( "IS_SAFARI: " + IS_SAFARI )
+	}
 
 
 	//STATS
@@ -102,11 +104,16 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 		this.bgm = slitMesh;
 	}
 
+	function onReady(){
+
+	}
+
 	var popcornPlayer = new AzealiaPopcornPlayer({
 		isVideo:  ( supports_video() && !isMobile && HAS_COORS && !IS_SAFARI) ? true : false,
 		muted: muteVideo, // || !PLAYING,
 		subtitleHander: addSubtitles,
-		onCanPlayThrough: kickOff
+		onCanPlayThrough: kickOff,
+		onReady: onReady
 	});
 
 	popcornPlayer.setup();
@@ -253,6 +260,7 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 			{
 				// $("#play").html("PAUSE");
 				popcornPlayer.play();
+				$("#calltoaction").css("opacity", "0");
 				$("#play").css("visibility", "hidden");
 				$("#play").css("display", "none");
 
@@ -260,8 +268,8 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 				$("#lyrics").css("display", "visible");
 
 			} else {
-				$("#play").html("PLAY");
-				popcornPlayer.pause();
+				// $("#play").html("PLAY");
+				// popcornPlayer.pause();
 			}
 		})
 
@@ -280,17 +288,17 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 			} else {
 				$("#lyrics").html("LYRICS");
 			}
-		})
+		});
 
 
-	function createFallMesh(string, time) {
-		if ( !window.textMeshes ){
-			window.textMeshes = [];
-			// console.log(time)
-		}
+		function createFallMesh(string, time) {
+			if ( !window.textMeshes ){
+				window.textMeshes = [];
+				// console.log(time)
+			}
 
-		window.textMeshes.push( {started: false, mesh:new THREE.TextTexture(string, 24, "#fff", "Cardo", "#000", 10), time:time});
-	};
+			window.textMeshes.push( {started: false, mesh:new THREE.TextTexture(string, 24, "#fff", "Cardo", "#000", 10), time:time});
+		};
 	
 		//LYRICS
 		//	create subtitles
@@ -318,9 +326,23 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 	var webcamBackgroundTime2 = {start:162.386, end: 191.124};
 	var bTransitioningBackground = false, bFadeInWebcam = true;
 
+	// accumulated delta
+	var moved = {x:0,y:0};
+	var cta_visible = true;
+
 	function update()
 	{
 		frame++;
+
+		// do we need to move our face still?
+		if ( !PLAYING && cta_visible && HAS_WEBCAM ){
+			moved.x += Math.abs(delta.x);
+			moved.y += Math.abs(delta.y);
+			if ( moved.x + moved.y > 10.0 ){
+				cta_visible = false;
+				$("#calltoaction").css("opacity", "0");
+			}
+		}
 
 		// if ( videoController.videoToLoadCount != 0 ) return;
 
@@ -343,7 +365,6 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 		videoSelectionBox.setRotationFromAxisAngle({x:0,y:0,z:1}, delta.x  *.25 );
 		videoSelectionBox.position.x = delta.x * -100;	
 		videoSelectionBox.position.y = delta.y * -150;	
-
 
 		depthSampleScale = Math.max(Math.min(1, lastDelta.distanceTo( delta ) * 50.), depthSampleScale * .985);
 		slit.setDepthSampleScale( depthSampleScale * .5 + .5 );
@@ -555,6 +576,7 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 
 	function positionSubtitles(){
 		// move subtitles
+		if ( !window.textMeshes ) return;
 		for ( var i =0; i<window.textMeshes.length; i++ ){
 			var sub = window.textMeshes[i];
 			if ( !sub.started ){
@@ -632,7 +654,7 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 		requestAnimationFrame( animate );
 		update();
 		TWEEN.update();
-		if ( hasWebGL ) draw();
+		if ( HAS_WEBGL ) draw();
 
 		if(useStats)
 		{
@@ -643,15 +665,15 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 	if ( ! Detector.webgl )
 	{
 		if ( !debug ){
-			hasWebGL = false;
-			hasUserMedia = false;
+			HAS_WEBGL = false;
+			HAS_USER_MEDIA = false;
 		}
 		//Detector.addGetWebGLMessage();
 		//document.getElementById( container ).innerHTML = "";
 	}
 
 
-	if ( hasWebGL) rendererSetup();
+	if ( HAS_WEBGL) rendererSetup();
 	if(useStats)
 	{	
 		stats = new Stats();
