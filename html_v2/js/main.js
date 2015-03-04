@@ -19,6 +19,7 @@ var LYRICS_ON 	= false;
 var PLAYING		= false;
 var HAS_PLAYED 	= false;
 var HAS_WEBCAM 	= false;
+var TEST_WEBCAM = false;
 
 var HAS_COORS = supports_crossorigin();
 var IS_SAFARI = (navigator.userAgent.indexOf('Safari') != -1 && navigator.userAgent.indexOf('Chrome') == -1);
@@ -106,8 +107,6 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 
 	function kickOff()
 	{
-		console.log( "kickOff" );
-		
 		setup();
 		this.s = scene;
 		events();
@@ -120,7 +119,6 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 	}
 
 	function onVideoDone(){
-		console.log("Reset subs?")
 		resetSubtitles();
 		// for now video restarts itself
 	}
@@ -170,7 +168,6 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 
 		//BACKGROUND PLANE
 		var backgroundTexture = popcornPlayer.getTexture("background");
-		console.log( "backgroundTexture: ", backgroundTexture );
 		backgroundVideoMat = new THREE.MeshBasicMaterial( {
 			map: backgroundTexture,
 			color: 0xFFFFFF,
@@ -232,15 +229,51 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 			height: tracking.height,
 			onGetUserMedia: function(texture)
 			{
-				console.log("onGetUserMedia: ", "success");
+				if (debug) console.log("onGetUserMedia: ", "success");
 				slit.webcamMesh.material.uniforms.map.value = texture;
 				HAS_WEBCAM = true;
+				TEST_WEBCAM = true;
 				$("#calltoaction").html("Move your face.");
+
+				//LYRICS
+				//	create subtitles
+				$.getJSON( "../WALLACE_TESTS/subtitles.json", 
+					function(data) {
+						var cues = data.entries;
+
+						for ( var i=0; i<cues.length; i++){
+							var cue = cues[i];
+							createFallMesh( cues[i].text, timeCodeToInt(cues[i].start) );
+						}
+
+						// alert parent we're donezo
+						if ( addSubtitles ) addSubtitles( window.textMeshes );
+					}
+				);
 			},
 			onGetUserMediaFail: function(e)
 			{
 				console.log("onGetUserMediaFail:", e)
 				HAS_WEBCAM = false;
+				TEST_WEBCAM = true;
+
+				$("#calltoaction").html("Move your mouse.");
+
+				//LYRICS
+				//	create subtitles
+				$.getJSON( "../WALLACE_TESTS/subtitles.json", 
+					function(data) {
+						var cues = data.entries;
+
+						for ( var i=0; i<cues.length; i++){
+							var cue = cues[i];
+							createFallMesh( cues[i].text, timeCodeToInt(cues[i].start) );
+						}
+
+						// alert parent we're donezo
+						if ( addSubtitles ) addSubtitles( window.textMeshes );
+					}
+				);
 			}
 		});
 
@@ -273,6 +306,7 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 				// videoController.setVideoPosition(0);
 				// videoController.setVolume( muteVideo? 0 : 1.0);
 			}
+			
 
 			if ( !wasPlaying )
 			{
@@ -282,8 +316,20 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 				$("#play").css("visibility", "hidden");
 				$("#play").css("display", "none");
 
+				// show credits
 				$("#lyrics").css("visibility", "visible");
-				$("#lyrics").css("display", "visible");
+				$("#lyrics").css("display", "block");
+
+				setTimeout(function(){
+				$	("#lyrics").css("opacity", "1");
+				}, 5000)
+
+				$("#credits").addClass("credits_small");
+				$("#title").addClass("title_small");
+				$("#credits").css("opacity", "1");
+				$(".credit").addClass("credit_small");
+				$(".wallace").addClass("wallace_small");
+				$(".w").addClass("ws");
 
 			} else {
 				// $("#play").html("PLAY");
@@ -302,11 +348,23 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 				}
 			}
 			if ( !wasOn ){
-				$("#lyrics").html("NO LYRICS");
+				$("#lyrics").html("No Lyrics");
 			} else {
-				$("#lyrics").html("LYRICS");
+				$("#lyrics").html("Lyrics");
 			}
 		});
+
+		var fullShown = false;
+		$("#fullcredits").click( function(){
+			fullShown = !fullShown;
+			if (fullShown){
+				$("#full").css("visibility", "visible");
+				$("#full").css("display", "block")
+			} else {
+				$("#full").css("visibility", "hidden");
+				$("#full").css("display", "none")
+			}
+		})
 
 
 		function createFallMesh(string, time) {
@@ -315,24 +373,10 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 				// console.log(time)
 			}
 
-			window.textMeshes.push( {started: false, mesh:new THREE.TextTexture(string, 24, "#fff", "Cardo", "#000", 10), time:time});
+			window.textMeshes.push( {started: false, mesh:new THREE.TextTexture(string, 24, "#fff", '"Cardo" serif', "#000", 10), time:time});
 		};
 	
-		//LYRICS
-		//	create subtitles
-		$.getJSON( "../WALLACE_TESTS/subtitles.json", 
-			function(data) {
-				var cues = data.entries;
-
-				for ( var i=0; i<cues.length; i++){
-					var cue = cues[i];
-					createFallMesh( cues[i].text, timeCodeToInt(cues[i].start) );
-				}
-
-				// alert parent we're donezo
-				if ( addSubtitles ) addSubtitles( window.textMeshes );
-			}
-		);
+		
 	}
 
 	/**
@@ -344,6 +388,31 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 	var webcamBackgroundTime2 = {start:162.386, end: 191.124};
 	var bTransitioningBackground = false, bFadeInWebcam = true;
 
+	var overlayHidden = false;
+
+	function hideOverlay(){
+		if ( !overlayHidden ){
+			overlayHidden = true;
+
+			$("#calltoaction").css("opacity", "0");
+			$("#play").css("visibility", "visible");
+			$("#play").css("display", "block");
+			$("#play").css("opacity", "1");
+			$("#overlay").css("opacity", "0");
+			$("#credits").css("opacity", "0");
+
+			setTimeout ( function(){
+				//console.log("hide")
+				$("#overlay").css("display", "none");
+				// $("#creditsContainer").css("display", "none");
+				$("#calltoaction").css("display", "none");
+				$("#overlay").css("visibility", "hidden");
+				$("#calltoaction").css("visibility", "hidden");
+
+			}, 2500)
+		}
+	}
+
 	// accumulated delta
 	var moved = {x:0,y:0};
 	var cta_visible = true;
@@ -353,12 +422,12 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 		frame++;
 
 		// do we need to move our face still?
-		if ( !PLAYING && cta_visible && HAS_WEBCAM ){
+		if ( !PLAYING && cta_visible && TEST_WEBCAM ){
 			moved.x += Math.abs(delta.x);
 			moved.y += Math.abs(delta.y);
 			if ( moved.x + moved.y > 10.0 ){
 				cta_visible = false;
-				$("#calltoaction").css("opacity", "0");
+				hideOverlay();
 			}
 		}
 

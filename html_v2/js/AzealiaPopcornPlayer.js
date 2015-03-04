@@ -113,7 +113,7 @@ var AzealiaPopcornPlayer = function(params)
 		} 
 		else
 		{
-			console.log( "this.isVideo == false" );
+			//console.log( "this.isVideo == false" );
 			
 			settings.videoFiles = params.videoFiles || {
 				"BackgroundVideo": {path: "images/black.jpg"},
@@ -153,7 +153,7 @@ var AzealiaPopcornPlayer = function(params)
 			
 			//can play through
 			media.on( "canplaythrough", function( e ) {
-				console.log("can play ", playThroughCount);
+				//console.log("can play ", playThroughCount);
 				playThroughCount++;
 				if(playThroughCount == 6)
 				{
@@ -163,12 +163,12 @@ var AzealiaPopcornPlayer = function(params)
 
 			// play
 			media.on( "play", function( e ) {
-				console.log("play", playingCount);
+				//console.log("play", playingCount);
 				playingCount++;
 				if ( playingCount == 6 ){
 					// playing first time
 				} else if ( playingCount == 12 ){
-					console.log("restart");
+					//console.log("restart");
 
 				}
 			}, false );
@@ -254,12 +254,12 @@ var AzealiaPopcornPlayer = function(params)
 			// if we have buffered more then half the video
 			if ( buff.length > 0 && buff.end(0) > settings.bufferTime )
 			{
-				console.log( video.media.id, "LOADED" );
+				//console.log( video.media.id, "LOADED" );
 			// if less then half the video has loaded call our function again
 			}
 			else
 			{
-				console.log( "Still Loading...." );
+				//console.log( "Still Loading...." );
 				setTimeout( loaded, 1000 );
 			}
 		}
@@ -329,7 +329,7 @@ var AzealiaPopcornPlayer = function(params)
 				return settings.currentTexture;
 			}
 			else{
-				console.log( "settings.textures["+ textureName + "] === undefined" );
+				//console.log( "settings.textures["+ textureName + "] === undefined" );
 			}
 		}
 

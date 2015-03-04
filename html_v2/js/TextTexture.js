@@ -2,7 +2,7 @@ var THREE = THREE || {};
 
 THREE.TextTexture = function(text, size, color, font, backGroundColor, backgroundMargin) {
 	backgroundMargin = backgroundMargin !== undefined ? backgroundMargin : 4;
-	font = font !== undefined ? font : "Cardo";
+	font = font !== undefined ? font : "Cardo serif";
 
 	var canvas = document.createElement("canvas");
 

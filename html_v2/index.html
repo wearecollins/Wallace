@@ -3,7 +3,7 @@
 <head>
 	<meta charset="utf-8">
 	<title>WALLACE</title>
-	<link href='http://fonts.googleapis.com/css?family=Cardo' rel='stylesheet' type='text/css'>
+	<link href='https://www.google.com/fonts#UsePlace:use/Collection:Cardo:400,400italic' rel='stylesheet' type='text/css'>
 	<link rel="stylesheet" type="text/css" href="css/style.css" />
 
 	<script type="text/javascript" src="js/includes/modernizr.js"></script>
@@ -31,14 +31,22 @@
 
 </head>
 <body>
-	<div id="overlay">
-		<div id="title">Azealia Banks<br/>"Wallace"<br /><br /></div>
-		<div id="credits">Directed by<br />Nick Ace x Rob Soucy<br/><br/>Produced by<br/>COLLINS</div>
-		<div id="spacer"></div>
-		<div id="play" class="button">PLAY</div>
-		<div id="lyrics" class="button">LYRICS</div>
+	<div id="overlay"></div>
+	<div id="creditsContainer">
+		<div id="credits" class="credits">
+			<div id="spacer" class="credit"></div>
+			<div id="title" class="credit title">Azealia <br/>Banks<br/><span class="wallace">&ldquo;<span class="w">W</span>allace&rdquo;</span></div>
+			<div id="na_rs" class="credit"><em>Directed by</em><br />Nick Ace<br/>Rob Soucy</div>
+			<div id="collins" class="credit"><em>Produced by</em><br/><a href="http://www.collins1.com" target="_blank">COLLINS</a><br /><br />
+				<div id="full"><em>Director of<br />Interaction</em><br />Brett Renfer<br /><br /><em>Developer</em><br /><a href="http://lars-berg.com" target="_blank">Lars Berg</a></div>
+			</div>
+			<div id="chrome" class="credit"><em>Designed for</em><br/><a href="http://www.google.com/chrome">Google Chrome</a><br /><br /><div id="fullcredits"><em>Full credits</em></div></div>
+			<div id="spacer" class="credit"></div>
+		</div>
 	</div>
-	<div id="calltoaction">Click "Allow" up there.</div>
+	<div id="calltoaction" class="calltoaction">Click &ldquo;Allow&rdquo; webcam to begin.</div>
+	<div id="play" class="calltoaction">Play</div>
+	<div id="lyrics" class="calltoaction">Lyrics</div>
 
 	<script type="text/javascript" src="js/main.js"></script>
 	
