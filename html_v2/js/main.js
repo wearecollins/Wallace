@@ -88,15 +88,17 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 		for ( var i =0; i<window.textMeshes.length; i++ ){
 			var sub = window.textMeshes[i];
 			sub.started = false;
+			sub.mesh.visible = true;
+			sub.mesh.parent.visible = true;
 		}
 		positionSubtitles();
 	}
 
 	function addSubtitles( subs ){
 		positionSubtitles();
-		for ( var i =0; i<window.textMeshes.length; i++ ){
+		for ( var i =0; i<subs.length; i++ ){
 			var sub = window.textMeshes[i];
-			if ( LYRICS_ON ) scene.add( subs[i].mesh );
+			if ( LYRICS_ON ) scene.add( sub.mesh );
 		}
 	}
 
@@ -117,6 +119,7 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 	}
 
 	function onVideoDone(){
+		console.log("Reset subs?")
 		resetSubtitles();
 		// for now video restarts itself
 	}

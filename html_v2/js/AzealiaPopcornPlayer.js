@@ -34,7 +34,7 @@ var AzealiaPopcornPlayer = function(params)
 		background: "BackgroundVideo"
 	}
 
-	var loadCount = 0, playThroughCount = 0, playingCount = 0;
+	var loadCount = 0, playThroughCount = 0, playingCount = 0, endedCount = 0;
 	var events = "play pause timeupdate".split(/\s+/g);
 
 	function createVideo(  name, url, type, onLoadComplete )
@@ -169,12 +169,26 @@ var AzealiaPopcornPlayer = function(params)
 					// playing first time
 				} else if ( playingCount == 12 ){
 					console.log("restart");
-					for(var i in settings.videos)
-					{
-						settings.videos[i].play( 0 );
-					}
+
 				}
 			}, false );
+
+			// end
+			media.on( "ended", function(){
+				endedCount++;
+				if ( endedCount == 6 ){
+					endedCount = 0;
+					//playThroughCount = 0;
+					playingCount = 0;
+
+					// for(var i in settings.videos)
+					// {
+					// 	settings.videos[i].play( 0 );
+					// }
+					settings.videos["BackgroundVideo"].play(0);
+					settings.onComplete();
+				}
+			});
 
 			// when each is ready... 
 			media.on( "canplayall", function() {
@@ -225,9 +239,8 @@ var AzealiaPopcornPlayer = function(params)
 						});
 					});
 				}
-			}).on("ended", function(e){
-				settings.onComplete();
-			});
+			})
+
 		});
 	}
 
