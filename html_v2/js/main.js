@@ -84,6 +84,14 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 	var camera, scene = new THREE.Scene(), slitScene = new THREE.Scene();
 	var slitMesh;
 
+	function resetSubtitles(){
+		for ( var i =0; i<window.textMeshes.length; i++ ){
+			var sub = window.textMeshes[i];
+			sub.started = false;
+		}
+		positionSubtitles();
+	}
+
 	function addSubtitles( subs ){
 		positionSubtitles();
 		for ( var i =0; i<window.textMeshes.length; i++ ){
@@ -108,12 +116,18 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 
 	}
 
+	function onVideoDone(){
+		resetSubtitles();
+		// for now video restarts itself
+	}
+
 	var popcornPlayer = new AzealiaPopcornPlayer({
 		isVideo:  ( supports_video() && !isMobile && HAS_COORS && !IS_SAFARI) ? true : false,
 		muted: muteVideo, // || !PLAYING,
 		subtitleHander: addSubtitles,
 		onCanPlayThrough: kickOff,
-		onReady: onReady
+		onReady: onReady,
+		onComplete: onVideoDone
 	});
 
 	popcornPlayer.setup();
@@ -621,7 +635,6 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 				break;
 
 			default:
-				console.log("chill out");
 				break;
 		}
 	}

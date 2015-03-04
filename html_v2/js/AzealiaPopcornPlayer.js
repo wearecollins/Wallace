@@ -18,7 +18,8 @@ var AzealiaPopcornPlayer = function(params)
 		// fmt: Modernizr.video.webm !== "" ? ".webm" : ".mp4",
 		bufferTime: 20,
 		onCanPlayThrough: params.onCanPlayThrough || function(e){},
-		onReady: params.onReady || function(e){}
+		onReady: params.onReady || function(e){},
+		onComplete: params.onComplete || function(e){}
 	}
 
 	var inverseVideoMap = {
@@ -33,13 +34,13 @@ var AzealiaPopcornPlayer = function(params)
 		background: "BackgroundVideo"
 	}
 
-	var loadCount = 0, playThroughCount = 0;
+	var loadCount = 0, playThroughCount = 0, playingCount = 0;
 	var events = "play pause timeupdate".split(/\s+/g);
 
 	function createVideo(  name, url, type, onLoadComplete )
 	{
 		var videoElement = document.createElement( 'video' );
-		videoElement.setAttribute("loop", "");
+		//videoElement.setAttribute("loop", "");
 		videoElement.setAttribute("type", type);
 		// videoElement.setAttribute("preload", "auto");
 		
@@ -152,11 +153,26 @@ var AzealiaPopcornPlayer = function(params)
 			
 			//can play through
 			media.on( "canplaythrough", function( e ) {
-				console.log(playThroughCount);
+				console.log("can play ", playThroughCount);
 				playThroughCount++;
 				if(playThroughCount == 6)
 				{
 					settings.onCanPlayThrough();
+				}
+			}, false );
+
+			// play
+			media.on( "play", function( e ) {
+				console.log("play", playingCount);
+				playingCount++;
+				if ( playingCount == 6 ){
+					// playing first time
+				} else if ( playingCount == 12 ){
+					console.log("restart");
+					for(var i in settings.videos)
+					{
+						settings.videos[i].play( 0 );
+					}
 				}
 			}, false );
 
@@ -209,6 +225,8 @@ var AzealiaPopcornPlayer = function(params)
 						});
 					});
 				}
+			}).on("ended", function(e){
+				settings.onComplete();
 			});
 		});
 	}
@@ -259,8 +277,6 @@ var AzealiaPopcornPlayer = function(params)
 	
 	function sync()
 	{
-		console.log();
-
 		if( loadCount >= 6 )
 		{
 			// var currentTime = settings.videos["BackgroundVideo"].currentTime();
@@ -279,7 +295,6 @@ var AzealiaPopcornPlayer = function(params)
 
 				settings.textures["BackgroundVideo"].needsUpdate = true;
 			} else {
-				console.log("undef");
 			}
 		}
 	}

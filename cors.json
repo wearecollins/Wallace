@@ -1,8 +1,14 @@
 [
     {
-      "origin": ["wallace-01.appspot.com", "localhost", "*"],
-      "responseHeader": ["video/mp4", "video/webm"],
-      "method": ["GET", "HEAD", "PUT", "DELETE"],
-      "maxAgeSeconds": 36000
+      "origin": ["wallace-01.appspot.com/*", "localhost/*", "*"],
+      "responseHeader": ["video/mp4","video/webm"],
+      "method": ["GET", "POST", "HEAD", "PUT", "OPTIONS"],
+      "maxAgeSeconds": 18000
+    },
+    {
+      "origin": ["wallace-01.appspot.com/*", "localhost/*", "*"],
+      "responseHeader": ["video/webm"],
+      "method": ["GET", "POST", "HEAD", "PUT", "OPTIONS"],
+      "maxAgeSeconds": 3000
     }
 ]
