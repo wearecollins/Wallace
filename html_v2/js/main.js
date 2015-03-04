@@ -90,6 +90,7 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 			sub.started = false;
 			sub.mesh.visible = true;
 			sub.mesh.parent.visible = true;
+			sub.mesh.rotation.z = 0;
 		}
 		positionSubtitles();
 	}
