@@ -238,7 +238,7 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 
 				//LYRICS
 				//	create subtitles
-				$.getJSON( "../WALLACE_TESTS/subtitles.json", 
+				$.getJSON( "../subtitles/subtitles.json", 
 					function(data) {
 						var cues = data.entries;
 
@@ -262,7 +262,7 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 
 				//LYRICS
 				//	create subtitles
-				$.getJSON( "../WALLACE_TESTS/subtitles.json", 
+				$.getJSON( "../subtitles/subtitles.json", 
 					function(data) {
 						var cues = data.entries;
 

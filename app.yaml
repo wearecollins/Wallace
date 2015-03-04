@@ -28,13 +28,8 @@ handlers:
   login: required
   auth_fail_action: redirect
 
-- url: /WALLACE_TESTS
-  static_dir: WALLACE_TESTS
-  login: required
-  auth_fail_action: redirect
-
-- url: /720p
-  static_dir: 720p
+- url: /subtitles
+  static_dir: html_v2/subtitles
   login: required
   auth_fail_action: redirect
 
@@ -55,9 +50,9 @@ handlers:
   static_files: html_v2/blendMaps/\1
   upload: html_v2/blendMaps/.*\.(gif|png|jpg|mp4)$
 
-- url: /WALLACE_TESTS/(.*\.(gif|png|jpg|mp4|vtt))$
-  static_files: WALLACE_TESTS/\1
-  upload: WALLACE_TESTS/.*\.(gif|png|jpg|mp4|vtt)$
+- url: /subtitles/(.*\.(gif|png|jpg|mp4|vtt))$
+  static_files: subtitles/\1
+  upload: subtitles/.*\.(gif|png|jpg|mp4|vtt)$
   mime_type: video/mp4
   expiration: "7d"
 
