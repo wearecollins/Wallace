@@ -80,7 +80,7 @@ var SlitScan = function( params )
 	canvas.id     = "distortionCanvas";
 	canvas.width  = dimX;
 	canvas.height = dimY;
-	canvasContext = canvas.getContext('2d');
+	var canvasContext = canvas.getContext('2d');
 
 	var bDistortionLoaded = false;
 

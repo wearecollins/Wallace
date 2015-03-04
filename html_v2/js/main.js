@@ -143,13 +143,14 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 		"down": new THREE.Vector3( 0., -.25, .05 )
 	}
 
+	var previousVideo;
 	var currentVideo = previousVideo = "doYouLikeHorses?";
 
 	var backgroundWebcamMat, backgroundVideoMat;
 	
 	// camera
 	var webcam;
-	var cameraTexture, slit, tracking, videoSelectionBox, azealiaMesh, depthSampleScale = 0;
+	var cameraTexture, slit, screenPlane, backgroundMesh, tracking, videoSelectionBox, azealiaMesh, depthSampleScale = 0;
 
 	function setup() 
 	{

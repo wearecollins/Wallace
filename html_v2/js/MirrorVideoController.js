@@ -60,7 +60,7 @@ var AzealiaVideoObject = function(params, useWebGL)
 	this.vidPosition = {position: 0.0001};
 }
 
-MirrorVideoController = function(params)
+var MirrorVideoController = function(params)
 {
 	params = params || {};
 	this.doubleWide = params.doubleWide || false;

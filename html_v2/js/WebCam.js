@@ -34,7 +34,7 @@ function WebCam(defaultVideoTag) {
                            window.msRequestAnimationFrame     ||
                            function( callback ) { window.setTimeout(callback, 1000 / 60); },
         cancelAnimFrame =  window.cancelAnimationFrame ||
-                           window.mozCancelAnimationFrame;
+                           window.mozCancelAnimationFrame,
 
         onWebCamFail = function onWebCamFail(e) {
             if(e.code === 1){
