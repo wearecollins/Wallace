@@ -49,7 +49,6 @@ $(window).bind("load", function() {
 	app = new APP(useStats, debug, muteVideo, auto );
 });
 
-
 function APP( _useStats, _debug, _muteVideo, _auto)
 {
 	var muteVideo = _muteVideo;// || !PLAYING;
@@ -67,11 +66,13 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 	var useStats = debug;//_useStats || true;
 	var frame = 0;
 
+	// credits
+	var fullShown = false;
+
 	if ( debug ){
 		console.log( "HAS_COORS: " + HAS_COORS );
 		console.log( "IS_SAFARI: " + IS_SAFARI )
 	}
-
 
 	//STATS
 	var stats; 
@@ -80,6 +81,8 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 	var renderer;
 	var mouse = new THREE.Vector2(), delta = new THREE.Vector2(), lastDelta = new THREE.Vector2();
 
+	var smallLeft = 50;
+	var smallTop = 25;
 
 	//basic stuff
 	var camera, scene = new THREE.Scene(), slitScene = new THREE.Scene();
@@ -123,16 +126,7 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 		// for now video restarts itself
 	}
 
-	var popcornPlayer = new AzealiaPopcornPlayer({
-		isVideo:  ( supports_video() && !isMobile && HAS_COORS && !IS_SAFARI) ? true : false,
-		muted: muteVideo, // || !PLAYING,
-		subtitleHander: addSubtitles,
-		onCanPlayThrough: kickOff,
-		onReady: onReady,
-		onComplete: onVideoDone
-	});
-
-	popcornPlayer.setup();
+	var popcornPlayer;
 
 	var mouthRect ;
 	var mouthPositions = {
@@ -277,8 +271,6 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 				);
 			}
 		});
-
-
 	
 		//TRACKING DEBGUG
 		var debugFlipper = new THREE.Object3D();
@@ -331,7 +323,17 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 				$(".credit").addClass("credit_small");
 				$(".wallace").addClass("wallace_small");
 				$(".w").addClass("ws");
+				$(".full").css("visibility", "hidden");
+				$(".full").css("display", "none");
 
+				$("#cloud").css("visibility", "visible");
+				$("#cloud").css("display", "block");
+
+				$(".credits_small").css("left", smallLeft + "px");
+				$(".credits_small").css("top", smallTop + "px");
+				$(".credits_small").css("height", Math.max(200, window.innerHeight - (smallTop*2)) + "px");
+
+				fullShown = false;
 			} else {
 				// $("#play").html("PLAY");
 				// popcornPlayer.pause();
@@ -349,21 +351,21 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 				}
 			}
 			if ( !wasOn ){
-				$("#lyrics").html("No Lyrics");
+				$("#lyrics").html('<a href="#">No Lyrics</a>');
 			} else {
-				$("#lyrics").html("Lyrics");
+				$("#lyrics").html('<a href="#">Lyrics</a>');
 			}
 		});
 
-		var fullShown = false;
+		
 		$("#fullcredits").click( function(){
 			fullShown = !fullShown;
 			if (fullShown){
-				$("#full").css("visibility", "visible");
-				$("#full").css("display", "block")
+				$(".full").css("visibility", "visible");
+				$(".full").css("display", "block")
 			} else {
-				$("#full").css("visibility", "hidden");
-				$("#full").css("display", "none")
+				$(".full").css("visibility", "hidden");
+				$(".full").css("display", "none")
 			}
 		})
 
@@ -640,6 +642,14 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 
 		slitMesh.scale.set( w, -h, 1);
 		backgroundMesh.scale.set( w, -h, 1);
+
+		smallLeft 	= (window.innerWidth - w)/2.0 + 50;
+		smallTop 	 = (window.innerHeight - h)/2.0 + 25;
+		if ( smallLeft < 50 ) smallLeft = 50;
+		if ( smallTop < 50 ) smallTop = 50;
+		$(".credits_small").css("left", smallLeft + "px");
+		$(".credits_small").css("top", smallTop + "px");
+		$(".credits_small").css("height", Math.max(200, window.innerHeight - (smallTop*2)) + "px");
 	}
 
 	function resetCamera()
@@ -713,8 +723,21 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 		}
 	}
 
-	function rendererSetup()
+	function setupWebGL()
 	{
+		$("#calltoaction").css("opacity", "1");
+		$("#credits").css("opacity","1");
+		popcornPlayer = new AzealiaPopcornPlayer({
+			isVideo:  ( supports_video() && !isMobile && HAS_COORS && !IS_SAFARI) ? true : false,
+			muted: muteVideo, // || !PLAYING,
+			subtitleHander: addSubtitles,
+			onCanPlayThrough: kickOff,
+			onReady: onReady,
+			onComplete: onVideoDone
+		});
+
+		popcornPlayer.setup();
+
 		renderer = new THREE.WebGLRenderer( { antialias: false, devicePixelRatio: 1, alpha: true } );
 		renderer.setClearColor( 0x000000, 0. );
 		renderer.sortObjects = false;
@@ -749,6 +772,42 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 		}
 	}
 
+	function nonChromeFallback(){
+		if ( isMobile ){
+			$("#credits").css("opacity","1");
+			$("#calltoaction").css("top", "40%");
+			$("#calltoaction").html('Please open on Google Chrome for desktop');
+			
+			setTimeout(function(){
+				$("#credits").css("opacity","0");
+				$("#overlay").css("opacity","0");
+				$("#calltoaction").css("opacity","0");
+
+				setTimeout ( function(){
+					$("#creditsContainer").css("display", "none");
+					$("#creditsContainer").css("visibility", "hidden");
+					$("#credits").css("display", "none");
+					$("#credits").css("visibility", "hidden");
+
+					$("#calltoaction").css("display", "none");
+					$("#calltoaction").css("visibility", "hidden");
+					//console.log("hide")
+					$("#overlay").css("display", "none");
+					$("#overlay").css("visibility", "hidden");
+				}, 2500)
+			}, 5000);
+		} else {
+			$("#credits").css("opacity","1");
+			$("#calltoaction").html('Please open in <a href="http://www.google.com/chrome">Google Chrome</a>');
+		}
+		$("#calltoaction").css("opacity", "1");
+
+		var underlay = document.createElement("div");
+		underlay.innerHTML = '<iframe width="' + window.innerWidth+'" height="' + window.innerHeight+'" src="https://www.youtube.com/embed/nQOD8M6Okoc?loop=1&autoplay=1&autohide=1&showinfo=0" frameborder="0" allowfullscreen></iframe>'
+		underlay.className = "underlay";
+		document.body.appendChild(underlay);
+	}
+
 	if ( ! Detector.webgl )
 	{
 		if ( !debug ){
@@ -760,7 +819,12 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 	}
 
 
-	if ( HAS_WEBGL) rendererSetup();
+	// the ultimate
+	var isChrome = !!window.chrome;
+
+	if ( HAS_WEBGL && isChrome) setupWebGL();
+	else nonChromeFallback();
+
 	if(useStats)
 	{	
 		stats = new Stats();

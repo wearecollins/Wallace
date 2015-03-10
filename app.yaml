@@ -68,9 +68,9 @@ handlers:
   mime_type: video/webm
   expiration: "7d"
 
-- url: /(.*\.(gif|png|jpg|jpeg|mp4|vtt))$
+- url: /(.*\.(gif|png|jpg|jpeg|mp4|vtt|svg))$
   static_files: html/\1
-  upload: html/.*\.(gif|png|jpg|jpeg|mp4)$
+  upload: html/.*\.(gif|png|jpg|jpeg|mp4|svg)$
 
 - url: /(.*\.(html))$
   static_files: html/\1
