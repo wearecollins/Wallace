@@ -803,7 +803,7 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 		$("#calltoaction").css("opacity", "1");
 
 		var underlay = document.createElement("div");
-		underlay.innerHTML = '<iframe width="' + window.innerWidth+'" height="' + window.innerHeight+'" src="https://www.youtube.com/embed/nQOD8M6Okoc?loop=1&autoplay=1&autohide=1&showinfo=0" frameborder="0" allowfullscreen></iframe>'
+		underlay.innerHTML = '<iframe width="' + window.innerWidth+'" height="' + window.innerHeight+'" src="https://www.youtube.com/embed/6Gu28S1S64A?loop=1&autoplay=1&autohide=1&showinfo=0" frameborder="0" allowfullscreen></iframe>'
 		underlay.className = "underlay";
 		document.body.appendChild(underlay);
 	}
