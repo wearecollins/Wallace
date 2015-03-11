@@ -786,7 +786,7 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 		}
 	}
 
-	function nonChromeFallback(){
+	function nonChromeFallback( isChrome, noWebGL ){
 		if ( isMobile ){
 			$("#credits").css("opacity","1");
 			$("#calltoaction").css("top", "40%");
@@ -811,8 +811,9 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 				}, 2500)
 			}, 5000);
 		} else {
+			var CTA = isChrome ? "Please make sure your Chrome is up to date and WebGL is enabled" : 'Please open in <a href="http://www.google.com/chrome">Google Chrome</a>';
 			$("#credits").css("opacity","1");
-			$("#calltoaction").html('Please open in <a href="http://www.google.com/chrome">Google Chrome</a>');
+			$("#calltoaction").html(CTA);
 		}
 		$("#calltoaction").css("opacity", "1");
 
@@ -837,7 +838,7 @@ function APP( _useStats, _debug, _muteVideo, _auto)
 	var isChrome = !!window.chrome;
 
 	if ( HAS_WEBGL && isChrome) setupWebGL();
-	else nonChromeFallback();
+	else nonChromeFallback( isChrome, HAS_WEBGL );
 
 	if(useStats)
 	{	
